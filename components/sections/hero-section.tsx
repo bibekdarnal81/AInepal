@@ -7,7 +7,7 @@ export function HeroSection() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl text-center">
                     <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl mb-6 animate-fade-in">
-                        Welcome to ReactBD
+                        Welcome to Rusha
                     </h1>
                     <p className="text-lg leading-8 text-gray-600 mb-8 animate-fade-in-up">
                         Empower your business with a custom website or learn new skills with our courses. Get started today!

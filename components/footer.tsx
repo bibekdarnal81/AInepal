@@ -52,7 +52,7 @@ export function Footer() {
 
                 <div className="mt-12 border-t border-gray-800 pt-8">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <p className="text-sm text-gray-400">© 2025 by ReactBD. All Rights Reserved.</p>
+                        <p className="text-sm text-gray-400">© 2025 by Rusha. All Rights Reserved.</p>
                         <div className="flex gap-6">
                             <Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Terms of Use</Link>
                             <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Notice</Link>
