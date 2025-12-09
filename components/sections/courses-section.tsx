@@ -33,11 +33,11 @@ export function CoursesSection() {
                             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                                 <img
                                     src="https://ui-avatars.com/api/?name=Noor+Mohammad&background=3b82f6&color=fff"
-                                    alt="Noor Mohammad"
+                                    alt="Rusha"
                                     className="w-12 h-12 rounded-full"
                                 />
                                 <div>
-                                    <p className="font-semibold text-gray-900">Noor Mohammad</p>
+                                    <p className="font-semibold text-gray-900">Rusha</p>
                                     <p className="text-sm text-gray-500">Course Instructor</p>
                                 </div>
                             </div>
