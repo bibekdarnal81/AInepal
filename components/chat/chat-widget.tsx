@@ -360,79 +360,105 @@ export function ChatWidget() {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 z-50 p-4 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform"
+                className="fixed bottom-6 right-6 z-50 group"
                 aria-label="Open chat"
             >
-                <MessageSquare className="h-6 w-6" />
+                <div className="relative">
+                    {/* Pulsing ring */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full animate-pulse opacity-75"></div>
+                    {/* Main button */}
+                    <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]">
+                        <MessageSquare className="h-7 w-7 text-white" />
+                        {/* Online indicator */}
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 border-4 border-white rounded-full animate-bounce"></div>
+                    </div>
+                </div>
             </button>
         )
     }
 
     return (
         <>
-            <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-card border border-border rounded-xl shadow-2xl flex flex-col h-[600px]">
+            <div className="fixed bottom-6 right-6 z-50 w-[420px] max-w-[calc(100vw-3rem)] bg-white dark:bg-gray-900 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex flex-col h-[650px] transition-all duration-500 ease-out animate-in slide-in-from-bottom-8 fade-in">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-t-xl">
-                    <div className="flex items-center gap-3">
-                        {userProfile?.avatar_url ? (
-                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
-                                <Image
-                                    src={userProfile.avatar_url}
-                                    alt={userProfile.display_name}
-                                    width={40}
-                                    height={40}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        ) : (
-                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                                <UserIcon className="h-5 w-5" />
-                            </div>
-                        )}
-                        <div>
-                            <h3 className="font-semibold">Chat Support</h3>
-                            {userProfile && (
-                                <p className="text-xs text-white/80">{userProfile.display_name}</p>
-                            )}
-                        </div>
+                <div className="relative p-5 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-t-3xl overflow-hidden">
+                    {/* Animated background */}
+                    <div className="absolute inset-0 opacity-30">
+                        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+                        <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+                        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setAiEnabled(!aiEnabled)}
-                            className={`hover:bg-white/20 rounded p-1 ${aiEnabled ? 'bg-white/30' : ''}`}
-                            title={aiEnabled ? 'AI Agent: ON' : 'AI Agent: OFF'}
-                        >
-                            <Sparkles className={`h-5 w-5 ${aiEnabled ? 'text-yellow-300' : 'text-white/60'}`} />
-                        </button>
-                        <button
-                            onClick={() => {
-                                setShowOrdersView(!showOrdersView)
-                                setShowCatalogView(false)
-                                if (!showOrdersView) {
-                                    fetchOrders()
-                                }
-                            }}
-                            className="hover:bg-white/20 rounded p-1"
-                            title="My Orders"
-                        >
-                            <ShoppingBag className="h-5 w-5" />
-                        </button>
-                        <button
-                            onClick={() => {
-                                setShowCatalogView(!showCatalogView)
-                                setShowOrdersView(false)
-                            }}
-                            className="hover:bg-white/20 rounded p-1"
-                            title="Browse Services"
-                        >
-                            <BookOpen className="h-5 w-5" />
-                        </button>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="hover:bg-white/20 rounded p-1"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
+
+                    <div className="relative flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                {userProfile?.avatar_url ? (
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-3 border-white/40 shadow-lg ring-2 ring-white/20">
+                                        <Image
+                                            src={userProfile.avatar_url}
+                                            alt={userProfile.display_name}
+                                            width={48}
+                                            height={48}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="w-12 h-12 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-lg">
+                                        <UserIcon className="h-6 w-6 text-white" />
+                                    </div>
+                                )}
+                                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-base text-white">Live Support</h3>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <div className="flex gap-0.5">
+                                        <span className="w-1 h-1 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                                        <span className="w-1 h-1 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                                        <span className="w-1 h-1 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                                    </div>
+                                    <p className="text-xs text-white/95 font-medium">Agent available</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setAiEnabled(!aiEnabled)}
+                                className={`p-2 rounded-full transition-all duration-200 ${aiEnabled ? 'bg-white/25 shadow-lg' : 'hover:bg-white/15'}`}
+                                title={aiEnabled ? 'AI Agent: ON' : 'AI Agent: OFF'}
+                            >
+                                <Sparkles className={`h-4 w-4 ${aiEnabled ? 'text-yellow-300' : 'text-white/90'}`} />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowOrdersView(!showOrdersView)
+                                    setShowCatalogView(false)
+                                    if (!showOrdersView) {
+                                        fetchOrders()
+                                    }
+                                }}
+                                className="p-2 rounded-full hover:bg-white/15 transition-all duration-200"
+                                title="My Orders"
+                            >
+                                <ShoppingBag className="h-4 w-4 text-white/90" />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowCatalogView(!showCatalogView)
+                                    setShowOrdersView(false)
+                                }}
+                                className="p-2 rounded-full hover:bg-white/15 transition-all duration-200"
+                                title="Browse Services"
+                            >
+                                <BookOpen className="h-4 w-4 text-white/90" />
+                            </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 rounded-full hover:bg-white/15 transition-all duration-200"
+                            >
+                                <X className="h-4 w-4 text-white/90" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -449,74 +475,78 @@ export function ChatWidget() {
                 {/* Messages */}
                 {(user || guestSession) && !showOrdersView && !showCatalogView && (
                     <>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-800/50 dark:to-gray-900">
                             {messages.length === 0 ? (
-                                <div className="text-center text-muted-foreground py-8">
-                                    <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                    <p>No messages yet</p>
-                                    <p className="text-sm">Start a conversation!</p>
+                                <div className="text-center py-12">
+                                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
+                                        <MessageSquare className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">No messages yet</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-500">Start a conversation with us!</p>
                                 </div>
                             ) : (
                                 messages.map((msg) => (
                                     <div
                                         key={msg.id}
-                                        className={`flex gap-2 ${msg.is_admin ? 'justify-start' : 'justify-end'}`}
+                                        className={`flex gap-3 ${msg.is_admin ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
                                     >
                                         {msg.is_admin && (
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${msg.is_ai_response
+                                            <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden shadow-md ${msg.is_ai_response
                                                 ? 'bg-gradient-to-br from-purple-500 to-pink-500'
                                                 : 'bg-gradient-to-br from-blue-500 to-cyan-500'
                                                 }`}>
                                                 {msg.is_ai_response ? (
-                                                    <Bot className="h-4 w-4 text-white" />
+                                                    <Bot className="h-5 w-5 text-white" />
                                                 ) : adminAvatar ? (
                                                     <Image
                                                         src={adminAvatar}
                                                         alt="Admin"
-                                                        width={32}
-                                                        height={32}
+                                                        width={36}
+                                                        height={36}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <UserIcon className="h-4 w-4 text-white" />
+                                                    <UserIcon className="h-5 w-5 text-white" />
                                                 )}
                                             </div>
                                         )}
 
-                                        <div className={`max-w-[80%] ${msg.is_admin ? '' : 'flex flex-col items-end'}`}>
+                                        <div className={`max-w-[75%] ${msg.is_admin ? '' : 'flex flex-col items-end'}`}>
                                             {msg.attachments && msg.attachments.length > 0 && (
                                                 <div className="mb-2">
                                                     {msg.attachments.map((att, idx) => (
-                                                        <div key={idx} className="rounded-2xl overflow-hidden bg-secondary/50">
+                                                        <div key={idx} className="rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 dark:border-gray-700">
                                                             <Image
                                                                 src={att.file_url}
                                                                 alt="Uploaded image"
                                                                 width={280}
                                                                 height={280}
-                                                                className="object-cover w-full max-w-[280px] h-auto"
+                                                                className="object-cover w-full max-w-[280px] h-auto transition-transform hover:scale-105 duration-500"
                                                             />
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
                                             {msg.message && msg.message !== '📷 Image' && (
-                                                <div
-                                                    className={`rounded-lg px-4 py-2 ${msg.is_admin
-                                                        ? 'bg-secondary text-foreground'
-                                                        : 'bg-gradient-to-r from-violet-600 to-pink-600 text-white'
-                                                        }`}
-                                                >
-                                                    <p className="text-sm text-inherit">{msg.message}</p>
-                                                    <p className="text-xs text-inherit opacity-70 mt-1">
-                                                        {new Date(msg.created_at).toLocaleTimeString([], {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
-                                                    </p>
+                                                <div className="group relative">
+                                                    <div
+                                                        className={`rounded-3xl px-5 py-3 shadow-md transition-all duration-200 ${msg.is_admin
+                                                            ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-md'
+                                                            : 'bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-tr-md shadow-lg'
+                                                            }`}
+                                                    >
+                                                        <p className="text-[15px] leading-relaxed font-normal">{msg.message}</p>
+                                                        <p className={`text-[10px] mt-1.5 ${msg.is_admin ? 'text-gray-500 dark:text-gray-400' : 'text-white/80'}`}>
+                                                            {new Date(msg.created_at).toLocaleTimeString([], {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             )}
                                             {(!msg.message || msg.message === '📷 Image') && msg.attachments && msg.attachments.length > 0 && (
-                                                <p className="text-xs text-muted-foreground mt-1">
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
                                                     {new Date(msg.created_at).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit'
@@ -526,12 +556,12 @@ export function ChatWidget() {
                                         </div>
 
                                         {!msg.is_admin && userProfile?.avatar_url && (
-                                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-md ring-2 ring-purple-200 dark:ring-purple-800">
                                                 <Image
                                                     src={userProfile.avatar_url}
                                                     alt={userProfile.display_name}
-                                                    width={32}
-                                                    height={32}
+                                                    width={36}
+                                                    height={36}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
@@ -541,16 +571,16 @@ export function ChatWidget() {
                             )}
                             {/* AI Typing Indicator */}
                             {aiTyping && (
-                                <div className="flex gap-2 justify-start">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="h-4 w-4 text-white" />
+                                <div className="flex gap-3 justify-start animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                                        <Bot className="h-5 w-5 text-white" />
                                     </div>
-                                    <div className="max-w-[80%]">
-                                        <div className="rounded-lg px-4 py-2 bg-secondary text-foreground">
-                                            <div className="flex items-center gap-1">
-                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    <div className="max-w-[75%]">
+                                        <div className="rounded-3xl rounded-tl-md px-5 py-3 bg-white dark:bg-gray-800 shadow-md">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                             </div>
                                         </div>
                                     </div>
@@ -587,8 +617,8 @@ export function ChatWidget() {
                         )}
 
                         {/* Input */}
-                        <form onSubmit={handleSendMessage} className="p-4 border-t border-border">
-                            <div className="flex gap-2">
+                        <form onSubmit={handleSendMessage} className="p-5 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-3xl">
+                            <div className="flex gap-2 items-center bg-gray-100 dark:bg-gray-800 p-2 rounded-full transition-all duration-200 focus-within:ring-2 focus-within:ring-purple-500 focus-within:bg-white dark:focus-within:bg-gray-700">
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -599,31 +629,31 @@ export function ChatWidget() {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110"
                                     title="Attach image"
                                 >
-                                    <Paperclip className="h-5 w-5 text-muted-foreground" />
+                                    <Paperclip className="h-5 w-5" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setShowPaymentModal(true)}
-                                    className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110"
                                     title="Payment inquiry"
                                 >
-                                    <DollarSign className="h-5 w-5 text-muted-foreground" />
+                                    <DollarSign className="h-5 w-5" />
                                 </button>
                                 <input
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type your message..."
-                                    className="flex-1 px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="flex-1 px-4 py-2 bg-transparent border-none text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none text-[15px]"
                                     disabled={uploading}
                                 />
                                 <button
                                     type="submit"
                                     disabled={(!newMessage.trim() && !selectedImage) || uploading}
-                                    className="px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="p-3 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 shadow-md"
                                 >
                                     {uploading ? (
                                         <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
@@ -1102,17 +1132,8 @@ function GuestChatForm({ onSubmit }: { onSubmit: (session: GuestSession) => void
         <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-orange-500 to-orange-600">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
                 <div className="mb-6">
-                    <button
-                        onClick={() => window.history.back()}
-                        className="text-gray-700 hover:text-gray-900 mb-4"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        chatting with the next available agent.
-                    </h2>
+
+
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
