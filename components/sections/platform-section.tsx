@@ -73,7 +73,7 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                Rusha provides automated service discovery, blazing fast
+                                 Rusha provides automated service discovery, blazing fast
                                 networking, and support for any protocol, all out of the box.
                             </motion.p>
 
@@ -177,7 +177,7 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
                             >
-                                Rusha dynamically scales highly performant servers, storage, and networking to meet application demands.
+                                 Rusha dynamically scales highly performant servers, storage, and networking to meet application demands.
                             </motion.p>
                             <motion.a
                                 href="#"

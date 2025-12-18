@@ -7,15 +7,15 @@ const steps = [
         number: '01',
         icon: GitBranch,
         title: 'Connect your repo',
-        description: 'Link your GitHub or GitLab repository. Rusha automatically detects your stack.',
-        code: 'Rusha init',
+        description: 'Link your GitHub or GitLab repository.  Rusha automatically detects your stack.',
+        code: ' Rusha init',
     },
     {
         number: '02',
         icon: Zap,
         title: 'Configure & Deploy',
         description: 'Set environment variables and deploy with a single command. Zero config needed.',
-        code: 'Rusha up',
+        code: ' Rusha up',
     },
     {
         number: '03',
@@ -85,7 +85,7 @@ export function HowItWorksSection() {
                                                             <div className="text-green-400 pl-4">{step.code}</div>
                                                             <div className="flex gap-2 mt-2">
                                                                 <span className="text-cyan-400">🚀</span>
-                                                                <span className="text-gray-300">https://your-app.up.Rusha.app</span>
+                                                                <span className="text-gray-300">https://your-app.up. Rusha.app</span>
                                                             </div>
                                                         </>
                                                     ) : (

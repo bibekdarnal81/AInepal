@@ -27,7 +27,7 @@ export function TechStackSection() {
                         <span className="text-gradient">favorite stack</span>
                     </h2>
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        Deploy any application, written in any language, using any framework. Rusha supports them all.
+                        Deploy any application, written in any language, using any framework.  Rusha supports them all.
                     </p>
                 </div>
 
@@ -52,7 +52,7 @@ export function TechStackSection() {
                 {/* Additional info */}
                 <div className="mt-12 text-center">
                     <p className="text-gray-400">
-                        And many more... Rusha supports any Dockerfile or Nixpacks buildpack.
+                        And many more...  Rusha supports any Dockerfile or Nixpacks buildpack.
                     </p>
                 </div>
             </div>

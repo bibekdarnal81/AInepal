@@ -55,9 +55,9 @@ export function Footer() {
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-6">
                             <Link href="/" className="text-xl font-bold text-gradient">
-                                Rusha
+                                 Rusha
                             </Link>
-                            <p className="text-sm text-gray-400">© 2025 Rusha. All rights reserved.</p>
+                            <p className="text-sm text-gray-400">© 2025  Rusha. All rights reserved.</p>
                         </div>
 
                         <div className="flex gap-6">

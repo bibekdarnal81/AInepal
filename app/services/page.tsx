@@ -1,61 +1,49 @@
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Code, ShoppingCart, Smartphone, TrendingUp, Palette, Pencil } from 'lucide-react';
+'use client'
 
-const services = [
-    {
-        id: 1,
-        title: 'E-Commerce Website',
-        price: '$1,000',
-        description: 'Complete online store solution built for modern businesses ready to sell online. Features secure payment processing, inventory management, and a powerful admin dashboard.',
-        icon: ShoppingCart,
-        features: ['Product Management', 'Secure Payment', 'Admin Dashboard', 'Responsive Design'],
-    },
-    {
-        id: 2,
-        title: 'Single Page Website',
-        price: '$200',
-        description: 'Perfect for businesses, personal brands, or landing pages that need to make a strong first impression with an elegant, scrollable format.',
-        icon: Code,
-        features: ['Modern Design', 'SEO Optimized', 'Contact Forms', 'Fast Loading'],
-    },
-    {
-        id: 3,
-        title: 'Blog Website',
-        price: '$250',
-        description: 'Modern blog platform with content management system designed for writers, businesses, and content creators with SEO optimization.',
-        icon: Pencil,
-        features: ['CMS Integration', 'SEO Ready', 'Social Sharing', 'Comment System'],
-    },
-    {
-        id: 4,
-        title: 'Portfolio Website',
-        price: '$200',
-        description: 'Showcase your work with a stunning portfolio website that highlights your skills and achievements with project galleries and case studies.',
-        icon: Palette,
-        features: ['Project Galleries', 'Case Studies', 'Contact Forms', 'Professional Design'],
-    },
-    {
-        id: 5,
-        title: 'Custom Web Development',
-        price: '$1,500',
-        description: 'Tailored web solutions for unique business requirements. Complex web applications, API integration, or specialized functionality built from the ground up.',
-        icon: Code,
-        features: ['Custom Solutions', 'API Integration', 'Scalable Architecture', 'Cloud Deployment'],
-    },
-    {
-        id: 6,
-        title: 'App Development',
-        price: '$2,000',
-        description: 'Native and cross-platform mobile applications for iOS and Android. Full-featured apps with modern UI and seamless performance.',
-        icon: Smartphone,
-        features: ['iOS & Android', 'Push Notifications', 'Offline Support', 'App Store Deployment'],
-    },
-];
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
+import { BuyButton } from '@/components/buy-button'
+import Link from 'next/link'
+import * as Icons from 'lucide-react'
+import { Check } from 'lucide-react'
+
+interface Service {
+    id: string
+    title: string
+    slug: string
+    description: string | null
+    price: number
+    currency: string
+    icon_name: string | null
+    thumbnail_url: string | null
+    features: string[]
+    is_featured: boolean
+    is_published: boolean
+}
 
 export default function ServicesPage() {
+    const [services, setServices] = useState<Service[]>([])
+    const [loading, setLoading] = useState(true)
+    const supabase = createClient()
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            const { data, error } = await supabase
+                .from('services')
+                .select('*')
+                .eq('is_published', true)
+                .order('display_order', { ascending: true })
+
+            if (!error && data) {
+                setServices(data)
+            }
+            setLoading(false)
+        }
+        fetchServices()
+    }, [supabase])
+
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
@@ -71,9 +59,9 @@ export default function ServicesPage() {
                                 With over 5 years of experience in modern web development, I specialize in creating high-performance, user-friendly websites and applications using cutting-edge technologies like React, Next.js, and Node.js.
                             </p>
                             <Link href="/contact">
-                                <Button variant="primary" size="lg">
+                                <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
                                     Free Consultation
-                                </Button>
+                                </button>
                             </Link>
                         </div>
                     </div>
@@ -91,50 +79,75 @@ export default function ServicesPage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                            {services.map((service) => {
-                                const Icon = service.icon;
-                                return (
-                                    <div
-                                        key={service.id}
-                                        className="group rounded-xl bg-white border-2 border-gray-200 hover:border-blue-500 p-8 transition-all duration-300 hover:shadow-xl"
-                                    >
-                                        <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-blue-100 p-4 group-hover:bg-blue-500 transition-colors">
-                                            <Icon className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors" />
-                                        </div>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                            </div>
+                        ) : services.length === 0 ? (
+                            <div className="text-center py-12">
+                                <p className="text-gray-600 text-lg">No services available at the moment. Please check back later!</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                {services.map((service) => {
+                                    const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
+                                        ? (Icons as any)[service.icon_name]
+                                        : Icons.Code
 
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                            {service.title}
-                                        </h3>
+                                    return (
+                                        <div
+                                            key={service.id}
+                                            className="group rounded-xl bg-white border-2 border-gray-200 hover:border-blue-500 p-8 transition-all duration-300 hover:shadow-xl"
+                                        >
+                                            <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-blue-100 p-4 group-hover:bg-blue-500 transition-colors">
+                                                <IconComponent className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors" />
+                                            </div>
 
-                                        <div className="text-3xl font-bold text-blue-600 mb-4">
-                                            {service.price}
-                                        </div>
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                                {service.title}
+                                            </h3>
 
-                                        <p className="text-gray-600 mb-6 leading-relaxed">
-                                            {service.description}
-                                        </p>
+                                            <div className="text-3xl font-bold text-blue-600 mb-4">
+                                                {service.currency === 'USD' && '$'}
+                                                {service.currency === 'EUR' && '€'}
+                                                {service.currency === 'GBP' && '£'}
+                                                {service.currency === 'NPR' && 'Rs '}
+                                                {service.price.toLocaleString()}
+                                            </div>
 
-                                        <ul className="space-y-3 mb-6">
-                                            {service.features.map((feature, index) => (
-                                                <li key={index} className="flex items-center gap-2 text-sm text-gray-700">
-                                                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    {feature}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                            {service.description && (
+                                                <p className="text-gray-600 mb-6 leading-relaxed line-clamp-4">
+                                                    {service.description}
+                                                </p>
+                                            )}
 
-                                        <Link href="/contact">
-                                            <Button variant="primary" size="md" className="w-full">
+                                            {service.features && service.features.length > 0 && (
+                                                <ul className="space-y-3 mb-6">
+                                                    {service.features.map((feature: string, index: number) => (
+                                                        <li key={index} className="flex items-center gap-2 text-sm text-gray-700">
+                                                            <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                                                            <span>{feature}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+
+                                            <BuyButton
+                                                itemType="service"
+                                                itemId={service.id}
+                                                itemTitle={service.title}
+                                                itemSlug={service.slug}
+                                                amount={service.price}
+                                                currency={service.currency}
+                                                className="w-full py-3 text-center"
+                                            >
                                                 Get Started
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                            </BuyButton>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -148,14 +161,14 @@ export default function ServicesPage() {
                             Have a project in mind? Get in touch and let's discuss how we can help you achieve your goals.
                         </p>
                         <Link href="/contact">
-                            <Button variant="secondary" size="lg">
+                            <button className="px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-colors">
                                 Contact Us
-                            </Button>
+                            </button>
                         </Link>
                     </div>
                 </section>
             </main>
             <Footer />
         </div>
-    );
+    )
 }

@@ -46,7 +46,7 @@
 :root {
   --radius: 0.75rem;
 
-  /* Rusha.com Dark Theme Colors */
+  /*  Rusha.com Dark Theme Colors */
   --background: #0a0a0a;
   --foreground: #ffffff;
 
@@ -76,7 +76,7 @@
   --input: rgba(255, 255, 255, 0.1);
   --ring: #8b5cf6;
 
-  /* Gradient colors for Rusha aesthetic */
+  /* Gradient colors for  Rusha aesthetic */
   --gradient-purple: #8b5cf6;
   --gradient-pink: #ec4899;
   --gradient-cyan: #06b6d4;

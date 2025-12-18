@@ -8,6 +8,11 @@ import { TweetsSection } from '@/components/sections/tweets-section';
 import { StatsSection } from '@/components/sections/stats-section';
 import { CTASection } from '@/components/sections/cta-section';
 import { PricingSection } from '@/components/sections/pricing-section';
+import { PostsSection } from '@/components/sections/posts-section';
+import { CoursesSection } from '@/components/sections/courses-section';
+import { ProjectsSection } from '@/components/sections/projects-showcase';
+import { ServicesSection } from '@/components/sections/services-showcase';
+import { ChatWidget } from '@/components/chat/chat-widget';
 
 export default function Home() {
   return (
@@ -16,6 +21,10 @@ export default function Home() {
         <Header />
         <main>
           <HeroWithTabs />
+          <ServicesSection />
+          <ProjectsSection />
+          <CoursesSection />
+          <PostsSection />
           <MonitorSection />
           <EvolveSection />
           <CustomersSection />
@@ -25,6 +34,7 @@ export default function Home() {
           <PricingSection />
         </main>
         <Footer />
+        <ChatWidget />
       </div>
     </div>
   );
