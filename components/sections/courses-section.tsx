@@ -143,8 +143,7 @@ export function CoursesSection() {
 
                             <div className="mb-4">
                                 <p className="text-3xl font-bold text-blue-600 mb-2">
-                                    {featuredCourse.currency === 'NPR' ? 'रू ' : '$'}
-                                    {featuredCourse.price.toLocaleString()}
+                                    Rs {featuredCourse.price.toLocaleString()}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                     {featuredCourse.students_count > 0 && `${featuredCourse.students_count.toLocaleString()} students enrolled`}

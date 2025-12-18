@@ -1,3 +1,5 @@
+'use client'
+
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
@@ -60,7 +62,7 @@ export default function CoursesPage() {
                             Our Courses
                         </h1>
                         <p className="text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-                            Master modern web development with our comprehensive courses. Learn from industry experts and build real-world projects.
+                            Master modern web     with our comprehensive courses. Learn from industry experts and build real-world projects.
                         </p>
                     </div>
                 </section>

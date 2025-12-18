@@ -123,7 +123,7 @@ export default function NewCoursePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-2">Price (USD)</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">Price (NPR)</label>
                             <input
                                 type="number"
                                 step="0.01"

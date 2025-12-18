@@ -57,7 +57,7 @@ export default function CoursesPage() {
             .eq('id', id)
 
         if (!error) {
-            setCourses(courses.map(c => 
+            setCourses(courses.map(c =>
                 c.id === id ? { ...c, is_published: !currentStatus } : c
             ))
         }
@@ -134,7 +134,7 @@ export default function CoursesPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-muted-foreground">
-                                            ${course.price}
+                                            NPR{course.price}
                                         </td>
                                         <td className="px-6 py-4 text-muted-foreground capitalize">
                                             {course.level}
@@ -142,11 +142,10 @@ export default function CoursesPage() {
                                         <td className="px-6 py-4">
                                             <button
                                                 onClick={() => togglePublish(course.id, course.is_published)}
-                                                className={`px-3 py-1 text-xs rounded-full font-medium transition-colors ${
-                                                    course.is_published
+                                                className={`px-3 py-1 text-xs rounded-full font-medium transition-colors ${course.is_published
                                                         ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
                                                         : 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20'
-                                                }`}
+                                                    }`}
                                             >
                                                 {course.is_published ? 'Published' : 'Draft'}
                                             </button>
