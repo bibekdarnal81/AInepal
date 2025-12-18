@@ -12,7 +12,6 @@ import { PostsSection } from '@/components/sections/posts-section';
 import { CoursesSection } from '@/components/sections/courses-section';
 import { ProjectsSection } from '@/components/sections/projects-showcase';
 import { ServicesSection } from '@/components/sections/services-showcase';
-import { ChatWidget } from '@/components/chat/chat-widget';
 
 export default function Home() {
   return (
@@ -34,7 +33,6 @@ export default function Home() {
           <PricingSection />
         </main>
         <Footer />
-        <ChatWidget />
       </div>
     </div>
   );

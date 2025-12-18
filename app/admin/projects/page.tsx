@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Plus, Edit, Trash2, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react'
 
 interface Project {
     id: string
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
             .eq('id', id)
 
         if (!error) {
-            setProjects(projects.map(p => 
+            setProjects(projects.map(p =>
                 p.id === id ? { ...p, is_published: !currentStatus } : p
             ))
         }
@@ -137,11 +137,10 @@ export default function ProjectsPage() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => togglePublish(project.id, project.is_published)}
-                                        className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${
-                                            project.is_published
-                                                ? 'bg-green-500/10 text-green-500'
-                                                : 'bg-yellow-500/10 text-yellow-500'
-                                        }`}
+                                        className={`px-2 py-1 text-xs rounded-full font-medium transition-colors ${project.is_published
+                                            ? 'bg-green-500/10 text-green-500'
+                                            : 'bg-yellow-500/10 text-yellow-500'
+                                            }`}
                                     >
                                         {project.is_published ? 'Published' : 'Draft'}
                                     </button>
@@ -153,6 +152,15 @@ export default function ProjectsPage() {
                                 </div>
 
                                 <div className="flex items-center gap-2 pt-2">
+                                    <Link
+                                        href={`/projects/${project.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        View
+                                    </Link>
                                     <Link
                                         href={`/admin/projects/${project.id}`}
                                         className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors text-sm"

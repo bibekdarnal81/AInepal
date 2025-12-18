@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
@@ -32,14 +32,15 @@ interface Project {
     }
 }
 
-export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
+export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const resolvedParams = use(params)
     const [project, setProject] = useState<Project | null>(null)
     const [loading, setLoading] = useState(true)
     const supabase = createClient()
 
     useEffect(() => {
         fetchProject()
-    }, [params.slug])
+    }, [resolvedParams.slug])
 
     const fetchProject = async () => {
         const { data } = await supabase
@@ -53,7 +54,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
                     icon_name
                 )
             `)
-            .eq('slug', params.slug)
+            .eq('slug', resolvedParams.slug)
             .eq('is_published', true)
             .single()
 

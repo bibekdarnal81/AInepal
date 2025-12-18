@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import ThumbnailUpload from '@/components/thumbnail-upload'
+import { CurriculumEditor } from '@/components/admin/curriculum-editor'
 
 export default function EditCoursePage() {
     const params = useParams()
@@ -25,6 +26,7 @@ export default function EditCoursePage() {
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
     const [deleteConfirm, setDeleteConfirm] = useState(false)
+    const [sections, setSections] = useState<any[]>([])
     const router = useRouter()
     const supabase = createClient()
 
@@ -53,7 +55,35 @@ export default function EditCoursePage() {
             setLoading(false)
         }
         fetchCourse()
+        fetchCurriculum()
     }, [id, router, supabase])
+
+    const fetchCurriculum = async () => {
+        const { data: sectionsData } = await supabase
+            .from('course_sections')
+            .select(`
+                *,
+                lessons:course_lessons(
+                    id,
+                    title,
+                    content,
+                    duration_minutes,
+                    video_url,
+                    is_free,
+                    order_index
+                )
+            `)
+            .eq('course_id', id)
+            .order('order_index')
+
+        if (sectionsData) {
+            const formattedSections = sectionsData.map(section => ({
+                ...section,
+                lessons: section.lessons?.sort((a: any, b: any) => a.order_index - b.order_index) || []
+            }))
+            setSections(formattedSections)
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -246,6 +276,15 @@ export default function EditCoursePage() {
                             <label className="text-sm font-medium text-foreground">{isPublished ? 'Published' : 'Draft'}</label>
                         </div>
                     </div>
+                </div>
+
+                {/* Curriculum Editor */}
+                <div className="bg-card rounded-xl border border-border p-6">
+                    <CurriculumEditor
+                        courseId={id}
+                        sections={sections}
+                        onUpdate={fetchCurriculum}
+                    />
                 </div>
 
                 <div className="flex gap-3 justify-end">

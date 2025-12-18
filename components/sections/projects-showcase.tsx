@@ -161,13 +161,15 @@ export function ProjectsSection() {
                                     className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
                                 >
                                     {project.thumbnail_url && (
-                                        <div className="aspect-video w-full overflow-hidden bg-secondary">
-                                            <img
-                                                src={project.thumbnail_url}
-                                                alt={project.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        </div>
+                                        <Link href={`/projects/${project.slug}`} className="block">
+                                            <div className="aspect-video w-full overflow-hidden bg-secondary cursor-pointer">
+                                                <img
+                                                    src={project.thumbnail_url}
+                                                    alt={project.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                />
+                                            </div>
+                                        </Link>
                                     )}
                                     <div className="p-6">
                                         {categoryInfo && (
@@ -182,9 +184,11 @@ export function ProjectsSection() {
                                             </span>
                                         )}
 
-                                        <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                                            {project.title}
-                                        </h3>
+                                        <Link href={`/projects/${project.slug}`}>
+                                            <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors cursor-pointer">
+                                                {project.title}
+                                            </h3>
+                                        </Link>
 
                                         {project.description && (
                                             <p className="text-muted-foreground text-sm mb-4 line-clamp-2">

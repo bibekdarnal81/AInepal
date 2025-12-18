@@ -4,26 +4,39 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
     try {
-        const { message, userId, chatHistory } = await request.json()
+        const { message, userId, guestSessionId, chatHistory } = await request.json()
 
         if (!message) {
             return NextResponse.json({ error: 'Message is required' }, { status: 400 })
         }
 
-        const supabase = await createClient()
-
-        // Get user info for personalization
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        if (!userId && !guestSessionId) {
+            return NextResponse.json({ error: 'User ID or Guest Session ID required' }, { status: 400 })
         }
 
-        // Fetch user profile
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('id', user.id)
-            .single()
+        const supabase = await createClient()
+
+        // Determine if this is a guest or authenticated user
+        const isGuest = !!guestSessionId
+        let userName = 'Guest'
+
+        if (userId) {
+            // Fetch user profile for authenticated users
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('display_name')
+                .eq('id', userId)
+                .single()
+            userName = profile?.display_name || 'User'
+        } else if (guestSessionId) {
+            // Fetch guest session info
+            const { data: guestSession } = await supabase
+                .from('guest_chat_sessions')
+                .select('guest_name')
+                .eq('id', guestSessionId)
+                .single()
+            userName = guestSession?.guest_name || 'Guest User'
+        }
 
         // Get business context (services, projects, courses)
         const [servicesRes, projectsRes, coursesRes] = await Promise.all([
@@ -49,7 +62,7 @@ ${projects.map(p => `- ${p.title}: ${p.description}`).join('\n')}
 Available Courses:
 ${courses.map(c => `- ${c.title}: ${c.description} (रू ${c.price})`).join('\n')}
 
-Current user: ${profile?.display_name || 'Guest'}
+Current user: ${userName}${isGuest ? ' (Guest User)' : ''}
 
 Previous conversation:
 ${chatHistory?.map((msg: any) => `${msg.is_admin ? 'AI' : 'User'}: ${msg.message}`).join('\n') || 'No previous messages'}
@@ -62,6 +75,7 @@ Guidelines:
 - If you don't know something, suggest talking to a human admin
 - Keep responses concise and actionable
 - Provide next steps or call-to-action when appropriate
+${isGuest ? '- For guest users, you can suggest they register for better service tracking' : ''}
 `
 
         const userMessage = `User question: ${message}\n\nPlease provide a helpful response.`
@@ -120,15 +134,22 @@ Guidelines:
         )
 
         // Save AI response to database using service role
+        const messageData: any = {
+            message: aiResponse,
+            is_admin: true,
+            is_ai_response: true,
+            is_read: true
+        }
+
+        if (userId) {
+            messageData.user_id = userId
+        } else if (guestSessionId) {
+            messageData.guest_session_id = guestSessionId
+        }
+
         const { error: insertError } = await serviceSupabase
             .from('chat_messages')
-            .insert({
-                user_id: user.id,
-                message: aiResponse,
-                is_admin: true,
-                is_ai_response: true,
-                is_read: true
-            })
+            .insert(messageData)
 
         if (insertError) {
             console.error('Error saving AI response:', insertError)

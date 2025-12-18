@@ -17,7 +17,8 @@ import {
     Briefcase,
     MessageSquare,
     ShoppingBag,
-    Mail
+    Mail,
+    Users
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -29,6 +30,14 @@ export default function AdminLayout({
     const [loading, setLoading] = useState(true)
     const [isAdmin, setIsAdmin] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [chatUsers, setChatUsers] = useState<Array<{
+        user_id: string | null
+        guest_session_id: string | null
+        display_name: string
+        unread_count: number
+        is_guest: boolean
+        last_message_time: string
+    }>>([])
     const router = useRouter()
     const pathname = usePathname()
     const supabase = createClient()
@@ -77,6 +86,110 @@ export default function AdminLayout({
 
         return () => subscription.unsubscribe()
     }, [router, supabase.auth, isLoginPage])
+
+    useEffect(() => {
+        if (isAdmin && !isLoginPage) {
+            fetchChatUsers()
+
+            // Subscribe to chat message changes
+            const chatChannel = supabase
+                .channel('admin_sidebar_chat')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'chat_messages',
+                }, () => {
+                    fetchChatUsers()
+                })
+                .subscribe()
+
+            return () => {
+                supabase.removeChannel(chatChannel)
+            }
+        }
+    }, [isAdmin, isLoginPage])
+
+    const fetchChatUsers = async () => {
+        try {
+            // Get all chat messages
+            const { data: messagesData } = await supabase
+                .from('chat_messages')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (messagesData && messagesData.length > 0) {
+                // Get unique user IDs and guest session IDs
+                const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))]
+                const guestSessionIds = [...new Set(messagesData.filter(m => m.guest_session_id).map(m => m.guest_session_id))]
+
+                // Fetch registered user profiles
+                const { data: profilesData } = await supabase
+                    .from('profiles')
+                    .select('id, display_name')
+                    .in('id', userIds)
+
+                // Fetch guest sessions
+                const { data: guestSessionsData } = await supabase
+                    .from('guest_chat_sessions')
+                    .select('id, guest_name')
+                    .in('id', guestSessionIds)
+
+                // Create maps
+                const profileMap = new Map(profilesData?.map(p => [p.id, p]) || [])
+                const guestMap = new Map(guestSessionsData?.map(g => [g.id, g]) || [])
+
+                // Group by user_id or guest_session_id
+                const userMap = new Map()
+
+                messagesData.forEach((msg: any) => {
+                    const key = msg.user_id || msg.guest_session_id
+                    if (!key) return
+
+                    if (!userMap.has(key)) {
+                        const unreadCount = messagesData.filter(
+                            (m: any) => ((m.user_id === msg.user_id && m.user_id) || (m.guest_session_id === msg.guest_session_id && m.guest_session_id)) && !m.is_read && !m.is_admin
+                        ).length
+
+                        if (msg.user_id) {
+                            const profile = profileMap.get(msg.user_id)
+                            userMap.set(key, {
+                                user_id: msg.user_id,
+                                guest_session_id: null,
+                                display_name: profile?.display_name || 'Unknown User',
+                                unread_count: unreadCount,
+                                is_guest: false,
+                                last_message_time: msg.created_at
+                            })
+                        } else if (msg.guest_session_id) {
+                            const guestSession = guestMap.get(msg.guest_session_id)
+                            userMap.set(key, {
+                                user_id: null,
+                                guest_session_id: msg.guest_session_id,
+                                display_name: guestSession?.guest_name || 'Guest User',
+                                unread_count: unreadCount,
+                                is_guest: true,
+                                last_message_time: msg.created_at
+                            })
+                        }
+                    }
+                })
+
+                // Sort by unread count (highest first), then by last message time
+                const sortedUsers = Array.from(userMap.values()).sort((a, b) => {
+                    if (a.unread_count !== b.unread_count) {
+                        return b.unread_count - a.unread_count
+                    }
+                    return new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+                }).slice(0, 2) // Show only top 2
+
+                setChatUsers(sortedUsers)
+            } else {
+                setChatUsers([])
+            }
+        } catch (err) {
+            console.error('Error fetching chat users:', err)
+        }
+    }
 
     const handleSignOut = async () => {
         await supabase.auth.signOut()
@@ -136,6 +249,7 @@ export default function AdminLayout({
         { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
         { name: 'Messages', href: '/admin/messages', icon: Mail },
         { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
+        { name: 'Users', href: '/admin/users', icon: Users },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
     ]
 
@@ -181,6 +295,60 @@ export default function AdminLayout({
                         </Link>
                     ))}
                 </nav>
+
+                {/* Recent Chats Section */}
+                {chatUsers.length > 0 && (
+                    <div className="px-2 pb-4 border-b border-border/50">
+                        <div className="flex items-center justify-between mb-3 px-3">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-primary/10">
+                                    <Users className="h-3.5 w-3.5 text-primary" />
+                                </div>
+                                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Active Chats</h3>
+                            </div>
+                            <Link
+                                href="/admin/chat"
+                                className="text-xs text-primary hover:text-primary/80 transition-colors"
+                            >
+                                View All
+                            </Link>
+                        </div>
+                        <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                            {chatUsers.map((chatUser) => (
+                                <Link
+                                    key={chatUser.user_id || chatUser.guest_session_id}
+                                    href="/admin/chat"
+                                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-secondary transition-colors"
+                                    onClick={() => setSidebarOpen(false)}
+                                >
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${chatUser.is_guest
+                                        ? 'bg-gradient-to-br from-orange-500 to-orange-600'
+                                        : 'bg-gradient-to-br from-violet-500 to-pink-500'
+                                        }`}>
+                                        <Users className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1.5">
+                                            <p className="text-sm font-medium text-foreground truncate">
+                                                {chatUser.display_name}
+                                            </p>
+                                            {chatUser.is_guest && (
+                                                <span className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-white rounded-full">
+                                                    G
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {chatUser.unread_count > 0 && (
+                                        <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
+                                            {chatUser.unread_count}
+                                        </span>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
                     <div className="flex items-center gap-3 px-4 py-2 mb-2">

@@ -7,25 +7,38 @@ import Image from 'next/image'
 
 interface ChatMessage {
     id: string
-    user_id: string
+    user_id: string | null
+    guest_session_id: string | null
     message: string
     is_admin: boolean
     is_read: boolean
     created_at: string
 }
 
+interface GuestSession {
+    id: string
+    guest_name: string
+    guest_email: string
+    guest_phone: string | null
+}
+
 interface UserWithMessages {
-    user_id: string
+    user_id: string | null
+    guest_session_id: string | null
     display_name: string
     avatar_url: string
     unread_count: number
     last_message: string
     last_message_time: string
+    is_guest: boolean
+    guest_email?: string
+    guest_phone?: string
 }
 
 export default function AdminChatPage() {
     const [users, setUsers] = useState<UserWithMessages[]>([])
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+    const [selectedGuestSessionId, setSelectedGuestSessionId] = useState<string | null>(null)
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [loading, setLoading] = useState(true)
@@ -36,15 +49,16 @@ export default function AdminChatPage() {
     useEffect(() => {
         fetchAdminProfile()
         fetchUsers()
-        subscribeToNewMessages()
+        const cleanup = subscribeToNewMessages()
+        return cleanup
     }, [])
 
     useEffect(() => {
-        if (selectedUserId) {
-            fetchMessages(selectedUserId)
-            markMessagesAsRead(selectedUserId)
+        if (selectedUserId || selectedGuestSessionId) {
+            fetchMessages(selectedUserId, selectedGuestSessionId)
+            markMessagesAsRead(selectedUserId, selectedGuestSessionId)
         }
-    }, [selectedUserId])
+    }, [selectedUserId, selectedGuestSessionId])
 
     useEffect(() => {
         scrollToBottom()
@@ -80,36 +94,68 @@ export default function AdminChatPage() {
             }
 
             if (messagesData && messagesData.length > 0) {
-                // Fetch all unique user profiles
-                const userIds = [...new Set(messagesData.map(m => m.user_id))]
+                // Get unique user IDs and guest session IDs
+                const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))]
+                const guestSessionIds = [...new Set(messagesData.filter(m => m.guest_session_id).map(m => m.guest_session_id))]
+
+                // Fetch registered user profiles
                 const { data: profilesData } = await supabase
                     .from('profiles')
                     .select('id, display_name, avatar_url')
                     .in('id', userIds)
 
-                // Create a profile map
-                const profileMap = new Map(profilesData?.map(p => [p.id, p]) || [])
+                // Fetch guest sessions
+                const { data: guestSessionsData } = await supabase
+                    .from('guest_chat_sessions')
+                    .select('*')
+                    .in('id', guestSessionIds)
 
-                // Group by user_id
+                // Create profile and guest maps
+                const profileMap = new Map(profilesData?.map(p => [p.id, p]) || [])
+                const guestMap = new Map(guestSessionsData?.map(g => [g.id, g]) || [])
+
+                // Group by user_id or guest_session_id
                 const userMap = new Map<string, UserWithMessages>()
 
                 messagesData.forEach((msg: any) => {
-                    // Only add the user if they haven't been added yet (to get the latest message as the "last_message")
-                    if (!userMap.has(msg.user_id)) {
+                    const key = msg.user_id || msg.guest_session_id
+                    if (!key) return
+
+                    // Only add if this is the first message for this user/guest
+                    if (!userMap.has(key)) {
                         const unreadCount = messagesData.filter(
-                            (m: any) => m.user_id === msg.user_id && !m.is_read && !m.is_admin
+                            (m: any) => ((m.user_id === msg.user_id && m.user_id) || (m.guest_session_id === msg.guest_session_id && m.guest_session_id)) && !m.is_read && !m.is_admin
                         ).length
 
-                        const profile = profileMap.get(msg.user_id)
-
-                        userMap.set(msg.user_id, {
-                            user_id: msg.user_id,
-                            display_name: profile?.display_name || 'Unknown User',
-                            avatar_url: profile?.avatar_url || '',
-                            unread_count: unreadCount,
-                            last_message: msg.message,
-                            last_message_time: msg.created_at
-                        })
+                        if (msg.user_id) {
+                            // Registered user
+                            const profile = profileMap.get(msg.user_id)
+                            userMap.set(key, {
+                                user_id: msg.user_id,
+                                guest_session_id: null,
+                                display_name: profile?.display_name || 'Unknown User',
+                                avatar_url: profile?.avatar_url || '',
+                                unread_count: unreadCount,
+                                last_message: msg.message,
+                                last_message_time: msg.created_at,
+                                is_guest: false
+                            })
+                        } else if (msg.guest_session_id) {
+                            // Guest user
+                            const guestSession = guestMap.get(msg.guest_session_id)
+                            userMap.set(key, {
+                                user_id: null,
+                                guest_session_id: msg.guest_session_id,
+                                display_name: guestSession?.guest_name || 'Guest User',
+                                avatar_url: '',
+                                unread_count: unreadCount,
+                                last_message: msg.message,
+                                last_message_time: msg.created_at,
+                                is_guest: true,
+                                guest_email: guestSession?.guest_email,
+                                guest_phone: guestSession?.guest_phone || undefined
+                            })
+                        }
                     }
                 })
 
@@ -124,46 +170,70 @@ export default function AdminChatPage() {
         }
     }
 
-    const fetchMessages = async (userId: string) => {
-        const { data } = await supabase
+    const fetchMessages = async (userId: string | null, guestSessionId: string | null) => {
+        const query = supabase
             .from('chat_messages')
             .select('*')
-            .eq('user_id', userId)
             .order('created_at', { ascending: true })
+
+        if (userId) {
+            query.eq('user_id', userId)
+        } else if (guestSessionId) {
+            query.eq('guest_session_id', guestSessionId)
+        } else {
+            return
+        }
+
+        const { data } = await query
 
         if (data) {
             setMessages(data)
         }
     }
 
-    const markMessagesAsRead = async (userId: string) => {
-        await supabase
+    const markMessagesAsRead = async (userId: string | null, guestSessionId: string | null) => {
+        const query = supabase
             .from('chat_messages')
             .update({ is_read: true })
-            .eq('user_id', userId)
             .eq('is_admin', false)
             .eq('is_read', false)
+
+        if (userId) {
+            query.eq('user_id', userId)
+        } else if (guestSessionId) {
+            query.eq('guest_session_id', guestSessionId)
+        } else {
+            return
+        }
+
+        await query
 
         // Refresh users list
         fetchUsers()
     }
 
     const subscribeToNewMessages = () => {
+        console.log('🔔 Setting up admin chat subscriptions...')
+
         const channel = supabase
-            .channel('admin_chat')
+            .channel('admin_chat_all')
             .on('postgres_changes', {
-                event: 'INSERT',
+                event: '*', // Listen to all events
                 schema: 'public',
                 table: 'chat_messages',
-            }, () => {
+            }, (payload) => {
+                console.log('📨 Message change detected:', payload.eventType)
                 fetchUsers()
-                if (selectedUserId) {
-                    fetchMessages(selectedUserId)
+                if (selectedUserId || selectedGuestSessionId) {
+                    fetchMessages(selectedUserId, selectedGuestSessionId)
                 }
             })
-            .subscribe()
+            .subscribe((status) => {
+                console.log('📡 Subscription status:', status)
+            })
 
         return () => {
+            console.log('🔌 Cleaning up subscription')
             supabase.removeChannel(channel)
         }
     }
@@ -174,23 +244,33 @@ export default function AdminChatPage() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!newMessage.trim() || !selectedUserId) return
+        if (!newMessage.trim() || (!selectedUserId && !selectedGuestSessionId)) return
+
+        const messageData: any = {
+            message: newMessage.trim(),
+            is_admin: true,
+            is_read: false
+        }
+
+        if (selectedUserId) {
+            messageData.user_id = selectedUserId
+        } else if (selectedGuestSessionId) {
+            messageData.guest_session_id = selectedGuestSessionId
+        }
 
         const { error } = await supabase
             .from('chat_messages')
-            .insert({
-                user_id: selectedUserId,
-                message: newMessage.trim(),
-                is_admin: true,
-                is_read: false
-            })
+            .insert(messageData)
 
         if (!error) {
             setNewMessage('')
         }
     }
 
-    const selectedUser = users.find(u => u.user_id === selectedUserId)
+    const selectedUser = users.find(u =>
+        (u.user_id && u.user_id === selectedUserId) ||
+        (u.guest_session_id && u.guest_session_id === selectedGuestSessionId)
+    )
 
     if (loading) {
         return (
@@ -222,13 +302,27 @@ export default function AdminChatPage() {
                         ) : (
                             users.map((user) => (
                                 <button
-                                    key={user.user_id}
-                                    onClick={() => setSelectedUserId(user.user_id)}
-                                    className={`w-full p-4 border-b border-border hover:bg-secondary/50 transition-colors text-left ${selectedUserId === user.user_id ? 'bg-secondary' : ''
+                                    key={user.user_id || user.guest_session_id}
+                                    onClick={() => {
+                                        if (user.user_id) {
+                                            setSelectedUserId(user.user_id)
+                                            setSelectedGuestSessionId(null)
+                                        } else if (user.guest_session_id) {
+                                            setSelectedGuestSessionId(user.guest_session_id)
+                                            setSelectedUserId(null)
+                                        }
+                                    }}
+                                    className={`w-full p-4 border-b border-border hover:bg-secondary/50 transition-colors text-left ${(
+                                        (user.user_id && selectedUserId === user.user_id) ||
+                                        (user.guest_session_id && selectedGuestSessionId === user.guest_session_id)
+                                    ) ? 'bg-secondary' : ''
                                         }`}
                                 >
                                     <div className="flex items-start gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${user.is_guest
+                                            ? 'bg-gradient-to-br from-orange-500 to-orange-600'
+                                            : 'bg-gradient-to-br from-violet-500 to-pink-500'
+                                            }`}>
                                             {user.avatar_url ? (
                                                 <Image
                                                     src={user.avatar_url}
@@ -242,16 +336,39 @@ export default function AdminChatPage() {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2 mb-1">
                                                 <p className="font-medium text-foreground truncate">
                                                     {user.display_name}
                                                 </p>
+                                                {user.is_guest && (
+                                                    <span className="px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
+                                                        Guest
+                                                    </span>
+                                                )}
                                                 {user.unread_count > 0 && (
                                                     <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
                                                         {user.unread_count}
                                                     </span>
                                                 )}
                                             </div>
+                                            {user.is_guest ? (
+                                                <div className="space-y-0.5">
+                                                    {user.guest_email && (
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            📧 {user.guest_email}
+                                                        </p>
+                                                    )}
+                                                    {user.guest_phone && (
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            📱 {user.guest_phone}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground mb-1">
+                                                    Registered User
+                                                </p>
+                                            )}
                                             <p className="text-sm text-muted-foreground truncate">
                                                 {user.last_message}
                                             </p>
@@ -268,12 +385,15 @@ export default function AdminChatPage() {
 
                 {/* Chat Messages */}
                 <div className="lg:col-span-2 bg-card rounded-xl border border-border flex flex-col">
-                    {selectedUserId ? (
+                    {(selectedUserId || selectedGuestSessionId) ? (
                         <>
                             {/* Chat Header */}
                             <div className="p-4 border-b border-border">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center overflow-hidden">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${selectedUser?.is_guest
+                                        ? 'bg-gradient-to-br from-orange-500 to-orange-600'
+                                        : 'bg-gradient-to-br from-violet-500 to-pink-500'
+                                        }`}>
                                         {selectedUser?.avatar_url ? (
                                             <Image
                                                 src={selectedUser.avatar_url}
@@ -286,11 +406,37 @@ export default function AdminChatPage() {
                                             <User className="h-5 w-5 text-white" />
                                         )}
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-foreground">
-                                            {selectedUser?.display_name}
-                                        </h3>
-                                        <p className="text-xs text-muted-foreground">Active conversation</p>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-semibold text-foreground">
+                                                {selectedUser?.display_name}
+                                            </h3>
+                                            {selectedUser?.is_guest ? (
+                                                <span className="px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
+                                                    Guest User
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 text-xs bg-violet-500 text-white rounded-full">
+                                                    Registered
+                                                </span>
+                                            )}
+                                        </div>
+                                        {selectedUser?.is_guest ? (
+                                            <div className="flex flex-col gap-0.5 mt-1">
+                                                {selectedUser?.guest_email && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        📧 {selectedUser.guest_email}
+                                                    </p>
+                                                )}
+                                                {selectedUser?.guest_phone && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        📱 {selectedUser.guest_phone}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground mt-1">Registered User</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

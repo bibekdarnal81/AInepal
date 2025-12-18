@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MessageSquare, X, Send, Paperclip, DollarSign, User as UserIcon, ShoppingBag, BookOpen, Bot, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import type { User } from '@supabase/supabase-js'
+import { createGuestSession, getGuestSessionFromStorage, isValidEmail, isValidPhone, type GuestSession } from '@/lib/chat/guest-session-manager'
 
 interface Order {
     id: string
@@ -41,8 +42,8 @@ export function ChatWidget() {
     const [newMessage, setNewMessage] = useState('')
     const [user, setUser] = useState<User | null>(null)
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-    const [guestName, setGuestName] = useState('')
-    const [showNameInput, setShowNameInput] = useState(true)
+    const [guestSession, setGuestSession] = useState<GuestSession | null>(null)
+    const [showGuestForm, setShowGuestForm] = useState(false)
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -59,17 +60,23 @@ export function ChatWidget() {
     const supabase = createClient()
 
     useEffect(() => {
-        checkUser()
+        const init = async () => {
+            const currentUser = await checkUser()
+            checkGuestSession(currentUser)
+        }
+        init()
     }, [])
 
     useEffect(() => {
-        if (user && isOpen) {
-            fetchUserProfile()
-            fetchAdminProfile()
+        if ((user || guestSession) && isOpen) {
+            if (user) {
+                fetchUserProfile()
+                fetchAdminProfile()
+            }
             fetchMessages()
             subscribeToMessages()
         }
-    }, [user, isOpen])
+    }, [user, guestSession, isOpen])
 
     useEffect(() => {
         scrollToBottom()
@@ -92,8 +99,16 @@ export function ChatWidget() {
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
-        if (user) {
-            setShowNameInput(false)
+        return user
+    }
+
+    const checkGuestSession = (currentUser: any) => {
+        const session = getGuestSessionFromStorage()
+        if (session) {
+            setGuestSession(session)
+            setShowGuestForm(false)
+        } else if (!currentUser) {
+            setShowGuestForm(true)
         }
     }
 
@@ -156,13 +171,20 @@ export function ChatWidget() {
 
 
     const fetchMessages = async () => {
-        if (!user) return
+        if (!user && !guestSession) return
 
-        const { data: messagesData } = await supabase
+        const query = supabase
             .from('chat_messages')
             .select('*')
-            .eq('user_id', user.id)
             .order('created_at', { ascending: true })
+
+        if (user) {
+            query.eq('user_id', user.id)
+        } else if (guestSession) {
+            query.eq('guest_session_id', guestSession.id)
+        }
+
+        const { data: messagesData } = await query
 
         if (messagesData) {
             // Fetch attachments for all messages
@@ -183,7 +205,11 @@ export function ChatWidget() {
     }
 
     const subscribeToMessages = () => {
-        if (!user) return
+        if (!user && !guestSession) return
+
+        const filter = user
+            ? `user_id=eq.${user.id}`
+            : `guest_session_id=eq.${guestSession!.id}`
 
         const channel = supabase
             .channel('chat_messages')
@@ -191,9 +217,19 @@ export function ChatWidget() {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'chat_messages',
-                filter: `user_id=eq.${user.id}`
+                filter
             }, (payload) => {
                 setMessages(prev => [...prev, payload.new as ChatMessage])
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'chat_messages',
+                filter
+            }, (payload) => {
+                setMessages(prev => prev.map(msg =>
+                    msg.id === payload.new.id ? payload.new as ChatMessage : msg
+                ))
             })
             .subscribe()
 
@@ -206,12 +242,7 @@ export function ChatWidget() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
-    const handleGuestStart = async () => {
-        if (!guestName.trim()) return
 
-        const returnUrl = encodeURIComponent(window.location.pathname)
-        window.location.href = `/auth/register?return=${returnUrl}&name=${encodeURIComponent(guestName)}`
-    }
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -227,7 +258,7 @@ export function ChatWidget() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
-        if ((!newMessage.trim() && !selectedImage) || !user) return
+        if ((!newMessage.trim() && !selectedImage) || (!user && !guestSession)) return
 
         setUploading(true)
         const userMessageText = newMessage.trim()
@@ -253,23 +284,30 @@ export function ChatWidget() {
 
             // Create message
             const messageText = userMessageText || '📷 Image'
-            const { data: messageData, error } = await supabase
+            const messageData: any = {
+                message: messageText,
+                is_admin: false,
+                is_read: false
+            }
+
+            if (user) {
+                messageData.user_id = user.id
+            } else if (guestSession) {
+                messageData.guest_session_id = guestSession.id
+            }
+
+            const { data: newMessageData, error } = await supabase
                 .from('chat_messages')
-                .insert({
-                    user_id: user.id,
-                    message: messageText,
-                    is_admin: false,
-                    is_read: false
-                })
+                .insert(messageData)
                 .select()
                 .single()
 
-            if (!error && messageData && imageUrl) {
+            if (!error && newMessageData && imageUrl) {
                 // Create attachment record
                 await supabase
                     .from('chat_attachments')
                     .insert({
-                        message_id: messageData.id,
+                        message_id: newMessageData.id,
                         file_url: imageUrl,
                         file_type: selectedImage?.type || 'image/jpeg',
                         file_size: selectedImage?.size || 0
@@ -295,7 +333,8 @@ export function ChatWidget() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             message: userMessageText,
-                            userId: user.id,
+                            userId: user?.id || null,
+                            guestSessionId: guestSession?.id || null,
                             chatHistory: messages.slice(-5) // Last 5 messages for context
                         })
                     })
@@ -397,39 +436,18 @@ export function ChatWidget() {
                     </div>
                 </div>
 
-                {/* Guest Name Input */}
-                {!user && showNameInput && (
-                    <div className="flex-1 flex items-center justify-center p-6">
-                        <div className="w-full space-y-4">
-                            <p className="text-foreground text-center mb-4">
-                                Please enter your name to start chatting
-                            </p>
-                            <input
-                                type="text"
-                                value={guestName}
-                                onChange={(e) => setGuestName(e.target.value)}
-                                placeholder="Your name"
-                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                onKeyDown={(e) => e.key === 'Enter' && handleGuestStart()}
-                            />
-                            <button
-                                onClick={handleGuestStart}
-                                className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90"
-                            >
-                                Start Chat
-                            </button>
-                            <p className="text-xs text-muted-foreground text-center">
-                                Already have an account?{' '}
-                                <a href="/auth/login" className="text-primary hover:underline">
-                                    Sign in
-                                </a>
-                            </p>
-                        </div>
-                    </div>
+                {/* Guest Form */}
+                {!user && !guestSession && showGuestForm && (
+                    <GuestChatForm
+                        onSubmit={(session: GuestSession) => {
+                            setGuestSession(session)
+                            setShowGuestForm(false)
+                        }}
+                    />
                 )}
 
                 {/* Messages */}
-                {user && !showOrdersView && !showCatalogView && (
+                {(user || guestSession) && !showOrdersView && !showCatalogView && (
                     <>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
                             {messages.length === 0 ? (
@@ -992,6 +1010,196 @@ function CatalogBrowse({ onClose, onPurchase }: { onClose: () => void, onPurchas
                     ))}
                 </div>
             )}
+        </div>
+    )
+}
+
+// Guest Chat Form Component
+function GuestChatForm({ onSubmit }: { onSubmit: (session: GuestSession) => void }) {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        question: ''
+    })
+    const [errors, setErrors] = useState({
+        name: '',
+        email: '',
+        phone: ''
+    })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const validateForm = (): boolean => {
+        const newErrors = {
+            name: '',
+            email: '',
+            phone: ''
+        }
+        let isValid = true
+
+        // Validate name
+        if (!formData.name.trim()) {
+            newErrors.name = 'This field is required'
+            isValid = false
+        }
+
+        // Validate email
+        if (!formData.email.trim()) {
+            newErrors.email = 'This field is required'
+            isValid = false
+        } else if (!isValidEmail(formData.email)) {
+            newErrors.email = 'Invalid email format'
+            isValid = false
+        }
+
+        // Validate phone (optional but validate format if provided)
+        if (formData.phone.trim() && !isValidPhone(formData.phone)) {
+            newErrors.phone = 'Invalid phone format'
+            isValid = false
+        }
+
+        setErrors(newErrors)
+        return isValid
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!validateForm()) return
+
+        setIsSubmitting(true)
+
+        try {
+            const session = await createGuestSession({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone || undefined,
+                question: formData.question || undefined
+            })
+
+            if (session) {
+                onSubmit(session)
+            } else {
+                alert('Failed to start chat. Please try again.')
+            }
+        } catch (error) {
+            console.error('Error starting guest chat:', error)
+            alert('Failed to start chat. Please try again.')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData(prev => ({ ...prev, [field]: e.target.value }))
+        // Clear error when user starts typing
+        if (errors[field as keyof typeof errors]) {
+            setErrors(prev => ({ ...prev, [field]: '' }))
+        }
+    }
+
+    return (
+        <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-orange-500 to-orange-600">
+            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
+                <div className="mb-6">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="text-gray-700 hover:text-gray-900 mb-4"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                        chatting with the next available agent.
+                    </h2>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name Field */}
+                    <div>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={handleInputChange('name')}
+                            placeholder="* Name"
+                            className={`w-full px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                        />
+                        {errors.name && (
+                            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                        )}
+                    </div>
+
+                    {/* Email Field */}
+                    <div>
+                        <input
+                            type="email"
+                            value={formData.email}
+                            onChange={handleInputChange('email')}
+                            placeholder="* Email"
+                            className={`w-full px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                        )}
+                    </div>
+
+                    {/* Phone Field */}
+                    <div>
+                        <div className="flex gap-2">
+                            <div className="w-24 flex items-center gap-2 px-3 py-3 bg-white border-2 border-gray-300 rounded-xl">
+                                <span className="text-2xl">🇳🇵</span>
+                                <span className="text-sm">▼</span>
+                            </div>
+                            <input
+                                type="tel"
+                                value={formData.phone}
+                                onChange={handleInputChange('phone')}
+                                placeholder="* Phone"
+                                className={`flex-1 px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                                    }`}
+                            />
+                        </div>
+                        {errors.phone && (
+                            <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                        )}
+                    </div>
+
+                    {/* Question Field */}
+                    <div>
+                        <textarea
+                            value={formData.question}
+                            onChange={handleInputChange('question')}
+                            placeholder="* Question"
+                            rows={4}
+                            className="w-full px-4 py-3 bg-white border-2 border-blue-400 rounded-xl text-gray-900 placeholder-orange-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                                Starting Chat...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                                Start Chat
+                            </>
+                        )}
+                    </button>
+                </form>
+            </div>
         </div>
     )
 }

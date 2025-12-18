@@ -4,48 +4,48 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { BookOpen, Users, Award, Clock, MessageSquare } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, MessageSquare, Star } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
 
-const courses = [
-    {
-        id: 1,
-        title: 'Building a Complete E-commerce Platform with MERN Stack',
-        description: 'Build a professional e-commerce platform using the MERN Stack. Create customer, admin, and backend applications from scratch.',
-        instructor: ' Rusha',
-        duration: '40 hours',
-        level: 'Intermediate',
-        image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop',
-    },
-    {
-        id: 2,
-        title: 'Master React & Next.js - Complete Guide',
-        description: 'Learn React and Next.js from basics to advanced. Build real-world projects and deploy them to production.',
-        instructor: ' Rusha',
-        duration: '35 hours',
-        level: 'Beginner',
-        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=600&fit=crop',
-    },
-    {
-        id: 3,
-        title: 'Full-Stack Web Development Bootcamp',
-        description: 'Comprehensive bootcamp covering HTML, CSS, JavaScript, Node.js, databases, and deployment strategies.',
-        instructor: ' Rusha',
-        duration: '60 hours',
-        level: 'Beginner',
-        image: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=600&fit=crop',
-    },
-    {
-        id: 4,
-        title: 'Advanced TypeScript & Design Patterns',
-        description: 'Master TypeScript and learn design patterns to write scalable, maintainable code for enterprise applications.',
-        instructor: ' Rusha',
-        duration: '25 hours',
-        level: 'Advanced',
-        image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=800&h=600&fit=crop',
-    },
-];
+interface Course {
+    id: string
+    title: string
+    slug: string
+    description: string | null
+    thumbnail_url: string | null
+    price: number
+    currency: string
+    duration_hours: number | null
+    level: string
+    instructor_name: string | null
+    instructor_avatar: string | null
+    students_count: number
+    rating: number
+}
 
 export default function CoursesPage() {
+    const [courses, setCourses] = useState<Course[]>([])
+    const [loading, setLoading] = useState(true)
+    const supabase = createClient()
+
+    useEffect(() => {
+        fetchCourses()
+    }, [])
+
+    const fetchCourses = async () => {
+        const { data } = await supabase
+            .from('courses')
+            .select('*')
+            .eq('is_published', true)
+            .order('created_at', { ascending: false })
+
+        if (data) {
+            setCourses(data)
+        }
+        setLoading(false)
+    }
+
     return (
         <div className="min-h-screen bg-slate-950">
             <Header />
@@ -62,7 +62,7 @@ export default function CoursesPage() {
                             Our Courses
                         </h1>
                         <p className="text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-                            Master modern web     with our comprehensive courses. Learn from industry experts and build real-world projects.
+                            Master modern web development with our comprehensive courses. Learn from industry experts and build real-world projects.
                         </p>
                     </div>
                 </section>
@@ -70,67 +70,94 @@ export default function CoursesPage() {
                 {/* Courses Grid */}
                 <section className="bg-slate-950 py-16">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                            {courses.map((course) => (
-                                <div
-                                    key={course.id}
-                                    className="group rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.02]"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img
-                                            src={course.image}
-                                            alt={course.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
-                                    </div>
-
-                                    <div className="p-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">
-                                                {course.level}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-sm text-gray-400">
-                                                <Clock className="w-4 h-4" />
-                                                {course.duration}
-                                            </span>
-                                        </div>
-
-                                        <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-purple-300 transition-colors">
-                                            {course.title}
-                                        </h3>
-
-                                        <p className="text-gray-400 mb-4 line-clamp-2">
-                                            {course.description}
-                                        </p>
-
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Users className="w-4 h-4 text-gray-500" />
-                                                <span className="text-sm text-gray-400">{course.instructor}</span>
-                                            </div>
-                                            <Link href={`/courses/${course.id}`}>
-                                                <Button variant="primary" size="sm">
-                                                    Enroll Now
-                                                </Button>
+                        {loading ? (
+                            <div className="flex items-center justify-center h-64">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                                {courses.map((course) => (
+                                    <div
+                                        key={course.id}
+                                        className="group rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.02]"
+                                    >
+                                        <div className="relative h-48 overflow-hidden">
+                                            <Link href={`/courses/${course.slug}`}>
+                                                {course.thumbnail_url ? (
+                                                    <img
+                                                        src={course.thumbnail_url}
+                                                        alt={course.title}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+                                                        <BookOpen className="h-16 w-16 text-slate-500" />
+                                                    </div>
+                                                )}
                                             </Link>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent pointer-events-none" />
                                         </div>
 
-                                        <button
-                                            onClick={() => {
-                                                window.dispatchEvent(new CustomEvent('openChatWithMessage', {
-                                                    detail: { itemType: 'course', itemTitle: course.title }
-                                                }))
-                                            }}
-                                            className="w-full mt-4 flex items-center justify-center gap-2 py-2 border-2 border-purple-500/50 text-purple-300 rounded-lg font-medium hover:bg-purple-500/10 transition-colors"
-                                        >
-                                            <MessageSquare className="h-4 w-4" />
-                                            Ask About This Course
-                                        </button>
+                                        <div className="p-6">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${course.level === 'beginner' ? 'bg-green-500/20 text-green-300' :
+                                                    course.level === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                                                        'bg-red-500/20 text-red-300'
+                                                    }`}>
+                                                    {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                                                </span>
+                                                {course.duration_hours && (
+                                                    <span className="flex items-center gap-1 text-sm text-gray-400">
+                                                        <Clock className="w-4 h-4" />
+                                                        {course.duration_hours}h
+                                                    </span>
+                                                )}
+                                                {course.rating > 0 && (
+                                                    <span className="flex items-center gap-1 text-sm text-gray-400">
+                                                        <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                                                        {course.rating}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <Link href={`/courses/${course.slug}`}>
+                                                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-purple-300 transition-colors">
+                                                    {course.title}
+                                                </h3>
+                                            </Link>
+
+                                            <p className="text-gray-400 mb-4 line-clamp-2">
+                                                {course.description}
+                                            </p>
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Users className="w-4 h-4 text-gray-500" />
+                                                    <span className="text-sm text-gray-400">{course.instructor_name || 'Rusha'}</span>
+                                                </div>
+                                                <Link href={`/enroll?course_slug=${course.slug}`}>
+                                                    <Button variant="primary" size="sm">
+                                                        Enroll Now
+                                                    </Button>
+                                                </Link>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                        detail: { itemType: 'course', itemTitle: course.title }
+                                                    }))
+                                                }}
+                                                className="w-full mt-4 flex items-center justify-center gap-2 py-2 border-2 border-purple-500/50 text-purple-300 rounded-lg font-medium hover:bg-purple-500/10 transition-colors"
+                                            >
+                                                <MessageSquare className="h-4 w-4" />
+                                                Ask About This Course
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
 

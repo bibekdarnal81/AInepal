@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 import ThumbnailUpload from '@/components/thumbnail-upload'
+import { RichTextEditor } from '@/components/rich-text-editor'
+import { AccordionItem } from '@/components/accordion'
 
 export default function NewServicePage() {
     const [title, setTitle] = useState('')
@@ -115,15 +117,16 @@ export default function NewServicePage() {
                             />
                         </div>
 
+
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                rows={4}
-                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                placeholder="Complete online store solution built for modern businesses..."
-                            />
+                            <AccordionItem title="Description" defaultOpen={true}>
+                                <RichTextEditor
+                                    content={description}
+                                    onChange={setDescription}
+                                    placeholder="Write your service description here..."
+                                    minHeight="250px"
+                                />
+                            </AccordionItem>
                         </div>
 
                         <div>

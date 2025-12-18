@@ -89,17 +89,19 @@ export function CoursesSection() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="rounded-xl overflow-hidden bg-white border-2 border-gray-200 shadow-lg">
-                        {featuredCourse.thumbnail_url ? (
-                            <img
-                                src={featuredCourse.thumbnail_url}
-                                alt={featuredCourse.title}
-                                className="w-full h-64 object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                <BookOpen className="h-24 w-24 text-white opacity-50" />
-                            </div>
-                        )}
+                        <Link href={`/courses/${featuredCourse.slug}`} className="block relative group-hover:opacity-90 transition-opacity">
+                            {featuredCourse.thumbnail_url ? (
+                                <img
+                                    src={featuredCourse.thumbnail_url}
+                                    alt={featuredCourse.title}
+                                    className="w-full h-64 object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <BookOpen className="h-24 w-24 text-white opacity-50" />
+                                </div>
+                            )}
+                        </Link>
                         <div className="p-8">
                             <div className="flex items-center gap-3 mb-4">
                                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${featuredCourse.level === 'beginner' ? 'bg-green-100 text-green-700' :
@@ -122,9 +124,11 @@ export function CoursesSection() {
                                 )}
                             </div>
 
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                                {featuredCourse.title}
-                            </h3>
+                            <Link href={`/courses/${featuredCourse.slug}`} className="block group">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
+                                    {featuredCourse.title}
+                                </h3>
+                            </Link>
                             <p className="text-gray-600 mb-6">
                                 {featuredCourse.description || 'Learn modern web development skills with this comprehensive course.'}
                             </p>
@@ -143,14 +147,14 @@ export function CoursesSection() {
 
                             <div className="mb-4">
                                 <p className="text-3xl font-bold text-blue-600 mb-2">
-                                    Rs {featuredCourse.price.toLocaleString()}
+                                    {featuredCourse.currency || 'Rs'} {featuredCourse.price.toLocaleString()}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                     {featuredCourse.students_count > 0 && `${featuredCourse.students_count.toLocaleString()} students enrolled`}
                                 </p>
                             </div>
 
-                            <Link href="/courses">
+                            <Link href={`/enroll?course_slug=${featuredCourse.slug}`}>
                                 <Button variant="primary" size="lg" className="w-full">
                                     Enroll Now →
                                 </Button>

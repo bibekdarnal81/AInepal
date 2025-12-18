@@ -1,11 +1,12 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import ThumbnailUpload from '@/components/thumbnail-upload'
+import { RichTextEditor } from '@/components/rich-text-editor'
+import { AccordionItem } from '@/components/accordion'
 
 export default function EditProjectPage() {
     const params = useParams()
@@ -21,6 +22,7 @@ export default function EditProjectPage() {
     const [githubUrl, setGithubUrl] = useState('')
     const [tags, setTags] = useState('')
     const [techStack, setTechStack] = useState('')
+    const [features, setFeatures] = useState('')
     const [displayOrder, setDisplayOrder] = useState('0')
     const [price, setPrice] = useState('0')
     const [currency, setCurrency] = useState('NPR')
@@ -54,6 +56,7 @@ export default function EditProjectPage() {
                 setGithubUrl(data.github_url || '')
                 setTags(data.tags?.join(', ') || '')
                 setTechStack(data.tech_stack?.join(', ') || '')
+                setFeatures(data.features?.join('\n') || '')
                 setDisplayOrder(data.display_order?.toString() || '0')
                 setPrice(data.price?.toString() || '0')
                 setCurrency(data.currency || 'NPR')
@@ -72,6 +75,7 @@ export default function EditProjectPage() {
 
         const tagsArray = tags.split(',').map(t => t.trim()).filter(Boolean)
         const techArray = techStack.split(',').map(t => t.trim()).filter(Boolean)
+        const featuresArray = features.split('\n').map(f => f.trim()).filter(Boolean)
 
         const { error: updateError } = await supabase
             .from('projects')
@@ -86,6 +90,7 @@ export default function EditProjectPage() {
                 github_url: githubUrl.trim() || null,
                 tags: tagsArray,
                 tech_stack: techArray,
+                features: featuresArray,
                 display_order: parseInt(displayOrder) || 0,
                 price: parseFloat(price) || 0,
                 currency: currency,
@@ -181,16 +186,16 @@ export default function EditProjectPage() {
                                 rows={3}
                                 className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                             />
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-foreground mb-2">Content</label>
-                            <textarea
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                rows={8}
-                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground resize-none font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <div className="md:col-span-2">
+                                <AccordionItem title="Content" defaultOpen={true}>
+                                    <RichTextEditor
+                                        content={content}
+                                        onChange={setContent}
+                                        placeholder="Write your project details here..."
+                                        minHeight="300px"
+                                    />
+                                </AccordionItem>
+                            </div>
                         </div>
 
                         <div>
@@ -273,6 +278,17 @@ export default function EditProjectPage() {
                                 onChange={(e) => setTechStack(e.target.value)}
                                 className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-foreground mb-2">Features (one per line)</label>
+                            <textarea
+                                rows={5}
+                                value={features}
+                                onChange={(e) => setFeatures(e.target.value)}
+                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                placeholder="Responsive Design\nSEO Optimized\nFast Loading\nModern UI"
+                            ></textarea>
                         </div>
                     </div>
 
