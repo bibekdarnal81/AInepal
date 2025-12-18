@@ -7,7 +7,7 @@ import { Footer } from '@/components/footer'
 import { BuyButton } from '@/components/buy-button'
 import Link from 'next/link'
 import * as Icons from 'lucide-react'
-import { Check } from 'lucide-react'
+import { Check, MessageSquare } from 'lucide-react'
 
 interface Service {
     id: string
@@ -143,6 +143,18 @@ export default function ServicesPage() {
                                             >
                                                 Get Started
                                             </BuyButton>
+
+                                            <button
+                                                onClick={() => {
+                                                    window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                        detail: { itemType: 'service', itemTitle: service.title }
+                                                    }))
+                                                }}
+                                                className="w-full mt-3 flex items-center justify-center gap-2 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                                            >
+                                                <MessageSquare className="h-5 w-5" />
+                                                Ask About This Service
+                                            </button>
                                         </div>
                                     )
                                 })}

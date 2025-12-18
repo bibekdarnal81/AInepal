@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MessageSquare, X, Send, Paperclip, DollarSign, User as UserIcon, ShoppingBag, BookOpen } from 'lucide-react'
+import { MessageSquare, X, Send, Paperclip, DollarSign, User as UserIcon, ShoppingBag, BookOpen, Bot, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import type { User } from '@supabase/supabase-js'
 
@@ -22,6 +22,7 @@ interface ChatMessage {
     id: string
     message: string
     is_admin: boolean
+    is_ai_response?: boolean
     created_at: string
     attachments?: Array<{
         file_url: string
@@ -51,6 +52,8 @@ export function ChatWidget() {
     const [orders, setOrders] = useState<Order[]>([])
     const [uploading, setUploading] = useState(false)
     const [adminAvatar, setAdminAvatar] = useState<string>('')
+    const [aiEnabled, setAiEnabled] = useState(true)
+    const [aiTyping, setAiTyping] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
@@ -71,6 +74,20 @@ export function ChatWidget() {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
+
+    // Listen for custom event to open chat with pre-filled message
+    useEffect(() => {
+        const handleOpenChatWithMessage = (event: CustomEvent) => {
+            const { itemType, itemTitle } = event.detail
+            setIsOpen(true)
+            setNewMessage(`Hi! I want to know more about the ${itemType}: "${itemTitle}". Can you provide more information?`)
+        }
+
+        window.addEventListener('openChatWithMessage' as any, handleOpenChatWithMessage as any)
+        return () => {
+            window.removeEventListener('openChatWithMessage' as any, handleOpenChatWithMessage as any)
+        }
+    }, [])
 
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser()
@@ -213,6 +230,7 @@ export function ChatWidget() {
         if ((!newMessage.trim() && !selectedImage) || !user) return
 
         setUploading(true)
+        const userMessageText = newMessage.trim()
 
         try {
             let imageUrl = null
@@ -234,7 +252,7 @@ export function ChatWidget() {
             }
 
             // Create message
-            const messageText = newMessage.trim() || '📷 Image'
+            const messageText = userMessageText || '📷 Image'
             const { data: messageData, error } = await supabase
                 .from('chat_messages')
                 .insert({
@@ -266,6 +284,31 @@ export function ChatWidget() {
             setImagePreview(null)
             if (fileInputRef.current) {
                 fileInputRef.current.value = ''
+            }
+
+            // Trigger AI response if enabled and message has text
+            if (aiEnabled && userMessageText && !imageUrl) {
+                setAiTyping(true)
+                try {
+                    const aiResponse = await fetch('/api/ai-agent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: userMessageText,
+                            userId: user.id,
+                            chatHistory: messages.slice(-5) // Last 5 messages for context
+                        })
+                    })
+
+                    if (aiResponse.ok) {
+                        // AI response is saved to DB by the API, will appear via subscription
+                        await new Promise(resolve => setTimeout(resolve, 1000)) // Brief delay for natural feel
+                    }
+                } catch (aiError) {
+                    console.error('AI agent error:', aiError)
+                } finally {
+                    setAiTyping(false)
+                }
             }
         } catch (error) {
             console.error('Error sending message:', error)
@@ -315,6 +358,13 @@ export function ChatWidget() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setAiEnabled(!aiEnabled)}
+                            className={`hover:bg-white/20 rounded p-1 ${aiEnabled ? 'bg-white/30' : ''}`}
+                            title={aiEnabled ? 'AI Agent: ON' : 'AI Agent: OFF'}
+                        >
+                            <Sparkles className={`h-5 w-5 ${aiEnabled ? 'text-yellow-300' : 'text-white/60'}`} />
+                        </button>
                         <button
                             onClick={() => {
                                 setShowOrdersView(!showOrdersView)
@@ -395,8 +445,13 @@ export function ChatWidget() {
                                         className={`flex gap-2 ${msg.is_admin ? 'justify-start' : 'justify-end'}`}
                                     >
                                         {msg.is_admin && (
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                                {adminAvatar ? (
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${msg.is_ai_response
+                                                ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                                                : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                                                }`}>
+                                                {msg.is_ai_response ? (
+                                                    <Bot className="h-4 w-4 text-white" />
+                                                ) : adminAvatar ? (
                                                     <Image
                                                         src={adminAvatar}
                                                         alt="Admin"
@@ -433,8 +488,8 @@ export function ChatWidget() {
                                                         : 'bg-gradient-to-r from-violet-600 to-pink-600 text-white'
                                                         }`}
                                                 >
-                                                    <p className="text-sm">{msg.message}</p>
-                                                    <p className="text-xs opacity-70 mt-1">
+                                                    <p className="text-sm text-inherit">{msg.message}</p>
+                                                    <p className="text-xs text-inherit opacity-70 mt-1">
                                                         {new Date(msg.created_at).toLocaleTimeString([], {
                                                             hour: '2-digit',
                                                             minute: '2-digit'
@@ -465,6 +520,23 @@ export function ChatWidget() {
                                         )}
                                     </div>
                                 ))
+                            )}
+                            {/* AI Typing Indicator */}
+                            {aiTyping && (
+                                <div className="flex gap-2 justify-start">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                                        <Bot className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div className="max-w-[80%]">
+                                        <div className="rounded-lg px-4 py-2 bg-secondary text-foreground">
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                             <div ref={messagesEndRef} />
                         </div>

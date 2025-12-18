@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, MessageSquare } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import { BuyButton } from '@/components/buy-button'
 
@@ -84,8 +84,8 @@ export function ServicesSection() {
                                     {service.currency === 'USD' && '$'}
                                     {service.currency === 'EUR' && '€'}
                                     {service.currency === 'GBP' && '£'}
-                                    {service.currency === 'NPR' && 'Rs '}
-                                    {service.price}
+                                    {service.currency === 'NPR' && 'रू '}
+                                    {service.price.toLocaleString()}
                                 </div>
 
                                 {service.description && (
@@ -116,6 +116,18 @@ export function ServicesSection() {
                                 >
                                     Buy Now
                                 </BuyButton>
+
+                                <button
+                                    onClick={() => {
+                                        window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                            detail: { itemType: 'service', itemTitle: service.title }
+                                        }))
+                                    }}
+                                    className="w-full mt-3 flex items-center justify-center gap-2 py-3 border-2 border-primary text-primary rounded-lg font-medium hover:bg-primary/10 transition-colors"
+                                >
+                                    <MessageSquare className="h-5 w-5" />
+                                    Ask About This Service
+                                </button>
                             </div>
                         )
                     })}

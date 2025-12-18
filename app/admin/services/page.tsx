@@ -10,6 +10,7 @@ interface Service {
     title: string
     slug: string
     price: number
+    currency: string
     is_published: boolean
     is_featured: boolean
     features: string[]
@@ -136,8 +137,13 @@ export default function ServicesPage() {
                                         </td>
                                         <td className="px-6 py-4 text-muted-foreground">
                                             <div className="flex items-center gap-1">
-                                                <DollarSign className="h-4 w-4" />
-                                                {service.price}
+                                                {service.currency === 'NPR' ? (
+                                                    <span className="text-sm">रू</span>
+                                                ) : (
+                                                    <DollarSign className="h-4 w-4" />
+                                                )}
+                                                <span>{service.price.toLocaleString()}</span>
+                                                <span className="text-xs text-muted-foreground/70 ml-1">{service.currency}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-muted-foreground">
@@ -147,8 +153,8 @@ export default function ServicesPage() {
                                             <button
                                                 onClick={() => togglePublish(service.id, service.is_published)}
                                                 className={`px-3 py-1 text-xs rounded-full font-medium transition-colors ${service.is_published
-                                                        ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
-                                                        : 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20'
+                                                    ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                                                    : 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20'
                                                     }`}
                                             >
                                                 {service.is_published ? 'Published' : 'Draft'}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowRight, ExternalLink, Github } from 'lucide-react'
+import { ArrowRight, ExternalLink, Github, MessageSquare } from 'lucide-react'
 import { BuyButton } from '@/components/buy-button'
 import * as Icons from 'lucide-react'
 
@@ -244,6 +244,18 @@ export function ProjectsSection() {
                                                 </>
                                             )}
                                         </div>
+
+                                        <button
+                                            onClick={() => {
+                                                window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                    detail: { itemType: 'project', itemTitle: project.title }
+                                                }))
+                                            }}
+                                            className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 border-2 border-primary text-primary rounded-lg font-medium hover:bg-primary/10 transition-colors text-sm"
+                                        >
+                                            <MessageSquare className="h-4 w-4" />
+                                            Ask About This Project
+                                        </button>
                                     </div>
                                 </div>
                             )

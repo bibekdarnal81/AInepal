@@ -2,7 +2,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { BookOpen, Users, Award, Clock } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, MessageSquare } from 'lucide-react';
 
 const courses = [
     {
@@ -113,6 +113,18 @@ export default function CoursesPage() {
                                                 </Button>
                                             </Link>
                                         </div>
+
+                                        <button
+                                            onClick={() => {
+                                                window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                    detail: { itemType: 'course', itemTitle: course.title }
+                                                }))
+                                            }}
+                                            className="w-full mt-4 flex items-center justify-center gap-2 py-2 border-2 border-purple-500/50 text-purple-300 rounded-lg font-medium hover:bg-purple-500/10 transition-colors"
+                                        >
+                                            <MessageSquare className="h-4 w-4" />
+                                            Ask About This Course
+                                        </button>
                                     </div>
                                 </div>
                             ))}

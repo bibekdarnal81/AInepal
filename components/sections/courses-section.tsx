@@ -1,8 +1,80 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { BookOpen, Award, Users } from 'lucide-react';
+import { BookOpen, Award, Users, MessageSquare, Clock, Star } from 'lucide-react';
+
+interface Course {
+    id: string
+    title: string
+    slug: string
+    description: string | null
+    thumbnail_url: string | null
+    price: number
+    currency: string
+    duration_hours: number | null
+    level: string
+    instructor_name: string | null
+    instructor_avatar: string | null
+    students_count: number
+    rating: number
+}
 
 export function CoursesSection() {
+    const [courses, setCourses] = useState<Course[]>([])
+    const [loading, setLoading] = useState(true)
+    const supabase = createClient()
+
+    useEffect(() => {
+        fetchCourses()
+    }, [])
+
+    const fetchCourses = async () => {
+        const { data } = await supabase
+            .from('courses')
+            .select('*')
+            .eq('is_published', true)
+            .eq('is_featured', true)
+            .limit(2)
+            .order('created_at', { ascending: false })
+
+        if (data) {
+            setCourses(data)
+        }
+        setLoading(false)
+    }
+
+    if (loading) {
+        return (
+            <section className="bg-gray-100 py-16">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                </div>
+            </section>
+        )
+    }
+
+    if (courses.length === 0) {
+        return (
+            <section className="bg-gray-100 py-16">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                            Master Modern Development
+                        </h2>
+                        <p className="text-gray-600">
+                            New courses coming soon! Check back later.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        )
+    }
+
+    const featuredCourse = courses[0]
+
     return (
         <section className="bg-gray-100 py-16">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -17,29 +89,66 @@ export function CoursesSection() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="rounded-xl overflow-hidden bg-white border-2 border-gray-200 shadow-lg">
-                        <img
-                            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=400&fit=crop"
-                            alt="MERN Stack Course"
-                            className="w-full h-64 object-cover"
-                        />
+                        {featuredCourse.thumbnail_url ? (
+                            <img
+                                src={featuredCourse.thumbnail_url}
+                                alt={featuredCourse.title}
+                                className="w-full h-64 object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <BookOpen className="h-24 w-24 text-white opacity-50" />
+                            </div>
+                        )}
                         <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${featuredCourse.level === 'beginner' ? 'bg-green-100 text-green-700' :
+                                    featuredCourse.level === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-red-100 text-red-700'
+                                    }`}>
+                                    {featuredCourse.level.charAt(0).toUpperCase() + featuredCourse.level.slice(1)}
+                                </span>
+                                {featuredCourse.duration_hours && (
+                                    <span className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Clock className="w-4 h-4" />
+                                        {featuredCourse.duration_hours} hours
+                                    </span>
+                                )}
+                                {featuredCourse.rating > 0 && (
+                                    <span className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                        {featuredCourse.rating}
+                                    </span>
+                                )}
+                            </div>
+
                             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                                Building a Complete E-commerce Platform with MERN Stack: BabyShop from Scratch to Deployment
+                                {featuredCourse.title}
                             </h3>
                             <p className="text-gray-600 mb-6">
-                                Build a professional e-commerce platform using the MERN Stack. Create customer, admin, and backend applications from scratch and deploy them on Vercel.
+                                {featuredCourse.description || 'Learn modern web development skills with this comprehensive course.'}
                             </p>
 
                             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                                 <img
-                                    src="https://ui-avatars.com/api/?name=Noor+Mohammad&background=3b82f6&color=fff"
-                                    alt=" Rusha"
+                                    src={featuredCourse.instructor_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(featuredCourse.instructor_name || 'Instructor')}&background=3b82f6&color=fff`}
+                                    alt={featuredCourse.instructor_name || 'Instructor'}
                                     className="w-12 h-12 rounded-full"
                                 />
                                 <div>
-                                    <p className="font-semibold text-gray-900"> Rusha</p>
+                                    <p className="font-semibold text-gray-900">{featuredCourse.instructor_name || 'Expert Instructor'}</p>
                                     <p className="text-sm text-gray-500">Course Instructor</p>
                                 </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="text-3xl font-bold text-blue-600 mb-2">
+                                    {featuredCourse.currency === 'NPR' ? 'रू ' : '$'}
+                                    {featuredCourse.price.toLocaleString()}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    {featuredCourse.students_count > 0 && `${featuredCourse.students_count.toLocaleString()} students enrolled`}
+                                </p>
                             </div>
 
                             <Link href="/courses">
@@ -47,6 +156,18 @@ export function CoursesSection() {
                                     Enroll Now →
                                 </Button>
                             </Link>
+
+                            <button
+                                onClick={() => {
+                                    window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                        detail: { itemType: 'course', itemTitle: featuredCourse.title }
+                                    }))
+                                }}
+                                className="w-full mt-4 flex items-center justify-center gap-2 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                            >
+                                <MessageSquare className="h-5 w-5" />
+                                Ask About This Course
+                            </button>
                         </div>
                     </div>
 
@@ -59,14 +180,14 @@ export function CoursesSection() {
                                 Join thousands of developers who have transformed their careers with our comprehensive courses.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Link href="/projects">
+                                <Link href="/courses">
                                     <Button variant="secondary" size="lg">
-                                        View Course Details
+                                        View All Courses
                                     </Button>
                                 </Link>
-                                <Link href="/projects">
+                                <Link href="/courses">
                                     <Button variant="primary" size="lg">
-                                        Enroll Now
+                                        Start Learning
                                     </Button>
                                 </Link>
                             </div>

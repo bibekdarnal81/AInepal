@@ -189,7 +189,7 @@ export default function AdminOrdersPage() {
                 <div className="bg-card rounded-lg border border-border p-4">
                     <p className="text-sm text-muted-foreground mb-1">Revenue</p>
                     <p className="text-2xl font-bold text-foreground">
-                        Rs {orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + o.amount, 0).toLocaleString('en-NP')}
+                        रू {orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + o.amount, 0).toLocaleString('en-NP')}
                     </p>
                 </div>
             </div>
@@ -227,7 +227,7 @@ export default function AdminOrdersPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-foreground font-medium">
-                                            {order.currency === 'NPR' ? 'Rs ' : '$'}{order.amount.toLocaleString('en-NP')}
+                                            {order.currency === 'NPR' ? 'रू ' : '$'}{order.amount.toLocaleString('en-NP')}
                                         </td>
                                         <td className="px-6 py-4">
                                             <select

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { ArrowLeft, ExternalLink, Github, Calendar, Tag } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, Calendar, Tag, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { BuyButton } from '@/components/buy-button'
 import * as Icons from 'lucide-react'
@@ -228,6 +228,17 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
 
                                 {/* Links */}
                                 <div className="space-y-3 pt-6 border-t border-border">
+                                    <button
+                                        onClick={() => {
+                                            window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                detail: { itemType: 'project', itemTitle: project.title }
+                                            }))
+                                        }}
+                                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-violet-600 to-pink-600 hover:opacity-90 rounded-lg transition-opacity w-full"
+                                    >
+                                        <MessageSquare className="h-5 w-5 text-white" />
+                                        <span className="text-white font-medium">Ask About This Project</span>
+                                    </button>
                                     {project.demo_url && (
                                         <a
                                             href={project.demo_url}
