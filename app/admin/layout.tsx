@@ -18,7 +18,10 @@ import {
     MessageSquare,
     ShoppingBag,
     Mail,
-    Users
+    Users,
+    Tag,
+    ChevronDown,
+    ChevronRight
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -30,6 +33,7 @@ export default function AdminLayout({
     const [loading, setLoading] = useState(true)
     const [isAdmin, setIsAdmin] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [expandedSections, setExpandedSections] = useState<string[]>(['content', 'management'])
     const [chatUsers, setChatUsers] = useState<Array<{
         user_id: string | null
         guest_session_id: string | null
@@ -47,7 +51,6 @@ export default function AdminLayout({
     useEffect(() => {
         // Skip auth check for login page
         if (isLoginPage) {
-            // No need to setLoading(false) here as we render children immediately for login page
             return
         }
 
@@ -196,6 +199,14 @@ export default function AdminLayout({
         router.push('/admin/login')
     }
 
+    const toggleSection = (section: string) => {
+        setExpandedSections(prev =>
+            prev.includes(section)
+                ? prev.filter(s => s !== section)
+                : [...prev, section]
+        )
+    }
+
     // For login page, just render children directly
     if (isLoginPage) {
         return <>{children}</>
@@ -239,18 +250,43 @@ export default function AdminLayout({
         )
     }
 
-    const navigation = [
-        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-        { name: 'Posts', href: '/admin/posts', icon: FileText },
-        { name: 'Courses', href: '/admin/courses', icon: BookOpen },
-        { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
-        { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
-        { name: 'Services', href: '/admin/services', icon: Briefcase },
-        { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-        { name: 'Messages', href: '/admin/messages', icon: Mail },
-        { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
-        { name: 'Users', href: '/admin/users', icon: Users },
-        { name: 'Settings', href: '/admin/settings', icon: Settings },
+    const navigationSections = [
+        {
+            id: 'overview',
+            title: 'Overview',
+            items: [
+                { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+            ]
+        },
+        {
+            id: 'content',
+            title: 'Content Management',
+            items: [
+                { name: 'Posts', href: '/admin/posts', icon: FileText },
+                { name: 'Post Categories', href: '/admin/posts/categories', icon: Tag },
+                { name: 'Courses', href: '/admin/courses', icon: BookOpen },
+                { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
+                { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
+                { name: 'Services', href: '/admin/services', icon: Briefcase },
+            ]
+        },
+        {
+            id: 'management',
+            title: 'Business',
+            items: [
+                { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+                { name: 'Messages', href: '/admin/messages', icon: Mail },
+                { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
+                { name: 'Users', href: '/admin/users', icon: Users },
+            ]
+        },
+        {
+            id: 'system',
+            title: 'System',
+            items: [
+                { name: 'Settings', href: '/admin/settings', icon: Settings },
+            ]
+        }
     ]
 
     return (
@@ -268,11 +304,18 @@ export default function AdminLayout({
                 fixed top-0 left-0 z-50 h-full w-64 bg-card border-r border-border
                 transform transition-transform duration-200 ease-in-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                lg:translate-x-0
+                lg:translate-x-0 flex flex-col
             `}>
-                <div className="flex items-center justify-between h-16 px-6 border-b border-border">
-                    <Link href="/admin" className="text-xl font-bold text-foreground">
-                        Admin Panel
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
+                    <Link href="/admin" className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">R</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-foreground">Rusha</p>
+                            <p className="text-xs text-muted-foreground">Admin</p>
+                        </div>
                     </Link>
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -282,30 +325,54 @@ export default function AdminLayout({
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-1">
-                    {navigation.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            <item.icon className="h-5 w-5" />
-                            {item.name}
-                        </Link>
+                {/* Navigation */}
+                <nav className="flex-1 overflow-y-auto p-3 space-y-6">
+                    {navigationSections.map((section) => (
+                        <div key={section.id}>
+                            {section.title && (
+                                <button
+                                    onClick={() => toggleSection(section.id)}
+                                    className="flex items-center justify-between w-full px-2 py-1.5 mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+                                >
+                                    {section.title}
+                                    {expandedSections.includes(section.id) ? (
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                    ) : (
+                                        <ChevronRight className="h-3.5 w-3.5" />
+                                    )}
+                                </button>
+                            )}
+                            {expandedSections.includes(section.id) && (
+                                <div className="space-y-0.5">
+                                    {section.items.map((item) => {
+                                        const isActive = pathname === item.href ||
+                                            (item.href !== '/admin' && pathname.startsWith(item.href))
+                                        return (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${isActive
+                                                        ? 'bg-primary/10 text-primary font-medium'
+                                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                                    }`}
+                                                onClick={() => setSidebarOpen(false)}
+                                            >
+                                                <item.icon className="h-4 w-4 flex-shrink-0" />
+                                                <span className="truncate">{item.name}</span>
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </nav>
 
                 {/* Recent Chats Section */}
                 {chatUsers.length > 0 && (
-                    <div className="px-2 pb-4 border-b border-border/50">
-                        <div className="flex items-center justify-between mb-3 px-3">
-                            <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-primary/10">
-                                    <Users className="h-3.5 w-3.5 text-primary" />
-                                </div>
-                                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Active Chats</h3>
-                            </div>
+                    <div className="px-3 pb-3 border-t border-border/50 pt-3 flex-shrink-0">
+                        <div className="flex items-center justify-between mb-2 px-2">
+                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Chats</h3>
                             <Link
                                 href="/admin/chat"
                                 className="text-xs text-primary hover:text-primary/80 transition-colors"
@@ -313,34 +380,34 @@ export default function AdminLayout({
                                 View All
                             </Link>
                         </div>
-                        <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                        <div className="space-y-0.5">
                             {chatUsers.map((chatUser) => (
                                 <Link
                                     key={chatUser.user_id || chatUser.guest_session_id}
                                     href="/admin/chat"
-                                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-secondary transition-colors"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-secondary/50 transition-colors"
                                     onClick={() => setSidebarOpen(false)}
                                 >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${chatUser.is_guest
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${chatUser.is_guest
                                         ? 'bg-gradient-to-br from-orange-500 to-orange-600'
                                         : 'bg-gradient-to-br from-violet-500 to-pink-500'
                                         }`}>
-                                        <Users className="h-4 w-4 text-white" />
+                                        <Users className="h-3.5 w-3.5 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1.5">
-                                            <p className="text-sm font-medium text-foreground truncate">
+                                        <div className="flex items-center gap-1">
+                                            <p className="text-xs font-medium text-foreground truncate">
                                                 {chatUser.display_name}
                                             </p>
                                             {chatUser.is_guest && (
-                                                <span className="px-1.5 py-0.5 text-[10px] bg-orange-500 text-white rounded-full">
+                                                <span className="px-1 py-0.5 text-[9px] bg-orange-500 text-white rounded-full">
                                                     G
                                                 </span>
                                             )}
                                         </div>
                                     </div>
                                     {chatUser.unread_count > 0 && (
-                                        <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
+                                        <span className="px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full font-medium">
                                             {chatUser.unread_count}
                                         </span>
                                     )}
@@ -350,24 +417,26 @@ export default function AdminLayout({
                     </div>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-                    <div className="flex items-center gap-3 px-4 py-2 mb-2">
-                        <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-                            <span className="text-sm font-medium text-primary">
+                {/* User Profile Footer */}
+                <div className="p-3 border-t border-border flex-shrink-0">
+                    <div className="flex items-center gap-2 px-2 py-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-semibold text-white">
                                 {user.email?.[0].toUpperCase()}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
+                            <p className="text-xs font-medium text-foreground truncate">
                                 {user.email}
                             </p>
+                            <p className="text-[10px] text-muted-foreground">Administrator</p>
                         </div>
                     </div>
                     <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                     >
-                        <LogOut className="h-5 w-5" />
+                        <LogOut className="h-4 w-4" />
                         Sign Out
                     </button>
                 </div>
@@ -376,13 +445,14 @@ export default function AdminLayout({
             {/* Main content */}
             <div className="lg:pl-64">
                 {/* Top bar */}
-                <header className="h-16 bg-card border-b border-border flex items-center px-6">
+                <header className="h-16 bg-card border-b border-border flex items-center px-6 sticky top-0 z-30">
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="lg:hidden text-muted-foreground hover:text-foreground"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
+                    <div className="flex-1" />
                 </header>
 
                 {/* Page content */}

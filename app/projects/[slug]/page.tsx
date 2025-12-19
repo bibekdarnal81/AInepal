@@ -15,6 +15,7 @@ interface Project {
     slug: string
     description: string | null
     content: string | null
+    features: string[] | null
     price: number
     currency: string
     thumbnail_url: string | null
@@ -158,10 +159,40 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                 <div className="bg-card border border-border rounded-xl p-6">
                                     <h2 className="text-2xl font-bold text-foreground mb-4">About This Project</h2>
                                     <div className="prose prose-invert max-w-none">
-                                        <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                            {project.content}
-                                        </p>
+                                        <div 
+                                            className="text-muted-foreground leading-relaxed"
+                                            dangerouslySetInnerHTML={{ __html: project.content }}
+                                        />
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Features */}
+                            {project.features && project.features.length > 0 && (
+                                <div className="bg-card border border-border rounded-xl p-6">
+                                    <h2 className="text-2xl font-bold text-foreground mb-4">Key Features</h2>
+                                    <ul className="space-y-3">
+                                        {project.features.map((feature, idx) => (
+                                            <li key={idx} className="flex items-start gap-3">
+                                                <svg
+                                                    className="h-6 w-6 text-primary flex-shrink-0 mt-0.5"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                </svg>
+                                                <span className="text-muted-foreground leading-relaxed">
+                                                    {feature}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )}
 
