@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Save, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Video } from 'lucide-react'
 import Link from 'next/link'
 import ThumbnailUpload from '@/components/thumbnail-upload'
 import { CurriculumEditor } from '@/components/admin/curriculum-editor'
@@ -146,12 +146,21 @@ export default function EditCoursePage() {
                         <p className="text-muted-foreground mt-1">Update course details</p>
                     </div>
                 </div>
-                <button
-                    onClick={() => setDeleteConfirm(true)}
-                    className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                >
-                    <Trash2 className="h-5 w-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <Link
+                        href={`/admin/courses/${id}/classes`}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg font-medium hover:bg-primary/20 transition-colors"
+                    >
+                        <Video className="h-4 w-4" />
+                        Live Classes
+                    </Link>
+                    <button
+                        onClick={() => setDeleteConfirm(true)}
+                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                    >
+                        <Trash2 className="h-5 w-5" />
+                    </button>
+                </div>
             </div>
 
             {error && (
