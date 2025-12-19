@@ -227,7 +227,7 @@ export default function AdminOrdersPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-foreground font-medium">
-                                            {order.currency === 'NPR' ? 'रू ' : '$'}{order.amount.toLocaleString('en-NP')}
+                                            रू {order.amount.toLocaleString('en-NP')}
                                         </td>
                                         <td className="px-6 py-4">
                                             <select

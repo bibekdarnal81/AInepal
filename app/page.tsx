@@ -9,7 +9,6 @@ import { StatsSection } from '@/components/sections/stats-section';
 import { CTASection } from '@/components/sections/cta-section';
 import { PricingSection } from '@/components/sections/pricing-section';
 import { PostsSection } from '@/components/sections/posts-section';
-import { CoursesSection } from '@/components/sections/courses-section';
 import { ProjectsSection } from '@/components/sections/projects-showcase';
 import { ServicesSection } from '@/components/sections/services-showcase';
 
@@ -22,7 +21,6 @@ export default function Home() {
           <HeroWithTabs />
           <ServicesSection />
           <ProjectsSection />
-          <CoursesSection />
           <PostsSection />
           <MonitorSection />
           <EvolveSection />

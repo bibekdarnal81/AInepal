@@ -264,7 +264,6 @@ export default function AdminLayout({
             items: [
                 { name: 'Posts', href: '/admin/posts', icon: FileText },
                 { name: 'Post Categories', href: '/admin/posts/categories', icon: Tag },
-                { name: 'Courses', href: '/admin/courses', icon: BookOpen },
                 { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
                 { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
                 { name: 'Services', href: '/admin/services', icon: Briefcase },
@@ -352,8 +351,8 @@ export default function AdminLayout({
                                                 key={item.name}
                                                 href={item.href}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${isActive
-                                                        ? 'bg-primary/10 text-primary font-medium'
-                                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                                    ? 'bg-primary/10 text-primary font-medium'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                                                     }`}
                                                 onClick={() => setSidebarOpen(false)}
                                             >

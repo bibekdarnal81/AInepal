@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ShoppingCart, Check } from 'lucide-react'
 
 interface BuyButtonProps {
-    itemType: 'service' | 'course' | 'project'
+    itemType: 'service' | 'project'
     itemId: string
     itemTitle: string
     itemSlug?: string

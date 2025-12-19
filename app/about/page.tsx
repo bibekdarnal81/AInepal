@@ -60,7 +60,7 @@ export default function AboutPage() {
                             <h2 className="text-3xl font-bold text-white mb-6">Our Story</h2>
                             <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
                                 <p>
-                                     Rusha was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.
+                                    Rusha was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.
                                 </p>
                                 <p>
                                     Today, we serve thousands of students worldwide, offering everything from free tutorials to premium courses, from open-source projects to custom development services. Our team of experienced developers and instructors is passionate about sharing knowledge and building amazing products.
@@ -112,14 +112,14 @@ export default function AboutPage() {
                             Become part of a growing community of developers learning and building together.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <Link href="/courses">
+                            <Link href="/contact">
                                 <Button variant="secondary" size="lg">
-                                    Browse Courses
+                                    Contact Us
                                 </Button>
                             </Link>
-                            <Link href="/contact">
+                            <Link href="/services">
                                 <Button variant="ghost" size="lg">
-                                    Contact Us
+                                    Our Services
                                 </Button>
                             </Link>
                         </div>

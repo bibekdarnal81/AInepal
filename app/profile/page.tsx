@@ -23,6 +23,8 @@ interface Order {
     created_at: string
 }
 
+
+
 export default function ProfilePage() {
     const [profile, setProfile] = useState<Profile>({
         display_name: '',
@@ -88,6 +90,8 @@ export default function ProfilePage() {
             setOrders(data)
         }
     }
+
+
 
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -219,6 +223,7 @@ export default function ProfilePage() {
                                 <ShoppingBag className="h-5 w-5" />
                                 My Orders
                             </button>
+
                             <button
                                 onClick={() => setActiveTab('security')}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'security'
@@ -369,7 +374,7 @@ export default function ProfilePage() {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="font-semibold text-foreground">
-                                                            ${order.amount.toFixed(2)}
+                                                            रू {order.amount.toLocaleString('en-NP')}
                                                         </p>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/10 text-green-500' :
                                                             order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
@@ -385,6 +390,8 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         )}
+
+
 
                         {activeTab === 'security' && (
                             <div className="bg-card rounded-xl border border-border">
