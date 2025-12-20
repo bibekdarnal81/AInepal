@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
@@ -39,7 +39,7 @@ interface GenericOrder {
 
 
 
-export default function ProfilePage() {
+function ProfilePageContent() {
     const [profile, setProfile] = useState<Profile>({
         display_name: '',
         phone: '',
@@ -512,3 +512,16 @@ export default function ProfilePage() {
         </div>
     )
 }
+
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <ProfilePageContent />
+        </Suspense>
+    )
+}
+
