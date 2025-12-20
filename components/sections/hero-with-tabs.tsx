@@ -773,7 +773,7 @@ export function HeroWithTabs() {
                     </h1>
 
                     <h2 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
-                         Rusha simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
+                         NextNepal simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
                     </h2>
 
                     <div className="flex flex-wrap gap-4">

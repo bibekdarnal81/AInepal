@@ -11,16 +11,16 @@ SET is_admin = true
 WHERE id = auth.uid();
 
 -- Option 2: Create a specific admin user (uncomment to use)
--- First, you need to sign up with admin@rusha.com at /admin/login
+-- First, you need to sign up with admin@NextNepal.com at /admin/login
 -- Then run these:
 /*
 UPDATE auth.users 
 SET email_confirmed_at = NOW()
-WHERE email = 'admin@rusha.com';
+WHERE email = 'admin@NextNepal.com';
 
 UPDATE profiles 
 SET is_admin = true 
-WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@rusha.com');
+WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@NextNepal.com');
 */
 
 -- ============================================

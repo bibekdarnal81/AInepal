@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 /**
- * Hero Section -  Rusha-inspired design
+ * Hero Section -  NextNepal-inspired design
  * Clean, minimal, with product mockup and company logos
  */
 export function HeroSection() {
@@ -36,7 +36,7 @@ export function HeroSection() {
                     </h1>
 
                     <p className="text-lg text-gray-400 mb-8 leading-relaxed max-w-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                         Rusha simplifies your infrastructure stack from servers to
+                         NextNepal simplifies your infrastructure stack from servers to
                         observability with a single, scalable, easy-to-use platform.
                     </p>
 
@@ -180,7 +180,7 @@ export function HeroSection() {
                             way to deploy applications is now boarding.
                         </p>
                         <p className="text-violet-400 font-medium">
-                            Welcome to  Rusha.
+                            Welcome to  NextNepal.
                         </p>
                     </div>
                 </div>

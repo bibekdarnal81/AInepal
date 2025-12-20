@@ -163,7 +163,7 @@ const EvolveDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                             <tspan x={172} y={208}>frontend</tspan>
                         </text>
                         <text fill="#BF92EC" fontFamily="var(--font-inter)" fontSize={6}>
-                            <tspan x={172} y={220}>frontend-prod.up. Rusha.app</tspan>
+                            <tspan x={172} y={220}>frontend-prod.up. NextNepal.app</tspan>
                         </text>
                         <circle cx={162} cy={235} r={4} stroke="#42946E" strokeWidth={0.7} fill="none" />
                         <path d="M160 235l1.5 1.5 3-3" stroke="#42946E" strokeWidth={0.7} strokeLinecap="round" />
@@ -181,7 +181,7 @@ const EvolveDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                             <tspan x={318} y={208}>api</tspan>
                         </text>
                         <text fill="#BF92EC" fontFamily="var(--font-inter)" fontSize={6}>
-                            <tspan x={318} y={220}>api-prod.up. Rusha.app</tspan>
+                            <tspan x={318} y={220}>api-prod.up. NextNepal.app</tspan>
                         </text>
                         <circle cx={308} cy={235} r={4} stroke="#42946E" strokeWidth={0.7} fill="none" />
                         <path d="M306 235l1.5 1.5 3-3" stroke="#42946E" strokeWidth={0.7} strokeLinecap="round" />
@@ -220,7 +220,7 @@ const EvolveDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                             <tspan x={172} y={308}>umami</tspan>
                         </text>
                         <text fill="#BF92EC" fontFamily="var(--font-inter)" fontSize={6}>
-                            <tspan x={172} y={320}>umami-prod.up. Rusha.app</tspan>
+                            <tspan x={172} y={320}>umami-prod.up. NextNepal.app</tspan>
                         </text>
                         <circle cx={162} cy={335} r={4} stroke="#42946E" strokeWidth={0.7} fill="none" />
                         <path d="M160 335l1.5 1.5 3-3" stroke="#42946E" strokeWidth={0.7} strokeLinecap="round" />

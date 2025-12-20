@@ -15,7 +15,7 @@ DECLARE
     admin_user_id UUID;
 BEGIN
     -- Try to find existing admin user
-    SELECT id INTO admin_user_id FROM auth.users WHERE email = 'admin@rusha.com';
+    SELECT id INTO admin_user_id FROM auth.users WHERE email = 'admin@NextNepal.com';
     
     IF admin_user_id IS NULL THEN
         -- User doesn't exist, create it
@@ -37,7 +37,7 @@ BEGIN
         ) VALUES (
             gen_random_uuid(),
             '00000000-0000-0000-0000-000000000000',
-            'admin@rusha.com',
+            'admin@NextNepal.com',
             crypt('admin123456', gen_salt('bf')),
             NOW(),
             NOW(),
@@ -89,7 +89,7 @@ SELECT
     END as status
 FROM auth.users u
 LEFT JOIN public.profiles p ON u.id = p.id
-WHERE u.email = 'admin@rusha.com';
+WHERE u.email = 'admin@NextNepal.com';
 
 -- =============================================================================
 -- STEP 3: Create sample orders for testing (optional)
@@ -106,7 +106,7 @@ BEGIN
     
     IF order_count = 0 THEN
         -- Get admin ID
-        SELECT id INTO admin_id FROM auth.users WHERE email = 'admin@rusha.com';
+        SELECT id INTO admin_id FROM auth.users WHERE email = 'admin@NextNepal.com';
         
         -- Create a test user if needed
         INSERT INTO auth.users (

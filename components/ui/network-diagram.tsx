@@ -321,7 +321,7 @@ const NetworkDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                     <tspan x={45} y={300.364}>ackee analytics</tspan>
                 </text>
                 <text fill="#BF92EC" fontFamily="Inter, sans-serif" fontSize={10.5}>
-                    <tspan x={45} y={319.318}>ackee-prod.up. Rusha.app</tspan>
+                    <tspan x={45} y={319.318}>ackee-prod.up. NextNepal.app</tspan>
                 </text>
 
                 {/* Check Icon + Status */}
@@ -354,7 +354,7 @@ const NetworkDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                     <tspan x={469} y={275.364}>api gateway</tspan>
                 </text>
                 <text fill="#BF92EC" fontFamily="Inter, sans-serif" fontSize={10.5}>
-                    <tspan x={469} y={294.318}>api-prod.up. Rusha.app</tspan>
+                    <tspan x={469} y={294.318}>api-prod.up. NextNepal.app</tspan>
                 </text>
 
                 {/* Check Icon + Status */}
@@ -387,7 +387,7 @@ const NetworkDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                     <tspan x={257} y={139.364}>frontend</tspan>
                 </text>
                 <text fill="#BF92EC" fontFamily="Inter, sans-serif" fontSize={10.5}>
-                    <tspan x={257} y={158.318}>frontend-prod.up. Rusha.app</tspan>
+                    <tspan x={257} y={158.318}>frontend-prod.up. NextNepal.app</tspan>
                 </text>
 
                 {/* Check Icon + Status */}

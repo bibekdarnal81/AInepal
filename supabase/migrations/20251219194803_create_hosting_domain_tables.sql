@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.domains (
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   domain_name TEXT NOT NULL UNIQUE,
   tld TEXT NOT NULL,
-  registrar TEXT DEFAULT 'rusha',
+  registrar TEXT DEFAULT 'NextNepal',
   price DECIMAL(10, 2) NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'expired', 'cancelled')),
   registered_at TIMESTAMP WITH TIME ZONE,

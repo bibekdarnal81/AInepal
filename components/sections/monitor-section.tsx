@@ -114,7 +114,7 @@ export function MonitorSection() {
                             {...fadeInUp}
                             transition={{ delay: 0.2 }}
                         >
-                             Rusha provides precise logging, metrics, alerting, profiles, traces,
+                             NextNepal provides precise logging, metrics, alerting, profiles, traces,
                             and trend inspection without any code changes.
                         </motion.p>
 

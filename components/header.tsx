@@ -95,7 +95,7 @@ export function Header() {
                 <div className="flex lg:flex-1">
                     <Link href="/" className="-m-1.5 p-1.5">
                         <span className="text-2xl font-bold text-gradient">
-                            Rusha
+                            NextNepal
                         </span>
                     </Link>
                 </div>
@@ -230,7 +230,7 @@ export function Header() {
                         <div className="flex items-center justify-between">
                             <Link href="/" className="-m-1.5 p-1.5">
                                 <span className="text-2xl font-bold text-gradient">
-                                    Rusha
+                                    NextNepal
                                 </span>
                             </Link>
                             <button

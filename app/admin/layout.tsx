@@ -324,7 +324,7 @@ export default function AdminLayout({
                             <span className="text-white font-bold text-sm">R</span>
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-foreground">Rusha</p>
+                            <p className="text-sm font-semibold text-foreground">NextNepal</p>
                             <p className="text-xs text-muted-foreground">Admin</p>
                         </div>
                     </Link>

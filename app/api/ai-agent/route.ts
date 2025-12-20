@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
         // Build context for AI
         const businessContext = `
-You are an AI assistant for Rusha, a digital agency offering web development, app development, and online courses.
+You are an AI assistant for NextNepal, a digital agency offering web development, app development, and online courses.
 
 Available Services:
 ${services.map(s => `- ${s.title}: ${s.description} (${s.currency === 'NPR' ? 'रू' : '$'}${s.price.toLocaleString()})`).join('\n')}

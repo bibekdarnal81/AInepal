@@ -81,7 +81,7 @@ export function CTASection() {
                             <span className="text-sm text-gray-400">Blog</span>
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
-                             Rusha V3: Faster and Cheaper
+                             NextNepal V3: Faster and Cheaper
                         </h3>
                         <p className="text-gray-400 text-sm">
                             Learn how we have simultaneously decreased cost and increased performance.
