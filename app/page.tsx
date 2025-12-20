@@ -11,6 +11,7 @@ import { PricingSection } from '@/components/sections/pricing-section';
 import { PostsSection } from '@/components/sections/posts-section';
 import { ProjectsSection } from '@/components/sections/projects-showcase';
 import { ServicesSection } from '@/components/sections/services-showcase';
+import { BundleOffersSection } from '@/components/sections/bundle-offers-section';
 
 export default function Home() {
   return (
@@ -28,6 +29,7 @@ export default function Home() {
           <TweetsSection />
           <StatsSection />
           <CTASection />
+          <BundleOffersSection />
           <PricingSection />
         </main>
         <Footer />

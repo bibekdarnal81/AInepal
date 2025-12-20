@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Save, Key, User, Mail, Phone, FileText, AlertCircle, ShoppingBag, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { AvatarUpload } from '@/components/avatar-upload'
@@ -14,11 +15,24 @@ interface Profile {
     avatar_url: string
 }
 
-interface Order {
+interface HostingOrder {
+    id: string
+    status: string
+    price: number
+    billing_cycle: string
+    next_billing_date: string | null
+    created_at: string
+    hosting_plans: {
+        name: string
+        slug: string
+    }
+}
+
+interface GenericOrder {
     id: string
     item_title: string
+    item_type: string
     amount: number
-    currency: string
     status: string
     created_at: string
 }
@@ -34,7 +48,8 @@ export default function ProfilePage() {
     })
     const [email, setEmail] = useState('')
     const [userId, setUserId] = useState('')
-    const [orders, setOrders] = useState<Order[]>([])
+    const [orders, setOrders] = useState<HostingOrder[]>([])
+    const [genericOrders, setGenericOrders] = useState<GenericOrder[]>([])
     const [newPassword, setNewPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [saving, setSaving] = useState(false)
@@ -43,9 +58,20 @@ export default function ProfilePage() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const supabase = createClient()
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     useEffect(() => {
         checkAuth()
+        // Set active tab from URL query parameter if present
+        const tab = searchParams?.get('tab')
+        if (tab && (tab === 'profile' || tab === 'orders' || tab === 'security')) {
+            setActiveTab(tab as 'profile' | 'orders' | 'security')
+        }
+        if (searchParams?.get('new_order') === 'true') {
+            setMessage({ type: 'success', text: 'Order placed successfully!' })
+            // Clean URL
+            router.replace('/profile?tab=orders')
+        }
     }, [])
 
     const checkAuth = async () => {
@@ -80,14 +106,25 @@ export default function ProfilePage() {
 
     const fetchOrders = async (userId: string) => {
         const { data } = await supabase
-            .from('orders')
-            .select('id, item_title, amount, currency, status, created_at')
+            .from('hosting_orders')
+            .select('*, hosting_plans(name, slug)')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(10)
 
         if (data) {
-            setOrders(data)
+            setOrders(data as any)
+        }
+
+        // Fetch generic orders
+        const { data: genericData } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+
+        if (genericData) {
+            setGenericOrders(genericData as GenericOrder[])
         }
     }
 
@@ -357,29 +394,60 @@ export default function ProfilePage() {
                                     <h2 className="text-lg font-semibold text-foreground">Order History</h2>
                                 </div>
                                 <div className="p-6">
-                                    {orders.length === 0 ? (
+                                    {orders.length === 0 && genericOrders.length === 0 ? (
                                         <div className="text-center py-12">
                                             <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                             <p className="text-muted-foreground">No orders yet</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {orders.map((order) => (
+                                            {/* Generic Orders (Bundles, etc) */}
+                                            {genericOrders.map((order) => (
                                                 <div key={order.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg border border-border">
                                                     <div>
-                                                        <p className="font-medium text-foreground">{order.item_title}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-medium text-foreground">{order.item_title}</p>
+                                                            <span className="text-xs uppercase bg-primary/10 text-primary px-1.5 py-0.5 rounded">{order.item_type}</span>
+                                                        </div>
                                                         <p className="text-sm text-muted-foreground">
                                                             {new Date(order.created_at).toLocaleDateString()}
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="font-semibold text-foreground">
-                                                            रू {order.amount.toLocaleString('en-NP')}
+                                                            Rs. {order.amount.toLocaleString('en-NP')}
                                                         </p>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/10 text-green-500' :
                                                             order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                                                                'bg-red-500/10 text-red-500'
-                                                            }`}>
+                                                                'bg-gray-500/10 text-gray-500'}
+                                                         `}>
+                                                            {order.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Hosting Orders */}
+                                            {orders.map((order) => (
+                                                <div key={order.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg border border-border">
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-medium text-foreground">{order.hosting_plans?.name || 'Unknown Plan'}</p>
+                                                            <span className="text-xs uppercase bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded">Hosting</span>
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {new Date(order.created_at).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-semibold text-foreground">
+                                                            Rs. {order.price.toLocaleString('en-NP')}
+                                                        </p>
+                                                        <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'active' ? 'bg-green-500/10 text-green-500' :
+                                                            order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
+                                                                order.status === 'suspended' ? 'bg-red-500/10 text-red-500' :
+                                                                    'bg-gray-500/10 text-gray-500'}
+                                                         `}>
                                                             {order.status}
                                                         </span>
                                                     </div>
@@ -390,8 +458,6 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         )}
-
-
 
                         {activeTab === 'security' && (
                             <div className="bg-card rounded-xl border border-border">

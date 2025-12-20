@@ -86,7 +86,7 @@ export function Header() {
 
     return (
         <header
-            className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
+            className={`sticky top-[var(--banner-height,0px)] z-50 transition-all duration-300 ${isScrolled
                 ? 'bg-black/80 backdrop-blur-lg border-b border-white/10'
                 : 'bg-transparent'
                 }`}

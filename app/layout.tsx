@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalChatWidget } from '@/components/chat/conditional-chat-widget';
+import { TopBanner } from '@/components/top-banner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <TopBanner />
         {children}
         <ConditionalChatWidget />
       </body>

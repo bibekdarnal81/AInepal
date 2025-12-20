@@ -21,7 +21,9 @@ import {
     Users,
     Tag,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Globe,
+    Network
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -277,6 +279,16 @@ export default function AdminLayout({
                 { name: 'Messages', href: '/admin/messages', icon: Mail },
                 { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
                 { name: 'Users', href: '/admin/users', icon: Users },
+            ]
+        },
+        {
+            id: 'hosting',
+            title: 'Hosting & Domains',
+            items: [
+                { name: 'Hosting Plans', href: '/admin/hosting', icon: Globe },
+                { name: 'Hosting Orders', href: '/admin/hosting/orders', icon: ShoppingBag },
+                { name: 'Bundle Offers', href: '/admin/bundle-offers', icon: Tag },
+                { name: 'Domains', href: '/admin/domains', icon: Network },
             ]
         },
         {

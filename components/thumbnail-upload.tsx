@@ -55,7 +55,10 @@ export default function ThumbnailUpload({
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Upload failed');
+                const errorMessage = errorData.details
+                    ? `${errorData.error}: ${errorData.details}`
+                    : (errorData.error || 'Upload failed');
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
@@ -100,8 +103,8 @@ export default function ThumbnailUpload({
                     <label
                         htmlFor="thumbnail-upload"
                         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${uploading
-                                ? 'bg-secondary text-muted-foreground cursor-wait'
-                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'bg-secondary text-muted-foreground cursor-wait'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
                             }`}
                     >
                         {uploading ? (
