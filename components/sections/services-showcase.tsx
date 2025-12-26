@@ -30,7 +30,7 @@ export function ServicesSection() {
                 .select('*')
                 .eq('is_published', true)
                 .order('display_order', { ascending: true })
-                .limit(4)
+                .limit(8)
 
             if (data) {
                 setServices(data)
