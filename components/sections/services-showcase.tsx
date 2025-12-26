@@ -30,7 +30,7 @@ export function ServicesSection() {
                 .select('*')
                 .eq('is_published', true)
                 .order('display_order', { ascending: true })
-                .limit(3)
+                .limit(4)
 
             if (data) {
                 setServices(data)
@@ -60,7 +60,7 @@ export function ServicesSection() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {services.map((service) => {
                         // Get icon from icon_name
                         const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
