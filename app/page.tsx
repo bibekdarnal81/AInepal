@@ -13,6 +13,7 @@ import { ProjectsSection } from '@/components/sections/projects-showcase';
 import { ServicesSection } from '@/components/sections/services-showcase';
 import { BundleOffersSection } from '@/components/sections/bundle-offers-section';
 import { PlatformSection } from '@/components/sections/platform-section';
+import { PortfoliosSection } from '@/components/sections/portfolios-section';
 
 
 
@@ -26,6 +27,7 @@ export default function Home() {
           <HeroWithTabs />
           <ServicesSection />
           <ProjectsSection />
+          <PortfoliosSection />
           <PostsSection />
           <MonitorSection />
           <PlatformSection />
