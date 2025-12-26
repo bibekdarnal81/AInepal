@@ -17,7 +17,9 @@ export default function NewServicePage() {
     const [currency, setCurrency] = useState('USD')
     const [iconName, setIconName] = useState('')
     const [category, setCategory] = useState('')
+    const [customCategory, setCustomCategory] = useState('')
     const [subcategory, setSubcategory] = useState('')
+    const [customSubcategory, setCustomSubcategory] = useState('')
     const [thumbnailUrl, setThumbnailUrl] = useState('')
     const [features, setFeatures] = useState('')
     const [displayOrder, setDisplayOrder] = useState('0')
@@ -44,8 +46,12 @@ export default function NewServicePage() {
     }
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setCategory(e.target.value)
+        const value = e.target.value
+        setCategory(value)
         setSubcategory('') // Reset subcategory when category changes
+        if (value !== 'Custom') {
+            setCustomCategory('') // Clear custom category if not 'Custom'
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,8 +70,8 @@ export default function NewServicePage() {
                 price: parseFloat(price) || 0,
                 currency,
                 icon_name: iconName.trim() || null,
-                category: category.trim() || null,
-                subcategory: subcategory.trim() || null,
+                category: (category === 'Custom' ? customCategory : category).trim() || null,
+                subcategory: (subcategory === 'Custom' ? customSubcategory : subcategory).trim() || null,
                 thumbnail_url: thumbnailUrl.trim() || null,
                 features: featuresArray,
                 display_order: parseInt(displayOrder) || 0,
@@ -196,9 +202,23 @@ export default function NewServicePage() {
                                 <option value="Branding">Branding</option>
                                 <option value="Consulting">Consulting</option>
                                 <option value="Maintenance & Support">Maintenance & Support</option>
-                                <option value="Other">Other</option>
+                                <option value="Custom">+ Add Custom Category</option>
                             </select>
                         </div>
+
+                        {category === 'Custom' && (
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-2">Custom Category *</label>
+                                <input
+                                    type="text"
+                                    value={customCategory}
+                                    onChange={(e) => setCustomCategory(e.target.value)}
+                                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    placeholder="Enter your custom category"
+                                    required
+                                />
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-2">Subcategory</label>
@@ -268,11 +288,27 @@ export default function NewServicePage() {
                                         <option value="Prototyping">Prototyping</option>
                                     </>
                                 )}
+                                {category && (
+                                    <option value="Custom">+ Add Custom Subcategory</option>
+                                )}
                             </select>
                             {!category && (
                                 <p className="text-xs text-muted-foreground mt-1">Select a category first</p>
                             )}
                         </div>
+
+                        {subcategory === 'Custom' && (
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-2">Custom Subcategory</label>
+                                <input
+                                    type="text"
+                                    value={customSubcategory}
+                                    onChange={(e) => setCustomSubcategory(e.target.value)}
+                                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    placeholder="Enter your custom subcategory"
+                                />
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-2">Display Order</label>
