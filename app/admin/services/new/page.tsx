@@ -16,6 +16,7 @@ export default function NewServicePage() {
     const [price, setPrice] = useState('0')
     const [currency, setCurrency] = useState('USD')
     const [iconName, setIconName] = useState('')
+    const [category, setCategory] = useState('')
     const [thumbnailUrl, setThumbnailUrl] = useState('')
     const [features, setFeatures] = useState('')
     const [displayOrder, setDisplayOrder] = useState('0')
@@ -57,6 +58,7 @@ export default function NewServicePage() {
                 price: parseFloat(price) || 0,
                 currency,
                 icon_name: iconName.trim() || null,
+                category: category.trim() || null,
                 thumbnail_url: thumbnailUrl.trim() || null,
                 features: featuresArray,
                 display_order: parseInt(displayOrder) || 0,
@@ -165,6 +167,17 @@ export default function NewServicePage() {
                                 placeholder="ShoppingCart, Code, Smartphone, etc."
                             />
                             <p className="text-xs text-muted-foreground mt-1">Lucide icon name (e.g., ShoppingCart, Code)</p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Category</label>
+                            <input
+                                type="text"
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Web Development, SEO, Marketing, etc."
+                            />
                         </div>
 
                         <div>

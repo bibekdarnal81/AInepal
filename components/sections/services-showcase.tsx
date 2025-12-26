@@ -15,6 +15,7 @@ interface Service {
     price: number
     currency: string
     icon_name: string | null
+    category: string | null
     features: string[]
 }
 
@@ -86,6 +87,12 @@ export function ServicesSection() {
                                             {service.title}
                                         </h3>
                                     </Link>
+
+                                    {service.category && (
+                                        <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-4">
+                                            {service.category}
+                                        </span>
+                                    )}
 
                                     {/* <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-5">
                                         {service.currency === 'USD' && '$'}
