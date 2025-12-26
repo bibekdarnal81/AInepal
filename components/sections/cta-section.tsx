@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Rocket, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { BookDemoModal } from '@/components/site/book-demo-modal';
 
 const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -11,8 +13,15 @@ const fadeInUp = {
 };
 
 export function CTASection() {
+    const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
     return (
         <section className="relative py-32 px-6 overflow-hidden bg-background">
+            <BookDemoModal
+                isOpen={isDemoModalOpen}
+                onClose={() => setIsDemoModalOpen(false)}
+            />
+
             {/* Gradient background effect */}
             <div className="absolute inset-0">
                 <div className="absolute inset-0 dot-grid opacity-10" />
@@ -31,15 +40,15 @@ export function CTASection() {
                     <p className="text-xl text-muted-foreground mb-8 text-balance">
                         See how Rusha can streamline your operations and drive growth. Schedule a personalized demo today.
                     </p>
-                    <motion.a
-                        href="/contact"
-                        className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors text-lg shadow-lg shadow-primary/25"
+                    <motion.button
+                        onClick={() => setIsDemoModalOpen(true)}
+                        className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors text-lg shadow-lg shadow-primary/25 cursor-pointer"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
                         Book a Free Demo
                         <ArrowRight className="w-5 h-5" />
-                    </motion.a>
+                    </motion.button>
                 </motion.div>
 
                 {/* Featured cards */}
