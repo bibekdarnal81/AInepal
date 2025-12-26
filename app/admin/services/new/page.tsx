@@ -171,13 +171,25 @@ export default function NewServicePage() {
 
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-2">Category</label>
-                            <input
-                                type="text"
+                            <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Web Development, SEO, Marketing, etc."
-                            />
+                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="">Select a category</option>
+                                <option value="Web Development">Web Development</option>
+                                <option value="Mobile Development">Mobile Development</option>
+                                <option value="SEO Optimization">SEO Optimization</option>
+                                <option value="Social Media Marketing">Social Media Marketing</option>
+                                <option value="Content Marketing">Content Marketing</option>
+                                <option value="E-Commerce">E-Commerce</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="UI/UX Design">UI/UX Design</option>
+                                <option value="Branding">Branding</option>
+                                <option value="Consulting">Consulting</option>
+                                <option value="Maintenance & Support">Maintenance & Support</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
 
                         <div>
