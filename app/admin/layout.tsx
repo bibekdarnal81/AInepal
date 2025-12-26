@@ -23,7 +23,8 @@ import {
     ChevronDown,
     ChevronRight,
     Globe,
-    Network
+    Network,
+    Image
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -267,6 +268,7 @@ export default function AdminLayout({
                 { name: 'Posts', href: '/admin/posts', icon: FileText },
                 { name: 'Post Categories', href: '/admin/posts/categories', icon: Tag },
                 { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
+                { name: 'Portfolios', href: '/admin/portfolios', icon: Image },
                 { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
                 { name: 'Services', href: '/admin/services', icon: Briefcase },
             ]
