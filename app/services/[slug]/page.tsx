@@ -1,14 +1,12 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { BuyButton } from '@/components/buy-button'
 import * as Icons from 'lucide-react'
-import { Check, MessageSquare, ArrowLeft, Clock, Award, Zap } from 'lucide-react'
-import Link from 'next/link'
+import { Check, Clock, Award, Zap } from 'lucide-react'
+import { ServiceHeroActions } from '@/components/services/service-hero-actions'
+import { ServiceBackLink } from '@/components/services/service-back-link'
+import { Metadata } from 'next'
 
 interface Service {
     id: string
@@ -21,66 +19,116 @@ interface Service {
     icon_name: string | null
     thumbnail_url: string | null
     features: string[]
+    category: string | null
+    subcategory: string | null
     is_featured: boolean
     is_published: boolean
     created_at: string
+    updated_at: string
 }
 
-export default function ServiceDetailPage() {
-    const params = useParams()
-    const router = useRouter()
-    const [service, setService] = useState<Service | null>(null)
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
+async function getService(slug: string) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single()
 
-    useEffect(() => {
-        const fetchService = async () => {
-            const { data, error } = await supabase
-                .from('services')
-                .select('*')
-                .eq('slug', params.slug)
-                .eq('is_published', true)
-                .single()
-
-            if (error || !data) {
-                router.push('/services')
-            } else {
-                setService(data)
-            }
-            setLoading(false)
-        }
-        fetchService()
-    }, [params.slug, router, supabase])
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-        )
+    if (error || !data) {
+        return null
     }
 
-    if (!service) return null
+    return data as Service
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params
+    const service = await getService(slug)
+
+    if (!service) {
+        return {
+            title: 'Service Not Found',
+            description: 'The requested service could not be found.',
+        }
+    }
+
+    const title = `${service.title} | Rusha Services`
+    const description = service.description || `Explore our ${service.title} service. Professional solutions for your business.`
+    const ogImage = service.thumbnail_url || '/og-services.jpg'
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'website',
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: service.title,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: [ogImage],
+        },
+    }
+}
+
+export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params
+    const service = await getService(slug)
+
+    if (!service) {
+        return notFound()
+    }
 
     const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
         ? (Icons as any)[service.icon_name]
         : Icons.Code
 
+    // Structured Data (JSON-LD)
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: service.title,
+        description: service.description,
+        provider: {
+            '@type': 'Organization',
+            name: 'Rusha',
+            url: process.env.NEXT_PUBLIC_APP_URL || 'https://rusha.co'
+        },
+        offers: {
+            '@type': 'Offer',
+            price: service.price,
+            priceCurrency: service.currency
+        },
+        serviceType: service.category || 'Digital Service',
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/services/${service.slug}`,
+        image: service.thumbnail_url
+    }
+
     return (
         <div className="min-h-screen bg-background">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Header />
             <main>
                 {/* Hero Section */}
                 <section className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-20 overflow-hidden">
                     <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
                     <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
-                        <Link
-                            href="/services"
-                            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Services
-                        </Link>
+                        <ServiceBackLink />
 
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
                             <div>
@@ -91,6 +139,19 @@ export default function ServiceDetailPage() {
                                 <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
                                     {service.title}
                                 </h1>
+
+                                {service.category && (
+                                    <div className="flex gap-2 mb-6">
+                                        <span className="inline-block px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full">
+                                            {service.category}
+                                        </span>
+                                        {service.subcategory && (
+                                            <span className="inline-block px-3 py-1 text-sm font-medium bg-secondary text-secondary-foreground rounded-full">
+                                                {service.subcategory}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
 
                                 {service.description && (
                                     <p className="text-lg text-muted-foreground leading-relaxed mb-8">
@@ -111,31 +172,7 @@ export default function ServiceDetailPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <BuyButton
-                                        itemType="service"
-                                        itemId={service.id}
-                                        itemTitle={service.title}
-                                        itemSlug={service.slug}
-                                        amount={service.price}
-                                        currency={service.currency}
-                                        className="px-8 py-4 text-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/50 transition-all duration-300"
-                                    >
-                                        Get Started Now
-                                    </BuyButton>
-
-                                    <button
-                                        onClick={() => {
-                                            window.dispatchEvent(new CustomEvent('openChatWithMessage', {
-                                                detail: { itemType: 'service', itemTitle: service.title }
-                                            }))
-                                        }}
-                                        className="px-8 py-4 text-lg flex items-center justify-center gap-2 border-2 border-primary/50 text-primary rounded-xl font-medium hover:bg-primary/10 hover:border-primary transition-all duration-300"
-                                    >
-                                        <MessageSquare className="h-5 w-5" />
-                                        Ask Questions
-                                    </button>
-                                </div>
+                                <ServiceHeroActions service={service} />
                             </div>
 
                             {service.thumbnail_url && (
@@ -239,28 +276,7 @@ export default function ServiceDetailPage() {
                             Let's bring your project to life with {service.title}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <BuyButton
-                                itemType="service"
-                                itemId={service.id}
-                                itemTitle={service.title}
-                                itemSlug={service.slug}
-                                amount={service.price}
-                                currency={service.currency}
-                                className="px-8 py-4 text-lg bg-white text-primary hover:bg-gray-100 shadow-xl transition-all duration-300"
-                            >
-                                Purchase Now
-                            </BuyButton>
-                            <button
-                                onClick={() => {
-                                    window.dispatchEvent(new CustomEvent('openChatWithMessage', {
-                                        detail: { itemType: 'service', itemTitle: service.title }
-                                    }))
-                                }}
-                                className="px-8 py-4 text-lg flex items-center justify-center gap-2 border-2 border-white text-white rounded-xl font-medium hover:bg-white/10 transition-all duration-300"
-                            >
-                                <MessageSquare className="h-5 w-5" />
-                                Contact Us
-                            </button>
+                            <ServiceHeroActions service={service} variant="white" />
                         </div>
                     </div>
                 </section>
