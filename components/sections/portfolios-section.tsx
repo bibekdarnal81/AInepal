@@ -78,7 +78,7 @@ export function PortfoliosSection() {
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr">
                     {portfolios.map((portfolio, index) => (
                         <motion.div
                             key={portfolio.id}
@@ -86,9 +86,9 @@ export function PortfoliosSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="group relative"
+                            className="group relative h-full"
                         >
-                            <div className="bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5">
+                            <div className="bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 h-full flex flex-col">
                                 {/* Image */}
                                 <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
                                     {portfolio.image_url ? (
@@ -123,7 +123,7 @@ export function PortfoliosSection() {
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-6 space-y-3">
+                                <div className="p-6 space-y-3 flex-1 flex flex-col">
                                     <div>
                                         <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
                                             {portfolio.title}
@@ -140,11 +140,11 @@ export function PortfoliosSection() {
                                         )}
                                     </div>
 
-                                    {portfolio.description && (
+                                    {/* {portfolio.description && (
                                         <p className="text-sm text-muted-foreground line-clamp-2">
                                             {portfolio.description}
                                         </p>
-                                    )}
+                                    )} */}
 
                                     {portfolio.technologies && portfolio.technologies.length > 0 && (
                                         <div className="flex flex-wrap gap-2 pt-2">
