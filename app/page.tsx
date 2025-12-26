@@ -12,6 +12,9 @@ import { PostsSection } from '@/components/sections/posts-section';
 import { ProjectsSection } from '@/components/sections/projects-showcase';
 import { ServicesSection } from '@/components/sections/services-showcase';
 import { BundleOffersSection } from '@/components/sections/bundle-offers-section';
+import { PlatformSection } from '@/components/sections/platform-section';
+
+
 
 export default function Home() {
   return (
@@ -19,11 +22,13 @@ export default function Home() {
       <div className="dot-grid">
         <Header />
         <main>
+
           <HeroWithTabs />
           <ServicesSection />
           <ProjectsSection />
           <PostsSection />
           <MonitorSection />
+          <PlatformSection />
           <EvolveSection />
           <CustomersSection />
           <TweetsSection />
