@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
 
         if (error) {
             console.error('Database error:', error)
+
+            // Check for missing column error (Postgres code 42703) or Schema Cache error (PGRST204)
+            if (error.code === '42703' || error.code === 'PGRST204') {
+                return NextResponse.json(
+                    { error: 'System Error: Database schema is outdated (missing columns). Please run the migration.' },
+                    { status: 500 }
+                )
+            }
+
             return NextResponse.json(
                 { error: 'Failed to save message. Please try again.' },
                 { status: 500 }

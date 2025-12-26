@@ -773,7 +773,7 @@ export function HeroWithTabs() {
                     </h1>
 
                     <h2 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
-                         NextNepal simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
+                        NextNepal simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
                     </h2>
 
                     <div className="flex flex-wrap gap-4">
@@ -784,7 +784,7 @@ export function HeroWithTabs() {
                             Deploy a new project
                         </Link>
                         <Link
-                            href="#demo"
+                            href="/book-demo"
                             className="hidden md:inline-flex px-6 py-3 text-lg font-medium text-foreground border border-border rounded-lg hover:bg-muted transition-colors"
                         >
                             Book a demo

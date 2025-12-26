@@ -36,7 +36,7 @@ export function HeroSection() {
                     </h1>
 
                     <p className="text-lg text-gray-400 mb-8 leading-relaxed max-w-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                         NextNepal simplifies your infrastructure stack from servers to
+                        NextNepal simplifies your infrastructure stack from servers to
                         observability with a single, scalable, easy-to-use platform.
                     </p>
 
@@ -50,7 +50,7 @@ export function HeroSection() {
                                 Deploy a new project
                             </Button>
                         </Link>
-                        <Link href="#demo">
+                        <Link href="/book-demo">
                             <Button
                                 size="lg"
                                 variant="ghost"

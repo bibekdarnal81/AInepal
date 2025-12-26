@@ -30,6 +30,7 @@ export default function Home() {
           <TechStackSection />
           <ProjectsSection />
           <PortfoliosSection />
+
           <PostsSection />
           <MonitorSection />
           <PlatformSection />

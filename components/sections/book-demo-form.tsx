@@ -19,7 +19,6 @@ const SERVICE_OPTIONS = [
     'Website Maintenance',
     'Branding',
     'Web Hosting',
-    'Microsoft Products',
     'Others'
 ];
 
