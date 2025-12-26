@@ -1,5 +1,4 @@
-
-    <svg
+<svg
         viewBox="0 0 1440 1208"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -10549,4 +10548,3 @@
             </clipPath>
         </defs>
     </svg>
-);
