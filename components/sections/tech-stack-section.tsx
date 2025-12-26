@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Code2, Database, Boxes, Container, Workflow, Cloud,
-    Terminal, Layers, Cpu, Globe, Braces, Wrench
+    Terminal, Layers, Cpu, Globe, Braces, Wrench,
+    CloudLightning, Droplet, Server
 } from 'lucide-react';
 
 const categories = [
@@ -12,7 +13,8 @@ const categories = [
     { id: 'frameworks', label: 'Frameworks' },
     { id: 'languages', label: 'Languages' },
     { id: 'tools', label: 'Tools & DevOps' },
-    { id: 'databases', label: 'Databases' }
+    { id: 'databases', label: 'Databases' },
+    { id: 'cloud', label: 'Cloud & Hosting' }
 ];
 
 const technologies = [
@@ -39,6 +41,12 @@ const technologies = [
     { name: 'MongoDB', icon: Database, category: 'databases', description: 'The developer data platform' },
     { name: 'Redis', icon: Cpu, category: 'databases', description: 'The open source, in-memory data store' },
     { name: 'Supabase', icon: Database, category: 'databases', description: 'Open Source Firebase Alternative' },
+
+    // Cloud & Hosting
+    { name: 'AWS', icon: CloudLightning, category: 'cloud', description: 'Amazon Web Services cloud computing platform' },
+    { name: 'Google Cloud', icon: Cloud, category: 'cloud', description: 'Suite of cloud computing services by Google' },
+    { name: 'DigitalOcean', icon: Droplet, category: 'cloud', description: 'Simple, scalable cloud computing solutions' },
+    { name: 'Vercel', icon: Server, category: 'cloud', description: 'Develop. Preview. Ship.' }
 ];
 
 export function TechStackSection() {
@@ -71,8 +79,8 @@ export function TechStackSection() {
                             key={category.id}
                             onClick={() => setActiveCategory(category.id)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === category.id
-                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                    : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                                 }`}
                         >
                             {category.label}
