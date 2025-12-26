@@ -8,12 +8,23 @@ interface BookDemoFormProps {
     className?: string;
 }
 
+const services = [
+    'Web Development',
+    'Mobile Application',
+    'UI/UX Design',
+    'Cloud Solutions',
+    'DevOps Services',
+    'Consultation',
+    'Other'
+];
+
 export function BookDemoForm({ onSuccess, className = '' }: BookDemoFormProps) {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
         company: '',
+        service: '',
         message: ''
     });
     const [loading, setLoading] = useState(false);
@@ -31,7 +42,7 @@ export function BookDemoForm({ onSuccess, className = '' }: BookDemoFormProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    subject: `Demo Request from ${formData.company || formData.name}`
+                    subject: `Demo Request: ${formData.service} - ${formData.company || formData.name}`
                 }),
             });
 
@@ -39,7 +50,7 @@ export function BookDemoForm({ onSuccess, className = '' }: BookDemoFormProps) {
 
             if (response.ok) {
                 setSubmitted(true);
-                setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+                setFormData({ name: '', email: '', phone: '', company: '', service: '', message: '' });
                 if (onSuccess) {
                     setTimeout(() => onSuccess(), 2000);
                 }
@@ -53,7 +64,7 @@ export function BookDemoForm({ onSuccess, className = '' }: BookDemoFormProps) {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
@@ -124,18 +135,37 @@ export function BookDemoForm({ onSuccess, className = '' }: BookDemoFormProps) {
                 />
             </div>
 
-            <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium text-foreground">
-                    Phone
-                </label>
-                <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    placeholder="+1 (555) 000-0000"
-                />
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label htmlFor="phone" className="text-sm font-medium text-foreground">
+                        Phone
+                    </label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        placeholder="+1 (555) 000-0000"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label htmlFor="service" className="text-sm font-medium text-foreground">
+                        Service Interest <span className="text-primary">*</span>
+                    </label>
+                    <select
+                        required
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    >
+                        <option value="" disabled>Select a service</option>
+                        {services.map(service => (
+                            <option key={service} value={service}>{service}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="space-y-2">
