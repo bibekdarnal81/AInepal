@@ -17,6 +17,7 @@ export default function NewServicePage() {
     const [currency, setCurrency] = useState('USD')
     const [iconName, setIconName] = useState('')
     const [category, setCategory] = useState('')
+    const [subcategory, setSubcategory] = useState('')
     const [thumbnailUrl, setThumbnailUrl] = useState('')
     const [features, setFeatures] = useState('')
     const [displayOrder, setDisplayOrder] = useState('0')
@@ -42,6 +43,11 @@ export default function NewServicePage() {
         }
     }
 
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setCategory(e.target.value)
+        setSubcategory('') // Reset subcategory when category changes
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
@@ -59,6 +65,7 @@ export default function NewServicePage() {
                 currency,
                 icon_name: iconName.trim() || null,
                 category: category.trim() || null,
+                subcategory: subcategory.trim() || null,
                 thumbnail_url: thumbnailUrl.trim() || null,
                 features: featuresArray,
                 display_order: parseInt(displayOrder) || 0,
@@ -170,11 +177,12 @@ export default function NewServicePage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-2">Category</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">Category *</label>
                             <select
                                 value={category}
-                                onChange={(e) => setCategory(e.target.value)}
+                                onChange={handleCategoryChange}
                                 className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                required
                             >
                                 <option value="">Select a category</option>
                                 <option value="Web Development">Web Development</option>
@@ -190,6 +198,80 @@ export default function NewServicePage() {
                                 <option value="Maintenance & Support">Maintenance & Support</option>
                                 <option value="Other">Other</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Subcategory</label>
+                            <select
+                                value={subcategory}
+                                onChange={(e) => setSubcategory(e.target.value)}
+                                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                disabled={!category}
+                            >
+                                <option value="">Select a subcategory</option>
+                                {category === 'Web Development' && (
+                                    <>
+                                        <option value="Full Stack Development">Full Stack Development</option>
+                                        <option value="Frontend Development">Frontend Development</option>
+                                        <option value="Backend Development">Backend Development</option>
+                                        <option value="CMS Development">CMS Development</option>
+                                        <option value="E-Commerce Development">E-Commerce Development</option>
+                                    </>
+                                )}
+                                {category === 'Mobile Development' && (
+                                    <>
+                                        <option value="iOS Development">iOS Development</option>
+                                        <option value="Android Development">Android Development</option>
+                                        <option value="Cross-Platform">Cross-Platform</option>
+                                        <option value="Progressive Web Apps">Progressive Web Apps</option>
+                                    </>
+                                )}
+                                {category === 'SEO Optimization' && (
+                                    <>
+                                        <option value="On-Page SEO">On-Page SEO</option>
+                                        <option value="Off-Page SEO">Off-Page SEO</option>
+                                        <option value="Technical SEO">Technical SEO</option>
+                                        <option value="Local SEO">Local SEO</option>
+                                        <option value="SEO Audit">SEO Audit</option>
+                                    </>
+                                )}
+                                {category === 'Social Media Marketing' && (
+                                    <>
+                                        <option value="Facebook Advertising">Facebook Advertising</option>
+                                        <option value="Instagram Marketing">Instagram Marketing</option>
+                                        <option value="LinkedIn Marketing">LinkedIn Marketing</option>
+                                        <option value="Twitter Marketing">Twitter Marketing</option>
+                                        <option value="TikTok Marketing">TikTok Marketing</option>
+                                    </>
+                                )}
+                                {category === 'Content Marketing' && (
+                                    <>
+                                        <option value="Blog Writing">Blog Writing</option>
+                                        <option value="Copywriting">Copywriting</option>
+                                        <option value="Video Production">Video Production</option>
+                                        <option value="Infographics">Infographics</option>
+                                    </>
+                                )}
+                                {category === 'Graphic Design' && (
+                                    <>
+                                        <option value="Logo Design">Logo Design</option>
+                                        <option value="Brochure Design">Brochure Design</option>
+                                        <option value="Social Media Graphics">Social Media Graphics</option>
+                                        <option value="Print Design">Print Design</option>
+                                    </>
+                                )}
+                                {category === 'UI/UX Design' && (
+                                    <>
+                                        <option value="User Interface Design">User Interface Design</option>
+                                        <option value="User Experience Design">User Experience Design</option>
+                                        <option value="Wireframing">Wireframing</option>
+                                        <option value="Prototyping">Prototyping</option>
+                                    </>
+                                )}
+                            </select>
+                            {!category && (
+                                <p className="text-xs text-muted-foreground mt-1">Select a category first</p>
+                            )}
                         </div>
 
                         <div>
