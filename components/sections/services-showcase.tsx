@@ -77,13 +77,15 @@ export function ServicesSection() {
 
                                 {/* Content */}
                                 <div className="relative z-10">
-                                    <div className="mb-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-3 group-hover:from-primary group-hover:to-primary/80 group-hover:scale-110 transition-all duration-500 shadow-lg">
-                                        <IconComponent className="h-7 w-7 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
-                                    </div>
+                                    <Link href={`/services/${service.slug}`} className="block">
+                                        <div className="mb-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-3 group-hover:from-primary group-hover:to-primary/80 group-hover:scale-110 transition-all duration-500 shadow-lg">
+                                            <IconComponent className="h-7 w-7 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+                                        </div>
 
-                                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors truncate">
-                                        {service.title}
-                                    </h3>
+                                        <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors truncate">
+                                            {service.title}
+                                        </h3>
+                                    </Link>
 
                                     {/* <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-5">
                                         {service.currency === 'USD' && '$'}
