@@ -119,7 +119,7 @@ export function ServicesSection() {
                                         </ul>
                                     )} */}
 
-                                    <BuyButton
+                                    {/* <BuyButton
                                         itemType="service"
                                         itemId={service.id}
                                         itemTitle={service.title}
@@ -129,7 +129,7 @@ export function ServicesSection() {
                                         className="w-full py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/50 transition-all duration-300"
                                     >
                                         Buy Now
-                                    </BuyButton>
+                                    </BuyButton> */}
 
                                     <button
                                         onClick={() => {
