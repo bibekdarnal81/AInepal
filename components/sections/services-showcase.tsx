@@ -88,13 +88,13 @@ export function ServicesSection() {
                                     {service.price.toLocaleString()}
                                 </div>
 
-                                {service.description && (
+                                {/* {service.description && (
                                     <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3">
                                         {service.description}
                                     </p>
-                                )}
+                                )} */}
 
-                                {service.features && service.features.length > 0 && (
+                                {/* {service.features && service.features.length > 0 && (
                                     <ul className="space-y-3 mb-6">
                                         {service.features.slice(0, 4).map((feature: string, index: number) => (
                                             <li key={index} className="flex items-start gap-2 text-sm text-foreground">
@@ -103,7 +103,7 @@ export function ServicesSection() {
                                             </li>
                                         ))}
                                     </ul>
-                                )}
+                                )} */}
 
                                 <BuyButton
                                     itemType="service"
