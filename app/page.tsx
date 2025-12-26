@@ -14,6 +14,7 @@ import { ServicesSection } from '@/components/sections/services-showcase';
 import { BundleOffersSection } from '@/components/sections/bundle-offers-section';
 import { PlatformSection } from '@/components/sections/platform-section';
 import { PortfoliosSection } from '@/components/sections/portfolios-section';
+import { TechStackSection } from '@/components/sections/tech-stack-section';
 
 
 
@@ -26,6 +27,7 @@ export default function Home() {
 
           <HeroWithTabs />
           <ServicesSection />
+          <TechStackSection />
           <ProjectsSection />
           <PortfoliosSection />
           <PostsSection />
