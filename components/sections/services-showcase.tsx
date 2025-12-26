@@ -76,7 +76,7 @@ export function ServicesSection() {
                                     <IconComponent className="h-8 w-8 text-primary group-hover:text-primary-foreground transition-colors" />
                                 </div>
 
-                                <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                                <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors truncate">
                                     {service.title}
                                 </h3>
 
