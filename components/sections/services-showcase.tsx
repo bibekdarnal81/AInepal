@@ -85,13 +85,13 @@ export function ServicesSection() {
                                         {service.title}
                                     </h3>
 
-                                    <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-5">
+                                    {/* <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-5">
                                         {service.currency === 'USD' && '$'}
                                         {service.currency === 'EUR' && '€'}
                                         {service.currency === 'GBP' && '£'}
                                         {service.currency === 'NPR' && 'रू '}
                                         {service.price.toLocaleString()}
-                                    </div>
+                                    </div> */}
 
                                     {/* {service.description && (
                                         <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3">
