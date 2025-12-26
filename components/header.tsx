@@ -208,10 +208,10 @@ export function Header() {
                                     Login
                                 </Link>
                                 <Link
-                                    href="#deploy"
-                                    className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-gray-200 transition-all transform hover:scale-105"
+                                    href="/book-demo"
+                                    className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105"
                                 >
-                                    Start Deploying
+                                    Book a Demo
                                 </Link>
                             </>
                         )}
@@ -326,11 +326,11 @@ export function Header() {
                                                 Login
                                             </Link>
                                             <Link
-                                                href="#deploy"
-                                                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold bg-white text-black hover:bg-gray-200"
+                                                href="/book-demo"
+                                                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
-                                                Start Deploying
+                                                Book a Demo
                                             </Link>
                                         </>
                                     )}
