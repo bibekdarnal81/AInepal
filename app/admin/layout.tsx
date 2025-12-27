@@ -23,7 +23,8 @@ import {
     ChevronRight,
     Globe,
     Network,
-    Image as ImageIcon
+    Image as ImageIcon,
+    CreditCard
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -276,6 +277,7 @@ export default function AdminLayout({
             title: 'Business',
             items: [
                 { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+                { name: 'Payment Methods', href: '/admin/payments', icon: CreditCard },
                 { name: 'Messages', href: '/admin/messages', icon: Mail },
                 { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
                 { name: 'Users', href: '/admin/users', icon: Users },

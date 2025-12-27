@@ -32,54 +32,21 @@ export function BuyButton({
     const supabase = createClient()
 
     const handlePurchase = async () => {
-        setLoading(true)
+        // Redirect to checkout page
+        let checkoutUrl = ''
 
-        // Check if user is logged in
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            // Redirect to login with return URL
-            const returnUrl = encodeURIComponent(window.location.pathname)
-            router.push(`/auth/login?return=${returnUrl}`)
-            return
+        if (itemType === 'service') {
+            // Service uses ID for checkout lookup
+            checkoutUrl = `/checkout/services/${itemId}`
+        } else if (itemType === 'project') {
+            // Project uses Slug for checkout lookup
+            checkoutUrl = `/checkout/projects/${itemSlug || itemId}`
+        } else {
+            // Fallback
+            checkoutUrl = `/checkout/${itemType}s/${itemId}`
         }
 
-        try {
-            // Create order
-            const response = await fetch('/api/orders/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    itemType,
-                    itemId,
-                    itemTitle,
-                    itemSlug,
-                    amount,
-                    currency
-                })
-            })
-
-            const data = await response.json()
-
-            if (response.ok && data.success) {
-                setSuccess(true)
-
-                // Show success message briefly
-                setTimeout(() => {
-                    // Redirect to dashboard orders
-                    router.push('/profile?tab=orders')
-                }, 1500)
-            } else {
-                alert(data.error || 'Failed to create order. Please try again.')
-                setLoading(false)
-            }
-        } catch (error) {
-            console.error('Purchase error:', error)
-            alert('An error occurred. Please try again.')
-            setLoading(false)
-        }
+        router.push(checkoutUrl)
     }
 
     if (success) {

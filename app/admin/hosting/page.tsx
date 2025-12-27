@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Globe, Plus, Edit, Trash2, Package } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, MoreVertical, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
 interface HostingPlan {
@@ -12,7 +12,9 @@ interface HostingPlan {
     storage_gb: number
     bandwidth_text: string
     price: number
+    price_yearly: number
     features: string[]
+    type: 'shared' | 'vps' | 'dedicated'
     is_active: boolean
     created_at: string
 }
@@ -20,6 +22,7 @@ interface HostingPlan {
 export default function HostingPlansAdminPage() {
     const [plans, setPlans] = useState<HostingPlan[]>([])
     const [loading, setLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState('')
     const supabase = createClient()
 
     useEffect(() => {
@@ -33,7 +36,7 @@ export default function HostingPlansAdminPage() {
             .order('price', { ascending: true })
 
         if (!error && data) {
-            setPlans(data)
+            setPlans(data as any)
         }
         setLoading(false)
     }
@@ -62,102 +65,141 @@ export default function HostingPlansAdminPage() {
         }
     }
 
+    const filteredPlans = plans.filter(plan =>
+        plan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        plan.type.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
+    const getTypeColor = (type: string) => {
+        switch (type) {
+            case 'dedicated': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400'
+            case 'vps': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+            default: return 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400'
+        }
+    }
+
     return (
         <div className="p-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-foreground mb-2">Hosting Plans</h1>
-                    <p className="text-muted-foreground">Manage web hosting plans and pricing</p>
+                    <p className="text-muted-foreground">Manage and monitor your hosting packages</p>
                 </div>
                 <Link
                     href="/admin/hosting/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
                 >
                     <Plus className="w-4 h-4" />
-                    Add New Plan
+                    Add Plan
                 </Link>
             </div>
 
+            {/* Search and Filter */}
+            <div className="mb-6">
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Search plans..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                </div>
+            </div>
+
             {loading ? (
-                <div className="text-center py-12">
+                <div className="text-center py-20">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                 </div>
-            ) : plans.length === 0 ? (
-                <div className="text-center py-12 bg-card rounded-xl border border-border">
-                    <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No hosting plans yet</p>
-                    <Link
-                        href="/admin/hosting/new"
-                        className="inline-block mt-4 text-primary hover:underline"
-                    >
-                        Create your first hosting plan
-                    </Link>
-                </div>
             ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.id}
-                            className="bg-card border border-border rounded-xl p-6 relative"
-                        >
-                            {!plan.is_active && (
-                                <div className="absolute top-4 right-4">
-                                    <span className="px-2 py-1 bg-red-500/10 text-red-500 text-xs rounded-full">
-                                        Inactive
-                                    </span>
-                                </div>
-                            )}
-
-                            <div className="mb-4">
-                                <h3 className="text-xl font-bold text-foreground mb-1">{plan.name}</h3>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-bold text-foreground">
-                                        रू {plan.price.toLocaleString('en-NP')}
-                                    </span>
-                                    <span className="text-muted-foreground">/month</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2 mb-6">
-                                <div className="text-sm text-foreground">
-                                    <span className="font-medium">Storage:</span> {plan.storage_gb} GB
-                                </div>
-                                <div className="text-sm text-foreground">
-                                    <span className="font-medium">Bandwidth:</span> {plan.bandwidth_text}
-                                </div>
-                                {plan.features && plan.features.length > 0 && (
-                                    <div className="text-sm text-muted-foreground">
-                                        {plan.features.length} features included
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <Link
-                                    href={`/admin/hosting/${plan.id}`}
-                                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors text-sm"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                    Edit
-                                </Link>
-                                <button
-                                    onClick={() => togglePlanStatus(plan.id, plan.is_active)}
-                                    className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${plan.is_active
-                                            ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20'
-                                            : 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
-                                        }`}
-                                >
-                                    {plan.is_active ? 'Deactivate' : 'Activate'}
-                                </button>
-                                <button
-                                    onClick={() => deletePlan(plan.id)}
-                                    className="px-3 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
+                <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-secondary/50 border-b border-border">
+                                    <th className="text-left px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Plan Details</th>
+                                    <th className="text-left px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Type</th>
+                                    <th className="text-left px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Resources</th>
+                                    <th className="text-left px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Pricing</th>
+                                    <th className="text-left px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Status</th>
+                                    <th className="text-right px-6 py-4 font-medium text-sm text-muted-foreground uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {filteredPlans.map((plan) => (
+                                    <tr key={plan.id} className="hover:bg-secondary/20 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div>
+                                                <div className="font-semibold text-foreground">{plan.name}</div>
+                                                <div className="text-xs text-muted-foreground">{plan.slug}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${getTypeColor(plan.type)}`}>
+                                                {plan.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm">
+                                                <div className="flex items-center gap-1.5 text-foreground">
+                                                    <span className="text-muted-foreground">Storage:</span> {plan.storage_gb} GB
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-foreground">
+                                                    <span className="text-muted-foreground">BW:</span> {plan.bandwidth_text}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="space-y-1">
+                                                <div className="text-sm font-medium text-foreground">
+                                                    रू {plan.price.toLocaleString()} <span className="text-muted-foreground font-normal text-xs">/mo</span>
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    रू {plan.price_yearly?.toLocaleString()} <span className="font-normal text-[10px]">/yr</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button
+                                                onClick={() => togglePlanStatus(plan.id, plan.is_active)}
+                                                className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors ${plan.is_active
+                                                        ? 'text-green-600 bg-green-500/10 hover:bg-green-500/20'
+                                                        : 'text-muted-foreground bg-secondary hover:bg-secondary/80'
+                                                    }`}
+                                            >
+                                                {plan.is_active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                                {plan.is_active ? 'Active' : 'Hidden'}
+                                            </button>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/admin/hosting/${plan.id}`}
+                                                    className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                                    title="Edit Plan"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </Link>
+                                                <button
+                                                    onClick={() => deletePlan(plan.id)}
+                                                    className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-colors"
+                                                    title="Delete Plan"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {filteredPlans.length === 0 && (
+                        <div className="p-12 text-center text-muted-foreground">
+                            No plans found matching your search.
                         </div>
-                    ))}
+                    )}
                 </div>
             )}
         </div>

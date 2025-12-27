@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Plus, X, GripVertical } from 'lucide-react'
 import Link from 'next/link'
@@ -22,13 +22,6 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-
-const PLAN_CATEGORIES = [
-    { value: 'starter', label: 'Starter', description: 'Perfect for small websites and blogs' },
-    { value: 'professional', label: 'Professional', description: 'For growing businesses' },
-    { value: 'business', label: 'Business', description: 'Enterprise-grade hosting' },
-    { value: 'custom', label: 'Custom', description: 'Custom hosting solution' }
-]
 
 // Sortable Feature Item Component
 function SortableFeatureItem({ id, feature, onRemove }: { id: string; feature: string; onRemove: () => void }) {
@@ -73,16 +66,17 @@ function SortableFeatureItem({ id, feature, onRemove }: { id: string; feature: s
     )
 }
 
-export default function NewHostingPlanPage() {
+export default function EditHostingPlanPage() {
     const router = useRouter()
+    const params = useParams()
     const supabase = createClient()
 
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [submitting, setSubmitting] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
         type: 'shared' as 'shared' | 'vps' | 'dedicated',
-        category: 'starter',
         storage_gb: 10,
         bandwidth_text: 'Unlimited',
         price: 1000,
@@ -99,6 +93,42 @@ export default function NewHostingPlanPage() {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     )
+
+    useEffect(() => {
+        const fetchPlan = async () => {
+            if (!params?.id) return
+
+            const { data, error } = await supabase
+                .from('hosting_plans')
+                .select('*')
+                .eq('id', params.id)
+                .single()
+
+            if (error) {
+                console.error('Error fetching plan:', error)
+                alert('Failed to load plan')
+                router.push('/admin/hosting')
+                return
+            }
+
+            if (data) {
+                setFormData({
+                    name: data.name,
+                    slug: data.slug,
+                    type: data.type || 'shared',
+                    storage_gb: data.storage_gb,
+                    bandwidth_text: data.bandwidth_text,
+                    price: data.price,
+                    price_yearly: data.price_yearly || (data.price * 10),
+                    features: data.features || [],
+                    is_active: data.is_active
+                })
+            }
+            setLoading(false)
+        }
+
+        fetchPlan()
+    }, [params?.id])
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event
@@ -118,12 +148,12 @@ export default function NewHostingPlanPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading(true)
+        setSubmitting(true)
 
         try {
             const { error } = await supabase
                 .from('hosting_plans')
-                .insert({
+                .update({
                     name: formData.name,
                     slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
                     type: formData.type,
@@ -134,20 +164,21 @@ export default function NewHostingPlanPage() {
                     features: formData.features,
                     is_active: formData.is_active
                 })
+                .eq('id', params?.id)
 
             if (error) {
-                console.error('Error creating hosting plan:', error)
-                alert('Failed to create hosting plan: ' + error.message)
+                console.error('Error updating hosting plan:', error)
+                alert('Failed to update hosting plan: ' + error.message)
                 return
             }
 
-            alert('Hosting plan created successfully!')
+            alert('Hosting plan updated successfully!')
             router.push('/admin/hosting')
         } catch (error) {
             console.error('Error:', error)
-            alert('An error occurred while creating the plan')
+            alert('An error occurred while updating the plan')
         } finally {
-            setLoading(false)
+            setSubmitting(false)
         }
     }
 
@@ -168,69 +199,12 @@ export default function NewHostingPlanPage() {
         }))
     }
 
-    const applyCategory = (category: string) => {
-        // Pre-fill based on category
-        switch (category) {
-            case 'starter':
-                setFormData(prev => ({
-                    ...prev,
-                    category,
-                    storage_gb: 10,
-                    bandwidth_text: 'Unlimited',
-                    price: 1000,
-                    price_yearly: 10000,
-                    features: [
-                        '1 Website',
-                        '10 GB SSD Storage',
-                        'Unlimited Bandwidth',
-                        'Free SSL Certificate',
-                        '99.9% Uptime Guarantee'
-                    ]
-                }))
-                break
-            case 'professional':
-                setFormData(prev => ({
-                    ...prev,
-                    category,
-                    storage_gb: 50,
-                    bandwidth_text: 'Unlimited',
-                    price: 2500,
-                    price_yearly: 25000,
-                    features: [
-                        '10 Websites',
-                        '50 GB SSD Storage',
-                        'Unlimited Bandwidth',
-                        'Free SSL Certificates',
-                        '99.9% Uptime Guarantee',
-                        'Daily Backups',
-                        'Priority Support'
-                    ]
-                }))
-                break
-            case 'business':
-                setFormData(prev => ({
-                    ...prev,
-                    category,
-                    storage_gb: 200,
-                    bandwidth_text: 'Unlimited',
-                    price: 5000,
-                    price_yearly: 50000,
-                    features: [
-                        'Unlimited Websites',
-                        '200 GB SSD Storage',
-                        'Unlimited Bandwidth',
-                        'Free SSL Certificates',
-                        '99.99% Uptime SLA',
-                        'Hourly Backups',
-                        '24/7 Priority Support',
-                        'CDN Integration',
-                        'Advanced Security'
-                    ]
-                }))
-                break
-            default:
-                setFormData(prev => ({ ...prev, category }))
-        }
+    if (loading) {
+        return (
+            <div className="p-8 text-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        )
     }
 
     return (
@@ -243,8 +217,8 @@ export default function NewHostingPlanPage() {
                     <ArrowLeft className="w-4 h-4" />
                     Back to Hosting Plans
                 </Link>
-                <h1 className="text-3xl font-bold text-foreground mb-2">Create Hosting Plan</h1>
-                <p className="text-muted-foreground">Add a new hosting plan with features and pricing</p>
+                <h1 className="text-3xl font-bold text-foreground mb-2">Edit Hosting Plan</h1>
+                <p className="text-muted-foreground">Update hosting plan details</p>
             </div>
 
             <form onSubmit={handleSubmit} className="max-w-2xl">
@@ -265,29 +239,6 @@ export default function NewHostingPlanPage() {
                                     }`}
                             >
                                 <div className="font-bold">{type}</div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Category Selection */}
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-foreground mb-3">
-                        Plan Category
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
-                        {PLAN_CATEGORIES.map((category) => (
-                            <button
-                                key={category.value}
-                                type="button"
-                                onClick={() => applyCategory(category.value)}
-                                className={`p-4 rounded-lg border-2 text-left transition-all ${formData.category === category.value
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border hover:border-primary/50'
-                                    }`}
-                            >
-                                <div className="font-medium text-foreground">{category.label}</div>
-                                <div className="text-sm text-muted-foreground mt-1">{category.description}</div>
                             </button>
                         ))}
                     </div>
@@ -444,10 +395,10 @@ export default function NewHostingPlanPage() {
                 <div className="flex gap-4">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={submitting}
                         className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
-                        {loading ? 'Creating...' : 'Create Hosting Plan'}
+                        {submitting ? 'Saving...' : 'Save Changes'}
                     </button>
                     <Link
                         href="/admin/hosting"

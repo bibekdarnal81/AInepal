@@ -1,34 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { uploadFile } from '@/lib/r2/operations';
 
-/**
- * Maximum file size in bytes (10MB)
- * Adjust this based on your needs
- */
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-/**
- * Allowed file types
- * Adjust this based on your needs
- */
-const ALLOWED_TYPES = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'application/pdf',
-    'text/plain',
-    'text/csv',
-];
-
-/**
- * POST /api/upload
- * Upload a file to R2
- */
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
     try {
-        const formData = await request.formData();
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const formData = await req.formData();
         const file = formData.get('file') as File;
+        const folder = formData.get('folder') as string || 'uploads';
 
         if (!file) {
             return NextResponse.json(
@@ -37,56 +25,35 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate file size
-        if (file.size > MAX_FILE_SIZE) {
-            return NextResponse.json(
-                { error: `File size exceeds maximum limit of ${MAX_FILE_SIZE / 1024 / 1024}MB` },
-                { status: 400 }
-            );
-        }
-
-        // Validate file type
-        if (!ALLOWED_TYPES.includes(file.type)) {
-            return NextResponse.json(
-                { error: `File type ${file.type} is not allowed` },
-                { status: 400 }
-            );
-        }
-
-        // Generate a unique key for the file
-        const timestamp = Date.now();
-        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const key = `uploads/${timestamp}-${sanitizedName}`;
-
-        // Convert file to buffer
+        // Convert File to Buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop();
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+        const key = `${folder}/${user.id}-${uniqueSuffix}.${fileExt}`;
+
         // Upload to R2
         const result = await uploadFile({
-            buffer,
             key,
+            buffer,
             contentType: file.type,
             metadata: {
-                originalName: file.name,
-                uploadedAt: new Date().toISOString(),
-            },
+                userId: user.id
+            }
         });
 
         return NextResponse.json({
             success: true,
-            file: {
-                key: result.key,
-                url: result.url,
-                size: result.size,
-                contentType: file.type,
-                originalName: file.name,
-            },
+            url: result.url,
+            key: result.key
         });
-    } catch (error) {
-        console.error('Upload error:', error);
+
+    } catch (error: any) {
+        console.error('Upload Error:', error);
         return NextResponse.json(
-            { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
+            { error: error.message || 'Error uploading file' },
             { status: 500 }
         );
     }

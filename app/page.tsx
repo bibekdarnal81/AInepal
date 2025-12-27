@@ -15,6 +15,7 @@ import { BundleOffersSection } from '@/components/sections/bundle-offers-section
 import { PlatformSection } from '@/components/sections/platform-section';
 import { PortfoliosSection } from '@/components/sections/portfolios-section';
 import { TechStackSection } from '@/components/sections/tech-stack-section';
+import { HostingSection } from '@/components/sections/hosting-section';
 
 
 
@@ -39,6 +40,7 @@ export default function Home() {
           <TweetsSection />
           <StatsSection />
           <CTASection />
+          <HostingSection />
           <BundleOffersSection />
           <PricingSection />
         </main>

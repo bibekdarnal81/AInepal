@@ -11,6 +11,8 @@ interface Project {
     slug: string
     category: string | null
     tech_stack: string[]
+    price?: number
+    currency?: string
     is_published: boolean
     is_featured: boolean
     created_at: string
@@ -113,7 +115,12 @@ export default function ProjectsPage() {
                         <div key={project.id} className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors">
                             <div className="p-6 space-y-4">
                                 <div>
-                                    <h3 className="font-semibold text-foreground text-lg">{project.title}</h3>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-semibold text-foreground text-lg">{project.title}</h3>
+                                        <div className="font-bold text-lg text-primary">
+                                            {project.currency === 'NPR' ? 'रू' : '$'} {project.price?.toLocaleString() || '0'}
+                                        </div>
+                                    </div>
                                     {project.category && (
                                         <p className="text-sm text-muted-foreground mt-1">{project.category}</p>
                                     )}

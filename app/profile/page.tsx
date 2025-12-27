@@ -105,27 +105,55 @@ function ProfilePageContent() {
     }
 
     const fetchOrders = async (userId: string) => {
-        const { data } = await supabase
+        const { data: hostingData } = await supabase
             .from('hosting_orders')
             .select('*, hosting_plans(name, slug)')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
-            .limit(10)
 
-        if (data) {
-            setOrders(data as any)
+        if (hostingData) {
+            setOrders(hostingData as any)
         }
 
-        // Fetch generic orders
-        const { data: genericData } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false })
+        // Fetch all other order types
+        const [
+            { data: services },
+            { data: projects },
+            { data: domains }
+        ] = await Promise.all([
+            supabase.from('service_orders').select('*, services(title)').eq('user_id', userId).order('created_at', { ascending: false }),
+            supabase.from('project_orders').select('*, projects(title)').eq('user_id', userId).order('created_at', { ascending: false }),
+            supabase.from('domain_orders').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+        ])
 
-        if (genericData) {
-            setGenericOrders(genericData as GenericOrder[])
-        }
+        const allGenericOrders: GenericOrder[] = [
+            ...(services?.map(o => ({
+                id: o.id,
+                item_title: o.services?.title || 'Service',
+                item_type: 'service',
+                amount: o.amount,
+                status: o.status,
+                created_at: o.created_at
+            })) || []),
+            ...(projects?.map(o => ({
+                id: o.id,
+                item_title: o.projects?.title || 'Project',
+                item_type: 'project',
+                amount: o.amount,
+                status: o.status,
+                created_at: o.created_at
+            })) || []),
+            ...(domains?.map(o => ({
+                id: o.id,
+                item_title: o.domain_name,
+                item_type: 'domain',
+                amount: o.amount,
+                status: o.status,
+                created_at: o.created_at
+            })) || [])
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+        setGenericOrders(allGenericOrders)
     }
 
 

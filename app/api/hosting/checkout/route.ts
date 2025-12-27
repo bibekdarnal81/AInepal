@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             )
         }
 
-        const { planId, planName, price, storage, bandwidth } = await request.json()
+        const { planId, planName, price, storage, bandwidth, billingCycle, paymentMethodId, paymentProofUrl, transactionId } = await request.json()
 
         if (!planId || !planName || !price) {
             return NextResponse.json(
@@ -50,8 +50,11 @@ export async function POST(request: Request) {
                 plan_id: plan_id,
                 status: 'pending',
                 price: price,
-                billing_cycle: 'monthly',
-                next_billing_date: nextBillingDate.toISOString()
+                billing_cycle: billingCycle || 'monthly',
+                next_billing_date: nextBillingDate.toISOString(),
+                payment_method_id: paymentMethodId || null,
+                payment_proof_url: paymentProofUrl || null,
+                transaction_id: transactionId || null
             })
             .select()
             .single()
