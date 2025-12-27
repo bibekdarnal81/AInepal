@@ -12,7 +12,6 @@ import {
     LogOut,
     Menu,
     X,
-    BookOpen,
     FolderKanban,
     Briefcase,
     MessageSquare,
@@ -24,8 +23,9 @@ import {
     ChevronRight,
     Globe,
     Network,
-    Image
+    Image as ImageIcon
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function AdminLayout({
     children,
@@ -217,7 +217,7 @@ export default function AdminLayout({
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="min-h-screen bg-black flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
         )
@@ -229,17 +229,15 @@ export default function AdminLayout({
 
     if (!isAdmin) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <div className="bg-card rounded-2xl border border-border p-8 shadow-xl max-w-md text-center">
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <div className="bg-zinc-900 rounded-2xl border border-white/10 p-8 shadow-xl max-w-md text-center">
                     <div className="mb-4">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10">
-                            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                            <X className="h-8 w-8 text-red-500" />
                         </div>
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground mb-2">Access Denied</h1>
-                    <p className="text-muted-foreground mb-6">
+                    <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
+                    <p className="text-zinc-400 mb-6">
                         You don't have admin privileges to access this page.
                     </p>
                     <button
@@ -268,7 +266,7 @@ export default function AdminLayout({
                 { name: 'Posts', href: '/admin/posts', icon: FileText },
                 { name: 'Post Categories', href: '/admin/posts/categories', icon: Tag },
                 { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
-                { name: 'Portfolios', href: '/admin/portfolios', icon: Image },
+                { name: 'Portfolios', href: '/admin/portfolios', icon: ImageIcon },
                 { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
                 { name: 'Services', href: '/admin/services', icon: Briefcase },
             ]
@@ -303,127 +301,136 @@ export default function AdminLayout({
     ]
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-black text-zinc-100 font-sans">
             {/* Mobile sidebar backdrop */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                fixed top-0 left-0 z-50 h-full w-64 bg-card border-r border-border
-                transform transition-transform duration-200 ease-in-out
+                fixed top-0 left-0 z-50 h-full w-64 bg-zinc-950/90 backdrop-blur-xl border-r border-white/5
+                transform transition-transform duration-300 ease-in-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:translate-x-0 flex flex-col
             `}>
                 {/* Header */}
-                <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
-                    <Link href="/admin" className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+                <div className="flex items-center justify-between h-16 px-6 border-b border-white/5 flex-shrink-0">
+                    <Link href="/admin" className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <span className="text-white font-bold text-sm">R</span>
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-foreground">NextNepal</p>
-                            <p className="text-xs text-muted-foreground">Admin</p>
+                            <p className="text-sm font-bold text-white tracking-wide">NextNepal</p>
+                            <p className="text-[10px] text-zinc-500 font-medium">ADMIN DASHBOARD</p>
                         </div>
                     </Link>
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
+                        className="lg:hidden text-zinc-400 hover:text-white transition-colors"
                     >
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto p-3 space-y-6">
+                <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-6 scrollbar-none">
                     {navigationSections.map((section) => (
                         <div key={section.id}>
                             {section.title && (
                                 <button
                                     onClick={() => toggleSection(section.id)}
-                                    className="flex items-center justify-between w-full px-2 py-1.5 mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+                                    className="flex items-center justify-between w-full px-3 py-2 mb-1 text-[11px] font-bold text-zinc-500 uppercase tracking-wider hover:text-zinc-300 transition-colors group"
                                 >
                                     {section.title}
                                     {expandedSections.includes(section.id) ? (
-                                        <ChevronDown className="h-3.5 w-3.5" />
+                                        <ChevronDown className="h-3 w-3 text-zinc-600 group-hover:text-zinc-400" />
                                     ) : (
-                                        <ChevronRight className="h-3.5 w-3.5" />
+                                        <ChevronRight className="h-3 w-3 text-zinc-600 group-hover:text-zinc-400" />
                                     )}
                                 </button>
                             )}
-                            {expandedSections.includes(section.id) && (
-                                <div className="space-y-0.5">
-                                    {section.items.map((item) => {
-                                        const isActive = pathname === item.href ||
-                                            (item.href !== '/admin' && pathname.startsWith(item.href))
-                                        return (
-                                            <Link
-                                                key={item.name}
-                                                href={item.href}
-                                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${isActive
-                                                    ? 'bg-primary/10 text-primary font-medium'
-                                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                                    }`}
-                                                onClick={() => setSidebarOpen(false)}
-                                            >
-                                                <item.icon className="h-4 w-4 flex-shrink-0" />
-                                                <span className="truncate">{item.name}</span>
-                                            </Link>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                            <AnimatePresence initial={false}>
+                                {expandedSections.includes(section.id) && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-0.5 overflow-hidden"
+                                    >
+                                        {section.items.map((item) => {
+                                            const isActive = pathname === item.href ||
+                                                (item.href !== '/admin' && pathname.startsWith(item.href))
+                                            return (
+                                                <Link
+                                                    key={item.name}
+                                                    href={item.href}
+                                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative group ${isActive
+                                                        ? 'bg-blue-600/10 text-blue-400'
+                                                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                                        }`}
+                                                    onClick={() => setSidebarOpen(false)}
+                                                >
+                                                    {isActive && (
+                                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+                                                    )}
+                                                    <item.icon className={`h-4 w-4 flex-shrink-0 transition-colors ${isActive ? 'text-blue-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                                                    <span className="truncate">{item.name}</span>
+                                                </Link>
+                                            )
+                                        })}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ))}
                 </nav>
 
                 {/* Recent Chats Section */}
                 {chatUsers.length > 0 && (
-                    <div className="px-3 pb-3 border-t border-border/50 pt-3 flex-shrink-0">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Chats</h3>
+                    <div className="px-3 pb-3 border-t border-white/5 pt-4 flex-shrink-0">
+                        <div className="flex items-center justify-between mb-3 px-3">
+                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Active Chats</h3>
                             <Link
                                 href="/admin/chat"
-                                className="text-xs text-primary hover:text-primary/80 transition-colors"
+                                className="text-[10px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
                             >
                                 View All
                             </Link>
                         </div>
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                             {chatUsers.map((chatUser) => (
                                 <Link
                                     key={chatUser.user_id || chatUser.guest_session_id}
                                     href="/admin/chat"
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-secondary/50 transition-colors"
+                                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-white/5 transition-colors group"
                                     onClick={() => setSidebarOpen(false)}
                                 >
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${chatUser.is_guest
-                                        ? 'bg-gradient-to-br from-orange-500 to-orange-600'
-                                        : 'bg-gradient-to-br from-violet-500 to-pink-500'
-                                        }`}>
-                                        <Users className="h-3.5 w-3.5 text-white" />
+                                    <div className="relative">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${chatUser.is_guest
+                                            ? 'bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/30'
+                                            : 'bg-gradient-to-br from-violet-500/20 to-pink-500/20 border border-violet-500/30'
+                                            }`}>
+                                            <Users className={`h-3.5 w-3.5 ${chatUser.is_guest ? 'text-orange-400' : 'text-violet-400'}`} />
+                                        </div>
+                                        {chatUser.unread_count > 0 && (
+                                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-black"></div>
+                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1">
-                                            <p className="text-xs font-medium text-foreground truncate">
+                                        <div className="flex items-center gap-1.5">
+                                            <p className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                                                 {chatUser.display_name}
                                             </p>
-                                            {chatUser.is_guest && (
-                                                <span className="px-1 py-0.5 text-[9px] bg-orange-500 text-white rounded-full">
-                                                    G
-                                                </span>
-                                            )}
                                         </div>
+                                        <p className="text-[10px] text-zinc-500 truncate">
+                                            {chatUser.is_guest ? 'Guest Visitor' : 'Registered User'}
+                                        </p>
                                     </div>
-                                    {chatUser.unread_count > 0 && (
-                                        <span className="px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full font-medium">
-                                            {chatUser.unread_count}
-                                        </span>
-                                    )}
                                 </Link>
                             ))}
                         </div>
@@ -431,45 +438,45 @@ export default function AdminLayout({
                 )}
 
                 {/* User Profile Footer */}
-                <div className="p-3 border-t border-border flex-shrink-0">
-                    <div className="flex items-center gap-2 px-2 py-2 mb-1">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-semibold text-white">
+                <div className="p-3 border-t border-white/5 flex-shrink-0 bg-black/20">
+                    <div className="flex items-center gap-3 px-2 py-2 mb-1">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 border border-white/10 shadow-inner">
+                            <span className="text-xs font-bold text-white">
                                 {user.email?.[0].toUpperCase()}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-foreground truncate">
-                                {user.email}
+                            <p className="text-xs font-bold text-white truncate">
+                                {user.email?.split('@')[0]}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">Administrator</p>
+                            <p className="text-[10px] text-zinc-500 truncate">Administrator</p>
                         </div>
                     </div>
                     <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-2 w-full px-3 py-2 mt-1 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                     >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-3.5 w-3.5" />
                         Sign Out
                     </button>
                 </div>
             </aside>
 
             {/* Main content */}
-            <div className="lg:pl-64">
+            <div className="lg:pl-64 min-h-screen flex flex-col">
                 {/* Top bar */}
-                <header className="h-16 bg-card border-b border-border flex items-center px-6 sticky top-0 z-30">
+                <header className="h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-6 sticky top-0 z-30 justify-between lg:justify-end">
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
+                        className="lg:hidden text-zinc-400 hover:text-white"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
-                    <div className="flex-1" />
+                    {/* Add any global actions like refresh or notifications here if needed later */}
                 </header>
 
                 {/* Page content */}
-                <main className="p-6">
+                <main className="flex-1 p-6 lg:p-8 bg-black">
                     {children}
                 </main>
             </div>

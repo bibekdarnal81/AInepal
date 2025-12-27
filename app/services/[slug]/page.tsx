@@ -3,10 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import * as Icons from 'lucide-react'
-import { Check, Clock, Award, Zap } from 'lucide-react'
+import { Check, Clock, Award, Zap, ArrowLeft, ArrowRight } from 'lucide-react'
 import { ServiceHeroActions } from '@/components/services/service-hero-actions'
-import { ServiceBackLink } from '@/components/services/service-back-link'
 import { Metadata } from 'next'
+import Link from 'next/link'
 
 interface Service {
     id: string
@@ -117,7 +117,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -125,28 +125,33 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             <Header />
             <main>
                 {/* Hero Section */}
-                <section className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-20 overflow-hidden">
-                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                    <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
-                        <ServiceBackLink />
+                <section className="relative pt-32 pb-20 overflow-hidden">
+                    {/* Background Gradients */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
 
-                        <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                        <Link href="/services" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-12">
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Services
+                        </Link>
+
+                        <div className="grid lg:grid-cols-2 gap-16 items-center">
                             <div>
-                                <div className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 p-6 mb-6">
-                                    <IconComponent className="h-16 w-16 text-primary" />
+                                <div className="inline-flex items-center justify-center rounded-2xl bg-zinc-900 border border-white/5 p-6 mb-8 shadow-2xl">
+                                    <IconComponent className="h-12 w-12 text-blue-400" />
                                 </div>
 
-                                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+                                <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
                                     {service.title}
                                 </h1>
 
                                 {service.category && (
-                                    <div className="flex gap-2 mb-6">
-                                        <span className="inline-block px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full">
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        <span className="inline-block px-3 py-1 text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
                                             {service.category}
                                         </span>
                                         {service.subcategory && (
-                                            <span className="inline-block px-3 py-1 text-sm font-medium bg-secondary text-secondary-foreground rounded-full">
+                                            <span className="inline-block px-3 py-1 text-sm font-medium bg-zinc-800 text-zinc-300 border border-white/5 rounded-full">
                                                 {service.subcategory}
                                             </span>
                                         )}
@@ -154,33 +159,33 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                                 )}
 
                                 {service.description && (
-                                    <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                                    <p className="text-lg text-zinc-400 leading-relaxed mb-10">
                                         {service.description}
                                     </p>
                                 )}
 
-                                <div className="flex items-center gap-6 mb-8">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground mb-1">Starting at</p>
-                                        <div className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                                            {service.currency === 'USD' && '$'}
-                                            {service.currency === 'EUR' && '€'}
-                                            {service.currency === 'GBP' && '£'}
-                                            {service.currency === 'NPR' && 'रू '}
-                                            {service.price.toLocaleString()}
-                                        </div>
+                                <div className="flex items-end gap-2 mb-10">
+                                    <div className="text-4xl font-bold text-white">
+                                        {service.currency === 'USD' && '$'}
+                                        {service.currency === 'EUR' && '€'}
+                                        {service.currency === 'GBP' && '£'}
+                                        {service.currency === 'NPR' && 'Rs '}
+                                        {service.price.toLocaleString()}
                                     </div>
+                                    <div className="text-lg text-zinc-500 mb-1">/ starting price</div>
                                 </div>
 
+                                {/* Custom styles for the actions component will need to handle dark mode if they don't already */}
                                 <ServiceHeroActions service={service} />
                             </div>
 
                             {service.thumbnail_url && (
-                                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/5 group">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                                     <img
                                         src={service.thumbnail_url}
                                         alt={service.title}
-                                        className="w-full h-auto object-cover"
+                                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
                                     />
                                 </div>
                             )}
@@ -190,22 +195,22 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
                 {/* Features Section */}
                 {service.features && service.features.length > 0 && (
-                    <section className="py-20 bg-card/50">
+                    <section className="py-20 relative">
                         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                            <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
+                            <h2 className="text-3xl font-bold text-white mb-12 text-center">
                                 What's Included
                             </h2>
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {service.features.map((feature, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-start gap-4 p-6 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
+                                        className="flex items-start gap-4 p-6 bg-zinc-900/40 backdrop-blur-sm rounded-2xl border border-white/5 hover:border-blue-500/30 hover:bg-zinc-900/60 transition-all duration-300 group"
                                     >
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                                            <Check className="h-6 w-6 text-green-500" />
+                                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                                            <Check className="h-5 w-5 text-green-400" />
                                         </div>
                                         <div>
-                                            <p className="text-foreground font-medium">{feature}</p>
+                                            <p className="text-zinc-200 font-medium leading-relaxed">{feature}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -219,7 +224,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                     <section className="py-20">
                         <div className="max-w-4xl mx-auto px-6 lg:px-8">
                             <div
-                                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-ul:text-muted-foreground"
+                                className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-400 prose-strong:text-white prose-ul:text-zinc-400 prose-li:marker:text-blue-500"
                                 dangerouslySetInnerHTML={{ __html: service.content }}
                             />
                         </div>
@@ -227,39 +232,39 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 )}
 
                 {/* Why Choose Us */}
-                <section className="py-20 bg-gradient-to-br from-primary/5 to-transparent">
+                <section className="py-24 bg-zinc-900/30 border-y border-white/5">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                        <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
+                        <h2 className="text-3xl font-bold text-white mb-16 text-center">
                             Why Choose This Service
                         </h2>
                         <div className="grid md:grid-cols-3 gap-8">
-                            <div className="text-center p-8 bg-card rounded-2xl border border-border">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-                                    <Zap className="h-8 w-8 text-primary" />
+                            <div className="text-center p-8 bg-zinc-900/50 rounded-3xl border border-white/5 hover:border-white/10 transition-colors">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 mb-6 border border-blue-500/20">
+                                    <Zap className="h-8 w-8 text-blue-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-4">Fast Delivery</h3>
-                                <p className="text-muted-foreground">
-                                    Quick turnaround time without compromising on quality
+                                <h3 className="text-xl font-bold text-white mb-4">Fast Delivery</h3>
+                                <p className="text-zinc-400 leading-relaxed">
+                                    Quick turnaround time without compromising on quality. We value your time.
                                 </p>
                             </div>
 
-                            <div className="text-center p-8 bg-card rounded-2xl border border-border">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-                                    <Award className="h-8 w-8 text-primary" />
+                            <div className="text-center p-8 bg-zinc-900/50 rounded-3xl border border-white/5 hover:border-white/10 transition-colors">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-500/10 mb-6 border border-purple-500/20">
+                                    <Award className="h-8 w-8 text-purple-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-4">Premium Quality</h3>
-                                <p className="text-muted-foreground">
-                                    Professional-grade work that exceeds expectations
+                                <h3 className="text-xl font-bold text-white mb-4">Premium Quality</h3>
+                                <p className="text-zinc-400 leading-relaxed">
+                                    Professional-grade work that exceeds expectations. We strive for excellence.
                                 </p>
                             </div>
 
-                            <div className="text-center p-8 bg-card rounded-2xl border border-border">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-                                    <Clock className="h-8 w-8 text-primary" />
+                            <div className="text-center p-8 bg-zinc-900/50 rounded-3xl border border-white/5 hover:border-white/10 transition-colors">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-green-500/10 mb-6 border border-green-500/20">
+                                    <Clock className="h-8 w-8 text-green-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-4">24/7 Support</h3>
-                                <p className="text-muted-foreground">
-                                    Always available to help with your questions
+                                <h3 className="text-xl font-bold text-white mb-4">24/7 Support</h3>
+                                <p className="text-zinc-400 leading-relaxed">
+                                    Always available to help with your questions. We are here when you need us.
                                 </p>
                             </div>
                         </div>
@@ -267,16 +272,19 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 </section>
 
                 {/* CTA Section */}
-                <section className="py-20 bg-gradient-to-r from-primary to-primary/80">
-                    <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                <section className="py-32 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none" />
+                    <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center relative z-10">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">
                             Ready to Get Started?
                         </h2>
-                        <p className="text-xl text-white/90 mb-10">
-                            Let's bring your project to life with {service.title}
+                        <p className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto">
+                            Let's bring your project to life with our {service.title} service.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <ServiceHeroActions service={service} variant="white" />
+                            <Link href="/book-demo" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2">
+                                Book a Consultation <ArrowRight className="h-5 w-5" />
+                            </Link>
                         </div>
                     </div>
                 </section>

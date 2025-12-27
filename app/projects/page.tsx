@@ -1,62 +1,63 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
-import { ExternalLink, Github, ArrowLeft, Search } from 'lucide-react'
-import { BuyButton } from '@/components/buy-button'
-import * as Icons from 'lucide-react'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
+import { ExternalLink, Github, ArrowLeft, Search, Filter, Sparkles, FolderKanban } from 'lucide-react';
+import { BuyButton } from '@/components/buy-button';
+import * as Icons from 'lucide-react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Project {
-    id: string
-    title: string
-    slug: string
-    description: string | null
-    price?: number
-    category_id: string | null
-    tech_stack: string[]
-    demo_url: string | null
-    github_url: string | null
-    thumbnail_url: string | null
+    id: string;
+    title: string;
+    slug: string;
+    description: string | null;
+    price?: number;
+    category_id: string | null;
+    tech_stack: string[];
+    demo_url: string | null;
+    github_url: string | null;
+    thumbnail_url: string | null;
     project_categories?: {
-        name: string
-        slug: string
-        color: string
-        icon_name: string | null
-    }
+        name: string;
+        slug: string;
+        color: string;
+        icon_name: string | null;
+    };
 }
 
 interface Category {
-    id: string
-    name: string
-    slug: string
-    color: string
-    icon_name: string | null
+    id: string;
+    name: string;
+    slug: string;
+    color: string;
+    icon_name: string | null;
 }
 
 export default function ProjectsPage() {
-    const [projects, setProjects] = useState<Project[]>([])
-    const [categories, setCategories] = useState<Category[]>([])
-    const [selectedCategory, setSelectedCategory] = useState<string>('all')
-    const [searchQuery, setSearchQuery] = useState('')
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+    const supabase = createClient();
 
     useEffect(() => {
-        fetchData()
-    }, [])
+        fetchData();
+    }, []);
 
     const fetchData = async () => {
         // Fetch categories
         const { data: categoriesData } = await supabase
             .from('project_categories')
             .select('*')
-            .order('display_order', { ascending: true })
+            .order('display_order', { ascending: true });
 
         if (categoriesData) {
-            setCategories(categoriesData)
+            setCategories(categoriesData);
         }
 
         // Fetch all published projects with category info
@@ -72,180 +73,226 @@ export default function ProjectsPage() {
                 )
             `)
             .eq('is_published', true)
-            .order('display_order', { ascending: true })
+            .order('display_order', { ascending: true });
 
         if (projectsData) {
-            setProjects(projectsData as any)
+            setProjects(projectsData as any);
         }
-        setLoading(false)
-    }
+        setLoading(false);
+    };
 
     const filteredProjects = projects.filter(project => {
-        const matchesCategory = selectedCategory === 'all' || project.category_id === selectedCategory
+        const matchesCategory = selectedCategory === 'all' || project.category_id === selectedCategory;
         const matchesSearch = !searchQuery ||
             project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            project.tech_stack?.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
+            project.tech_stack?.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()));
 
-        return matchesCategory && matchesSearch
-    })
+        return matchesCategory && matchesSearch;
+    });
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-black text-white selection:bg-blue-500/30 font-sans">
             <Header />
 
-            <main className="py-20">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <main className="relative pt-24 pb-20 min-h-screen">
+                {/* Background Gradients */}
+                <div className="fixed inset-0 pointer-events-none">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[100px]" />
+                </div>
+
+                <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
                     {/* Header */}
-                    <div className="mb-12">
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Home
-                        </Link>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="mb-12 text-center"
+                    >
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/50 border border-white/10 text-zinc-400 text-sm font-medium mb-6 backdrop-blur-sm">
+                            <FolderKanban className="h-4 w-4" />
+                            <span>Our Portfolio</span>
+                        </div>
 
-                        <h1 className="text-4xl font-bold text-foreground mb-4">All Projects</h1>
-                        <p className="text-lg text-muted-foreground">
-                            Explore our complete portfolio of projects across different categories
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                            Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Impact</span>
+                        </h1>
+                        <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
+                            Explore our collection of digital products, client projects, and open-source contributions.
                         </p>
-                    </div>
+                    </motion.div>
 
-                    {/* Search Bar */}
-                    <div className="relative mb-8">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search projects by name, description, or technology..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-card border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                        />
-                    </div>
+                    {/* Controls Section (Search + Filter) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="mb-12 space-y-6"
+                    >
+                        {/* Search Bar */}
+                        <div className="relative max-w-2xl mx-auto">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                            <input
+                                type="text"
+                                placeholder="Search by name, technology, or description..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-4 bg-zinc-900/50 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all backdrop-blur-sm"
+                            />
+                        </div>
 
-                    {/* Category Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-12 overflow-x-auto pb-2">
-                        <button
-                            onClick={() => setSelectedCategory('all')}
-                            className={`px-5 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${selectedCategory === 'all'
-                                    ? 'bg-primary text-primary-foreground shadow-md'
-                                    : 'bg-card border border-border text-foreground hover:bg-secondary'
-                                }`}
-                        >
-                            All Projects ({projects.length})
-                        </button>
-                        {categories.map((category) => {
-                            const IconComponent = category.icon_name && (Icons as any)[category.icon_name]
-                                ? (Icons as any)[category.icon_name]
-                                : Icons.FolderKanban
+                        {/* Category Tabs */}
+                        <div className="flex flex-wrap justify-center gap-2">
+                            <button
+                                onClick={() => setSelectedCategory('all')}
+                                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === 'all'
+                                    ? 'bg-white text-black border-white shadow-lg shadow-white/10 scale-105'
+                                    : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-white/20'
+                                    }`}
+                            >
+                                All Projects
+                            </button>
+                            {categories.map((category) => {
+                                const IconComponent = category.icon_name && (Icons as any)[category.icon_name]
+                                    ? (Icons as any)[category.icon_name]
+                                    : Icons.FolderKanban;
 
-                            const projectCount = projects.filter(p => p.category_id === category.id).length
+                                const projectCount = projects.filter(p => p.category_id === category.id).length;
+                                if (projectCount === 0) return null;
 
-                            // Only show categories that have projects
-                            if (projectCount === 0) return null
+                                const isActive = selectedCategory === category.id;
 
-                            return (
-                                <button
-                                    key={category.id}
-                                    onClick={() => setSelectedCategory(category.id)}
-                                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${selectedCategory === category.id
-                                            ? 'shadow-md'
-                                            : 'bg-card border border-border text-foreground hover:bg-secondary'
-                                        }`}
-                                    style={selectedCategory === category.id ? {
-                                        backgroundColor: `${category.color}20`,
-                                        borderColor: category.color,
-                                        color: category.color
-                                    } : {}}
-                                >
-                                    <IconComponent className="h-4 w-4" style={{ color: category.color }} />
-                                    {category.name}
-                                    <span className="text-xs opacity-70">({projectCount})</span>
-                                </button>
-                            )
-                        })}
-                    </div>
+                                return (
+                                    <button
+                                        key={category.id}
+                                        onClick={() => setSelectedCategory(category.id)}
+                                        className={`group px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${isActive
+                                            ? 'bg-zinc-800 border-zinc-700 text-white shadow-lg scale-105'
+                                            : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-white/20'
+                                            }`}
+                                        style={isActive ? { borderColor: category.color } : {}}
+                                    >
+                                        <IconComponent
+                                            className={`h-4 w-4 transition-colors ${isActive ? '' : 'grayscale group-hover:grayscale-0'}`}
+                                            style={isActive || !isActive ? { color: isActive ? category.color : undefined } : {}}
+                                        />
+                                        {category.name}
+                                        <span className={`text-xs ml-1 ${isActive ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                                            {projectCount}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
 
-                    {/* Loading State */}
+                    {/* Projects Grid */}
                     {loading ? (
-                        <div className="flex items-center justify-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                        <div className="flex items-center justify-center py-20">
+                            <div className="relative w-16 h-16">
+                                <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin"></div>
+                                <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin-reverse"></div>
+                            </div>
                         </div>
                     ) : filteredProjects.length === 0 ? (
-                        <div className="text-center py-20">
-                            <p className="text-muted-foreground text-lg">
-                                {searchQuery ? 'No projects found matching your search' : 'No projects found in this category'}
+                        <div className="text-center py-20 bg-zinc-900/30 rounded-3xl border border-white/5 mx-auto max-w-2xl">
+                            <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="h-8 w-8 text-zinc-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
+                            <p className="text-zinc-400">
+                                {searchQuery ? `We couldn't find anything matching "${searchQuery}"` : 'This category is empty right now.'}
                             </p>
+                            <button
+                                onClick={() => { setSearchQuery(''); setSelectedCategory('all') }}
+                                className="mt-6 text-blue-400 hover:text-blue-300 font-medium hover:underline"
+                            >
+                                Clear all filters
+                            </button>
                         </div>
                     ) : (
-                        <>
-                            {/* Results Count */}
-                            <p className="text-muted-foreground mb-6">
-                                Showing {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}
-                            </p>
-
-                            {/* Projects Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <motion.div
+                            layout
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        >
+                            <AnimatePresence>
                                 {filteredProjects.map((project) => {
-                                    const categoryInfo = project.project_categories as any
+                                    const categoryInfo = project.project_categories as any;
 
                                     return (
-                                        <div
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
                                             key={project.id}
-                                            className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl hover:border-primary/50 transition-all duration-300"
+                                            className="group bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 flex flex-col"
                                         >
-                                            {project.thumbnail_url && (
-                                                <div className="aspect-video w-full overflow-hidden bg-secondary">
+                                            {/* Thumbnail */}
+                                            <Link href={`/projects/${project.slug}`} className="block relative aspect-video w-full overflow-hidden bg-black/50 group cursor-pointer">
+                                                {project.thumbnail_url ? (
                                                     <img
                                                         src={project.thumbnail_url}
                                                         alt={project.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                     />
-                                                </div>
-                                            )}
-                                            <div className="p-6">
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-zinc-800">
+                                                        <Icons.Image className="h-10 w-10 text-zinc-600" />
+                                                    </div>
+                                                )}
+
+                                                {/* Overlay Category Badge */}
                                                 {categoryInfo && (
-                                                    <span
-                                                        className="px-2 py-1 text-xs font-medium rounded mb-3 inline-block"
-                                                        style={{
-                                                            backgroundColor: `${categoryInfo.color}20`,
-                                                            color: categoryInfo.color
-                                                        }}
-                                                    >
-                                                        {categoryInfo.name}
-                                                    </span>
+                                                    <div className="absolute top-4 left-4">
+                                                        <span
+                                                            className="px-2.5 py-1 text-xs font-semibold rounded-md backdrop-blur-md border border-white/10 shadow-lg"
+                                                            style={{
+                                                                backgroundColor: `${categoryInfo.color}30`, // 30% opacity
+                                                                color: categoryInfo.color,
+                                                                borderColor: `${categoryInfo.color}40`
+                                                            }}
+                                                        >
+                                                            {categoryInfo.name}
+                                                        </span>
+                                                    </div>
                                                 )}
+                                            </Link>
 
-                                                <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                                                    {project.title}
-                                                </h3>
+                                            {/* Content */}
+                                            <div className="p-6 flex flex-col flex-1">
+                                                <Link href={`/projects/${project.slug}`}>
+                                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-1">
+                                                        {project.title}
+                                                    </h3>
+                                                </Link>
 
-                                                {project.description && (
-                                                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                                                        {project.description}
-                                                    </p>
-                                                )}
+                                                <p className="text-zinc-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+                                                    {project.description || "No description available."}
+                                                </p>
 
+                                                {/* Tech Stack */}
                                                 {project.tech_stack && project.tech_stack.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        {project.tech_stack.slice(0, 4).map((tech: string, idx: number) => (
+                                                    <div className="flex flex-wrap gap-2 mb-6">
+                                                        {project.tech_stack.slice(0, 3).map((tech: string, idx: number) => (
                                                             <span
                                                                 key={idx}
-                                                                className="px-2 py-1 text-xs bg-secondary text-foreground rounded"
+                                                                className="px-2 py-1 text-[10px] uppercase tracking-wider font-semibold bg-white/5 text-zinc-300 border border-white/5 rounded"
                                                             >
                                                                 {tech}
                                                             </span>
                                                         ))}
-                                                        {project.tech_stack.length > 4 && (
-                                                            <span className="px-2 py-1 text-xs text-muted-foreground">
-                                                                +{project.tech_stack.length - 4} more
+                                                        {project.tech_stack.length > 3 && (
+                                                            <span className="px-2 py-1 text-[10px] text-zinc-500">
+                                                                +{project.tech_stack.length - 3}
                                                             </span>
                                                         )}
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center gap-3 mt-4">
+                                                {/* Actions */}
+                                                <div className="pt-4 border-t border-white/5 flex items-center gap-3">
                                                     {project.price && project.price > 0 ? (
                                                         <BuyButton
                                                             itemType="project"
@@ -253,7 +300,7 @@ export default function ProjectsPage() {
                                                             itemTitle={project.title}
                                                             itemSlug={project.slug}
                                                             amount={project.price}
-                                                            className="flex-1"
+                                                            className="flex-1 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-colors text-center"
                                                         >
                                                             Purchase Project
                                                         </BuyButton>
@@ -264,9 +311,9 @@ export default function ProjectsPage() {
                                                                     href={project.demo_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors"
                                                                 >
-                                                                    <ExternalLink className="h-4 w-4" />
+                                                                    <ExternalLink className="h-3.5 w-3.5" />
                                                                     View Demo
                                                                 </a>
                                                             )}
@@ -275,9 +322,9 @@ export default function ProjectsPage() {
                                                                     href={project.github_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-secondary text-foreground rounded-lg font-medium hover:bg-secondary/80 transition-colors"
+                                                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-800 text-white border border-white/5 rounded-lg font-medium text-sm hover:bg-zinc-700 transition-colors"
                                                                 >
-                                                                    <Github className="h-4 w-4" />
+                                                                    <Github className="h-3.5 w-3.5" />
                                                                     Code
                                                                 </a>
                                                             )}
@@ -285,16 +332,16 @@ export default function ProjectsPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
-                                    )
+                                        </motion.div>
+                                    );
                                 })}
-                            </div>
-                        </>
+                            </AnimatePresence>
+                        </motion.div>
                     )}
                 </div>
             </main>
 
             <Footer />
         </div>
-    )
+    );
 }

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, Eye, Clock, CheckCircle, Users, UserCircle } from 'lucide-react'
+import { FileText, Eye, Clock, CheckCircle, Users, UserCircle, ArrowRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 interface Stats {
     totalPosts: number
@@ -73,7 +74,6 @@ export default function AdminDashboard() {
             if (usersError) {
                 console.error('Error fetching registered users:', usersError)
             } else if (users) {
-                console.log('Fetched registered users:', users.length)
                 setRegisteredUsers(users)
             }
 
@@ -85,7 +85,6 @@ export default function AdminDashboard() {
             if (countError) {
                 console.error('Error counting registered users:', countError)
             } else if (usersCount !== null) {
-                console.log('Total registered users:', usersCount)
                 setTotalUsers(usersCount)
             }
 
@@ -99,7 +98,6 @@ export default function AdminDashboard() {
             if (guestsError) {
                 console.error('Error fetching guest users:', guestsError)
             } else if (guests) {
-                console.log('Fetched guest users:', guests.length)
                 setGuestUsers(guests)
             }
 
@@ -111,7 +109,6 @@ export default function AdminDashboard() {
             if (guestsCountError) {
                 console.error('Error counting guest users:', guestsCountError)
             } else if (guestsCount !== null) {
-                console.log('Total guest users:', guestsCount)
                 setTotalGuests(guestsCount)
             }
 
@@ -125,210 +122,225 @@ export default function AdminDashboard() {
             title: 'Total Posts',
             value: stats.totalPosts,
             icon: FileText,
-            color: 'bg-blue-500/10 text-blue-500'
+            color: 'text-blue-400',
+            bg: 'bg-blue-400/10',
+            border: 'border-blue-400/20'
         },
         {
             title: 'Published',
             value: stats.publishedPosts,
             icon: CheckCircle,
-            color: 'bg-green-500/10 text-green-500'
+            color: 'text-green-400',
+            bg: 'bg-green-400/10',
+            border: 'border-green-400/20'
         },
         {
             title: 'Drafts',
             value: stats.draftPosts,
             icon: Clock,
-            color: 'bg-yellow-500/10 text-yellow-500'
+            color: 'text-orange-400',
+            bg: 'bg-orange-400/10',
+            border: 'border-orange-400/20'
         },
         {
             title: 'Registered Users',
             value: totalUsers,
             icon: UserCircle,
-            color: 'bg-violet-500/10 text-violet-500'
+            color: 'text-violet-400',
+            bg: 'bg-violet-400/10',
+            border: 'border-violet-400/20'
         },
         {
             title: 'Guest Users',
             value: totalGuests,
             icon: Users,
-            color: 'bg-orange-500/10 text-orange-500'
+            color: 'text-pink-400',
+            bg: 'bg-pink-400/10',
+            border: 'border-pink-400/20'
         },
     ]
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+                <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin"></div>
+                    <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin-reverse"></div>
+                </div>
             </div>
         )
     }
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-                <p className="text-muted-foreground mt-1">Welcome to your admin panel</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                    <p className="text-zinc-400 mt-1 flex items-center gap-2">
+                        Overview of your platform's performance
+                    </p>
+                </div>
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-white/5 text-xs font-medium text-zinc-400">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    System Online
+                </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {statCards.map((stat) => (
-                    <div key={stat.title} className="bg-card rounded-xl border border-border p-6">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-lg ${stat.color}`}>
-                                <stat.icon className="h-6 w-6" />
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {statCards.map((stat, index) => (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        key={stat.title}
+                        className={`bg-zinc-900/50 backdrop-blur-sm rounded-2xl border ${stat.border} p-5 hover:bg-zinc-900 transition-colors group`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className={`p-2.5 rounded-xl ${stat.bg}`}>
+                                <stat.icon className={`h-5 w-5 ${stat.color}`} />
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">{stat.title}</p>
-                                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                            </div>
+                            <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Metric</span>
                         </div>
-                    </div>
+                        <div>
+                            <p className="text-3xl font-bold text-white mb-1 group-hover:scale-105 transition-transform origin-left">{stat.value}</p>
+                            <p className="text-xs font-medium text-zinc-400">{stat.title}</p>
+                        </div>
+                    </motion.div>
                 ))}
             </div>
 
-            {/* Recent Posts */}
-            <div className="bg-card rounded-xl border border-border">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-foreground">Recent Posts</h2>
-                    <Link
-                        href="/admin/posts"
-                        className="text-sm text-primary hover:text-primary/80 transition-colors"
-                    >
-                        View all
-                    </Link>
-                </div>
-                <div className="divide-y divide-border">
-                    {recentPosts.length === 0 ? (
-                        <div className="px-6 py-12 text-center">
-                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <p className="text-muted-foreground">No posts yet</p>
-                            <Link
-                                href="/admin/posts/new"
-                                className="inline-block mt-4 text-primary hover:text-primary/80"
-                            >
-                                Create your first post
-                            </Link>
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* Recent Posts - Takes up 2 columns */}
+                <div className="lg:col-span-2 bg-zinc-900/40 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden flex flex-col">
+                    <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 rounded-lg bg-blue-500/10">
+                                <FileText className="h-4 w-4 text-blue-400" />
+                            </div>
+                            <h2 className="text-lg font-bold text-white">Recent Posts</h2>
                         </div>
-                    ) : (
-                        recentPosts.map((post) => (
-                            <Link
-                                key={post.id}
-                                href={`/admin/posts/${post.id}`}
-                                className="flex items-center justify-between px-6 py-4 hover:bg-secondary/50 transition-colors"
-                            >
-                                <div>
-                                    <h3 className="font-medium text-foreground">{post.title}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {new Date(post.created_at).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <span className={`px-2 py-1 text-xs rounded-full ${post.published
-                                    ? 'bg-green-500/10 text-green-500'
-                                    : 'bg-yellow-500/10 text-yellow-500'
-                                    }`}>
-                                    {post.published ? 'Published' : 'Draft'}
-                                </span>
-                            </Link>
-                        ))
-                    )}
-                </div>
-            </div>
-
-            {/* User Lists Grid */}
-            <div className="grid lg:grid-cols-2 gap-6">
-                {/* Registered Users List */}
-                <div className="bg-card rounded-xl border border-border">
-                    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <UserCircle className="h-5 w-5 text-violet-500" />
-                            <h2 className="text-lg font-semibold text-foreground">Registered Users</h2>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{totalUsers} total</span>
+                        <Link
+                            href="/admin/posts"
+                            className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 group"
+                        >
+                            View all
+                            <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                        </Link>
                     </div>
-                    <div className="divide-y divide-border">
-                        {registeredUsers.length === 0 ? (
-                            <div className="px-6 py-12 text-center">
-                                <UserCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <p className="text-muted-foreground">No registered users yet</p>
+                    <div className="flex-1 divide-y divide-white/5">
+                        {recentPosts.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+                                <div className="w-16 h-16 rounded-full bg-zinc-800/50 flex items-center justify-center mb-4">
+                                    <FileText className="h-6 w-6 text-zinc-600" />
+                                </div>
+                                <p className="text-zinc-400 font-medium">No posts created yet</p>
+                                <Link
+                                    href="/admin/posts/new"
+                                    className="mt-4 px-4 py-2 bg-white text-black text-xs font-bold rounded-lg hover:bg-zinc-200 transition-colors"
+                                >
+                                    Create First Post
+                                </Link>
                             </div>
                         ) : (
-                            registeredUsers.map((user) => (
-                                <div
-                                    key={user.id}
-                                    className="flex items-center gap-4 px-6 py-4 hover:bg-secondary/50 transition-colors"
+                            recentPosts.map((post) => (
+                                <Link
+                                    key={post.id}
+                                    href={`/admin/posts/${post.id}`}
+                                    className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors group"
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                        {user.avatar_url ? (
-                                            <img
-                                                src={user.avatar_url}
-                                                alt={user.display_name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <UserCircle className="h-6 w-6 text-white" />
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-foreground truncate">{user.display_name}</h3>
-                                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="px-2 py-1 text-xs bg-violet-500/10 text-violet-500 rounded-full">
-                                            Registered
-                                        </span>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {new Date(user.created_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* Guest Users List */}
-                <div className="bg-card rounded-xl border border-border">
-                    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-orange-500" />
-                            <h2 className="text-lg font-semibold text-foreground">Guest Users</h2>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{totalGuests} total</span>
-                    </div>
-                    <div className="divide-y divide-border">
-                        {guestUsers.length === 0 ? (
-                            <div className="px-6 py-12 text-center">
-                                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <p className="text-muted-foreground">No guest users yet</p>
-                            </div>
-                        ) : (
-                            guestUsers.map((guest) => (
-                                <div
-                                    key={guest.id}
-                                    className="flex items-center gap-4 px-6 py-4 hover:bg-secondary/50 transition-colors"
-                                >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
-                                        <Users className="h-6 w-6 text-white" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-medium text-foreground truncate">{guest.guest_name}</h3>
-                                            <span className="px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
-                                                Guest
-                                            </span>
+                                    <div className="min-w-0 pr-4">
+                                        <h3 className="font-medium text-zinc-200 group-hover:text-white truncate transition-colors">{post.title}</h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <p className="text-xs text-zinc-500">
+                                                {new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </p>
                                         </div>
-                                        <p className="text-xs text-muted-foreground truncate">📧 {guest.guest_email}</p>
-                                        {guest.guest_phone && (
-                                            <p className="text-xs text-muted-foreground truncate">📱 {guest.guest_phone}</p>
-                                        )}
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(guest.created_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
+                                    <span className={`flex-shrink-0 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide rounded-full border ${post.published
+                                        ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                        : 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                                        }`}>
+                                        {post.published ? 'Published' : 'Draft'}
+                                    </span>
+                                </Link>
                             ))
                         )}
+                    </div>
+                </div>
+
+                {/* User Lists - Takes up 1 column */}
+                <div className="space-y-6">
+                    {/* Registered Users Short List */}
+                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden">
+                        <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 rounded-lg bg-violet-500/10">
+                                    <UserCircle className="h-4 w-4 text-violet-400" />
+                                </div>
+                                <h2 className="text-lg font-bold text-white">New Users</h2>
+                            </div>
+                        </div>
+                        <div className="divide-y divide-white/5">
+                            {registeredUsers.length === 0 ? (
+                                <div className="px-6 py-8 text-center">
+                                    <p className="text-zinc-500 text-sm">No users yet</p>
+                                </div>
+                            ) : (
+                                registeredUsers.slice(0, 4).map((user) => (
+                                    <div key={user.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-white/5 transition-colors">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 ring-2 ring-black">
+                                            {user.avatar_url ? (
+                                                <img src={user.avatar_url} alt={user.display_name} className="w-full h-full rounded-full object-cover" />
+                                            ) : (
+                                                <span className="text-xs font-bold text-white">{user.email?.charAt(0).toUpperCase()}</span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-medium text-zinc-200 truncate">{user.display_name}</p>
+                                            <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
+                                        </div>
+                                        <span className="text-[10px] text-zinc-600 font-mono">
+                                            {new Date(user.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Guest Users Short List */}
+                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden">
+                        <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 rounded-lg bg-pink-500/10">
+                                    <Users className="h-4 w-4 text-pink-400" />
+                                </div>
+                                <h2 className="text-lg font-bold text-white">Recent Guests</h2>
+                            </div>
+                        </div>
+                        <div className="divide-y divide-white/5">
+                            {guestUsers.length === 0 ? (
+                                <div className="px-6 py-8 text-center">
+                                    <p className="text-zinc-500 text-sm">No guests yet</p>
+                                </div>
+                            ) : (
+                                guestUsers.slice(0, 4).map((guest) => (
+                                    <div key={guest.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-white/5 transition-colors">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center flex-shrink-0 ring-2 ring-black">
+                                            <Users className="h-3.5 w-3.5 text-white" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium text-zinc-200 truncate">{guest.guest_name}</p>
+                                                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-pink-500/10 text-pink-400 border border-pink-500/20">GUEST</span>
+                                            </div>
+                                            <p className="text-[10px] text-zinc-500 truncate">{guest.guest_email}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

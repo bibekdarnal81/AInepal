@@ -1,32 +1,33 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
-import { BuyButton } from '@/components/buy-button'
-import Link from 'next/link'
-import * as Icons from 'lucide-react'
-import { Check, MessageSquare } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { BuyButton } from '@/components/buy-button';
+import Link from 'next/link';
+import * as Icons from 'lucide-react';
+import { Check, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Service {
-    id: string
-    title: string
-    slug: string
-    description: string | null
-    price: number
-    currency: string
-    icon_name: string | null
-    thumbnail_url: string | null
-    features: string[]
-    is_featured: boolean
-    is_published: boolean
+    id: string;
+    title: string;
+    slug: string;
+    description: string | null;
+    price: number;
+    currency: string;
+    icon_name: string | null;
+    thumbnail_url: string | null;
+    features: string[];
+    is_featured: boolean;
+    is_published: boolean;
 }
 
 export default function ServicesPage() {
-    const [services, setServices] = useState<Service[]>([])
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
+    const [services, setServices] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(true);
+    const supabase = createClient();
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -34,153 +35,186 @@ export default function ServicesPage() {
                 .from('services')
                 .select('*')
                 .eq('is_published', true)
-                .order('display_order', { ascending: true })
+                .order('display_order', { ascending: true });
 
             if (!error && data) {
-                setServices(data)
+                setServices(data);
             }
-            setLoading(false)
-        }
-        fetchServices()
-    }, [supabase])
+            setLoading(false);
+        };
+        fetchServices();
+    }, [supabase]);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-black text-white selection:bg-blue-500/30 font-sans">
             <Header />
-            <main>
+
+            <main className="relative pt-24 pb-20">
+                {/* Background Gradients */}
+                <div className="fixed inset-0 pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px]" />
+                    <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
+                </div>
+
                 {/* Hero Section */}
-                <section className="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-50 py-20">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="text-center">
-                            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl mb-6">
-                                Transform Your Ideas Into Digital Reality
+                <section className="relative z-10 px-6 lg:px-8 mb-20 lg:mb-32">
+                    <div className="mx-auto max-w-4xl text-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                        >
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
+                                <Sparkles className="h-4 w-4" />
+                                <span>Expert Web Solutions</span>
+                            </div>
+
+                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
+                                Transform Your Ideas Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 animate-gradient">Digital Reality</span>
                             </h1>
-                            <p className="text-lg leading-8 text-gray-600 max-w-3xl mx-auto mb-8">
-                                With over 5 years of experience in modern web development, I specialize in creating high-performance, user-friendly websites and applications using cutting-edge technologies like React, Next.js, and Node.js.
+
+                            <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                                We specialize in high-performance web development, creating stunning user experiences with cutting-edge technologies.
                             </p>
-                            <Link href="/contact">
-                                <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                                    Free Consultation
-                                </button>
-                            </Link>
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
 
-                {/* Services Section */}
-                <section className="bg-white py-16">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                                Choose Your Perfect Solution
-                            </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Compare our comprehensive web development services to find the ideal match for your project requirements and budget.
-                            </p>
-                        </div>
-
+                {/* Services Grid */}
+                <section className="relative z-10 px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl">
                         {loading ? (
-                            <div className="flex items-center justify-center py-12">
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                            <div className="flex items-center justify-center py-20">
+                                <div className="relative w-16 h-16">
+                                    <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin"></div>
+                                    <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin-reverse"></div>
+                                </div>
                             </div>
                         ) : services.length === 0 ? (
-                            <div className="text-center py-12">
-                                <p className="text-gray-600 text-lg">No services available at the moment. Please check back later!</p>
+                            <div className="text-center py-20 px-6 bg-zinc-900/50 rounded-3xl border border-white/5">
+                                <p className="text-zinc-400 text-xl font-light">No services available right now.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                                {services.map((service) => {
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                                {services.map((service, index) => {
+                                    // Dynamically resolve icon
                                     const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
                                         ? (Icons as any)[service.icon_name]
-                                        : Icons.Code
+                                        : Icons.Code;
 
                                     return (
-                                        <div
+                                        <motion.div
                                             key={service.id}
-                                            className="group rounded-xl bg-white border-2 border-gray-200 hover:border-blue-500 p-8 transition-all duration-300 hover:shadow-xl"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.1 }}
+                                            className="group relative flex flex-col p-8 rounded-3xl bg-zinc-900/40 backdrop-blur-sm border border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:bg-zinc-900/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10"
                                         >
-                                            <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-blue-100 p-4 group-hover:bg-blue-500 transition-colors">
-                                                <IconComponent className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors" />
-                                            </div>
-
-                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                                {service.title}
-                                            </h3>
-
-                                            <div className="text-3xl font-bold text-blue-600 mb-4">
-                                                {service.currency === 'USD' && '$'}
-                                                {service.currency === 'EUR' && '€'}
-                                                {service.currency === 'GBP' && '£'}
-                                                {service.currency === 'NPR' && 'Rs '}
-                                                {service.price.toLocaleString()}
-                                            </div>
-
-                                            {service.description && (
-                                                <p className="text-gray-600 mb-6 leading-relaxed line-clamp-4">
+                                            {/* Header */}
+                                            <div className="mb-6">
+                                                <Link href={`/services/${service.slug}`} className="block group-hover:opacity-80 transition-opacity">
+                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                                        <IconComponent className="h-7 w-7 text-blue-400 group-hover:text-blue-300" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                                                        {service.title}
+                                                    </h3>
+                                                </Link>
+                                                <p className="text-zinc-400 line-clamp-3 text-sm leading-relaxed">
                                                     {service.description}
                                                 </p>
-                                            )}
+                                            </div>
 
+                                            {/* Features */}
                                             {service.features && service.features.length > 0 && (
-                                                <ul className="space-y-3 mb-6">
-                                                    {service.features.map((feature: string, index: number) => (
-                                                        <li key={index} className="flex items-center gap-2 text-sm text-gray-700">
-                                                            <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                                                <ul className="mb-8 space-y-3 flex-grow">
+                                                    {service.features.slice(0, 4).map((feature: string, idx: number) => (
+                                                        <li key={idx} className="flex items-start gap-3 text-sm text-zinc-300/80">
+                                                            <div className="mt-1 w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                                                <Check className="h-2.5 w-2.5 text-green-400" />
+                                                            </div>
                                                             <span>{feature}</span>
                                                         </li>
                                                     ))}
+                                                    {service.features.length > 4 && (
+                                                        <li className="text-xs text-zinc-500 pl-7 flex items-center gap-1">
+                                                            And {service.features.length - 4} more features...
+                                                        </li>
+                                                    )}
                                                 </ul>
                                             )}
 
-                                            <BuyButton
-                                                itemType="service"
-                                                itemId={service.id}
-                                                itemTitle={service.title}
-                                                itemSlug={service.slug}
-                                                amount={service.price}
-                                                currency={service.currency}
-                                                className="w-full py-3 text-center"
-                                            >
-                                                Get Started
-                                            </BuyButton>
+                                            {/* Pricing & Footer */}
+                                            <div className="mt-auto pt-6 border-t border-white/5">
+                                                <div className="flex items-end gap-1 mb-6">
+                                                    <span className="text-3xl font-bold text-white">
+                                                        {service.currency === 'USD' && '$'}
+                                                        {service.currency === 'EUR' && '€'}
+                                                        {service.currency === 'GBP' && '£'}
+                                                        {service.currency === 'NPR' && 'Rs. '}
+                                                        {service.price.toLocaleString()}
+                                                    </span>
+                                                    <span className="text-sm text-zinc-500 mb-1.5 ml-1">/ project</span>
+                                                </div>
 
-                                            <button
-                                                onClick={() => {
-                                                    window.dispatchEvent(new CustomEvent('openChatWithMessage', {
-                                                        detail: { itemType: 'service', itemTitle: service.title }
-                                                    }))
-                                                }}
-                                                className="w-full mt-3 flex items-center justify-center gap-2 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
-                                            >
-                                                <MessageSquare className="h-5 w-5" />
-                                                Ask About This Service
-                                            </button>
-                                        </div>
-                                    )
+                                                <div className="space-y-3">
+                                                    <BuyButton
+                                                        itemType="service"
+                                                        itemId={service.id}
+                                                        itemTitle={service.title}
+                                                        itemSlug={service.slug}
+                                                        amount={service.price}
+                                                        currency={service.currency}
+                                                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold transition-all shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30"
+                                                    >
+                                                        Get Started
+                                                    </BuyButton>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            window.dispatchEvent(new CustomEvent('openChatWithMessage', {
+                                                                detail: { itemType: 'service', itemTitle: service.title }
+                                                            }));
+                                                        }}
+                                                        className="w-full py-3.5 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-300 hover:text-white font-medium transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <MessageSquare className="h-4 w-4" />
+                                                        Ask a Question
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    );
                                 })}
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* CTA Section */}
-                <section className="bg-gradient-to-r from-blue-600 to-indigo-600 py-16">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-                        <h2 className="text-3xl font-bold text-white mb-4">
-                            Let's Build Something Amazing Together
-                        </h2>
-                        <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-                            Have a project in mind? Get in touch and let's discuss how we can help you achieve your goals.
-                        </p>
-                        <Link href="/contact">
-                            <button className="px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                                Contact Us
-                            </button>
-                        </Link>
+                {/* Bottom CTA */}
+                <section className="mt-20 lg:mt-32 px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl">
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-blue-900/20 to-black border border-white/10 px-6 py-16 sm:px-16 lg:py-24 text-center">
+                            <div className="absolute top-0 left-0 w-full h-full bg-[url('/noise.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+
+                            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6 relative z-10">
+                                Not sure which service is right for you?
+                            </h2>
+                            <p className="max-w-xl mx-auto text-zinc-400 mb-10 text-lg relative z-10">
+                                Schedule a free consultation call. We'll analyze your needs and recommend the perfect solution for your business.
+                            </p>
+
+                            <div className="relative z-10">
+                                <Link href="/book-demo" className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-zinc-200 transition-colors">
+                                    Book a Free Consultation
+                                    <ArrowRight className="h-5 w-5" />
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
             <Footer />
         </div>
-    )
+    );
 }

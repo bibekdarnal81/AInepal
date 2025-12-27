@@ -5,15 +5,17 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useEffect } from 'react'
 import { Bold, Italic, List, ListOrdered, Heading2, Quote, Undo, Redo } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface RichTextEditorProps {
     content: string
     onChange: (content: string) => void
     placeholder?: string
     minHeight?: string
+    className?: string
 }
 
-export function RichTextEditor({ content, onChange, placeholder = 'Start typing...', minHeight = '200px' }: RichTextEditorProps) {
+export function RichTextEditor({ content, onChange, placeholder = 'Start typing...', minHeight = '200px', className }: RichTextEditorProps) {
     const editor = useEditor({
         immediatelyRender: false,
         extensions: [
@@ -45,7 +47,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start typing.
     }
 
     return (
-        <div className="border border-border rounded-lg bg-secondary overflow-hidden">
+        <div className={cn("border border-border rounded-lg bg-secondary overflow-hidden", className)}>
             {/* Toolbar */}
             <div className="flex items-center gap-1 p-2 border-b border-border bg-card/50">
                 <button

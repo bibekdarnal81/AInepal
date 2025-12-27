@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Input } from '../../../components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card'
-import { CheckCircle, XCircle, Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil, Plus, ShoppingBag, X, Search, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { RichTextEditor } from '@/components/rich-text-editor'
 import ThumbnailUpload from '@/components/thumbnail-upload'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 
 interface BundleOffer {
     id: string
@@ -57,9 +56,10 @@ export default function BundleOffersAdmin() {
     const [loadingItems, setLoadingItems] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
+    const [isFormOpen, setIsFormOpen] = useState(false)
 
     const fetchOffers = async () => {
-        const { data, error } = await supabase.from('bundle_offers').select('*')
+        const { data, error } = await supabase.from('bundle_offers').select('*').order('created_at', { ascending: false })
         if (error) {
             console.error(error)
         } else if (data) {
@@ -73,7 +73,7 @@ export default function BundleOffersAdmin() {
         setForm({
             name: offer.name,
             description: offer.description,
-            hosting_type: offer.hosting_type, // This might be 'bundle' if generic, or specific type if used that way
+            hosting_type: offer.hosting_type,
             target_id: '',
             price: offer.price.toString(),
             discount_percent: offer.discount_percent.toString(),
@@ -105,7 +105,7 @@ export default function BundleOffersAdmin() {
             setSelectedItems(mappedItems)
         }
 
-        // Scroll to top
+        setIsFormOpen(true)
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -115,6 +115,7 @@ export default function BundleOffersAdmin() {
         setSelectedItems([])
         setError('')
         setSuccess('')
+        setIsFormOpen(false)
     }
 
     const deleteOffer = async (id: string) => {
@@ -142,7 +143,7 @@ export default function BundleOffersAdmin() {
 
             setLoadingItems(true)
             let tableName = ''
-            let selectQuery = 'id, title' // Default for projects/services
+            let selectQuery = 'id, title'
 
             switch (form.hosting_type) {
                 case 'project':
@@ -189,11 +190,9 @@ export default function BundleOffersAdmin() {
                     type: form.hosting_type,
                     name: selectedItem.title || selectedItem.name || selectedItem.domain_name || 'Unknown'
                 }
-                // Prevent duplicates
                 if (!selectedItems.some(i => i.id === value)) {
                     setSelectedItems(prev => [...prev, newItem])
                 }
-                // Reset selection
                 setForm(prev => ({ ...prev, target_id: '' }))
             }
         } else {
@@ -221,7 +220,7 @@ export default function BundleOffersAdmin() {
         const payload = {
             name: form.name,
             description: form.description,
-            hosting_type: 'bundle', // Or keep form.hosting_type if it acts as a category
+            hosting_type: 'bundle',
             price: Number(form.price),
             discount_percent: Number(form.discount_percent),
             poster_url: form.poster_url,
@@ -229,11 +228,9 @@ export default function BundleOffersAdmin() {
             show_on_home: form.show_on_home
         }
 
-
         let offerId = editingId
 
         if (editingId) {
-            // Update existing offer
             const { error: updateError } = await supabase
                 .from('bundle_offers')
                 .update(payload)
@@ -244,7 +241,6 @@ export default function BundleOffersAdmin() {
                 return
             }
 
-            // Delete existing items to replace them
             const { error: deleteItemsError } = await supabase
                 .from('bundle_items')
                 .delete()
@@ -254,7 +250,6 @@ export default function BundleOffersAdmin() {
                 console.error('Error clearing old items:', deleteItemsError)
             }
         } else {
-            // Insert new offer
             const { data: offerData, error: offerError } = await supabase
                 .from('bundle_offers')
                 .insert([payload])
@@ -269,10 +264,8 @@ export default function BundleOffersAdmin() {
         }
 
         if (offerId) {
-            // Insert bundle items
             const itemsPayload = selectedItems.map(item => ({
                 bundle_id: offerId,
-                // Dynamically assign correct column based on type
                 ...(item.type === 'hosting' ? { hosting_plan_id: item.id } : {}),
                 ...(item.type === 'project' ? { project_id: item.id } : {}),
                 ...(item.type === 'service' ? { service_id: item.id } : {}),
@@ -290,158 +283,314 @@ export default function BundleOffersAdmin() {
 
             setSuccess(`Bundle offer ${editingId ? 'updated' : 'created'} successfully`)
             fetchOffers()
-            cancelEdit() // Reset form
+            cancelEdit()
         }
     }
 
 
     return (
-        <div className="p-8 min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
-            <h1 className="text-3xl font-bold text-foreground mb-6">Bundle Offers – Admin</h1>
-            {error && (
-                <div className="flex items-center text-red-500 mb-4">
-                    <XCircle className="h-5 w-5 mr-2" /> {error}
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white">Bundle Offers</h1>
+                    <p className="text-zinc-400 mt-1">Manage special deals and product bundles</p>
                 </div>
-            )}
-            {success && (
-                <div className="flex items-center text-green-500 mb-4">
-                    <CheckCircle className="h-5 w-5 mr-2" /> {success}
-                </div>
-            )}
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <Input name="name" placeholder="Offer Name" value={form.name} onChange={handleChange} required />
-                <select
-                    name="hosting_type"
-                    value={form.hosting_type}
-                    onChange={handleChange}
-                    required
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <option value="" disabled>Select Type</option>
-                    <option value="service">Service</option>
-                    <option value="hosting">Hosting</option>
-                    <option value="domain">Domain</option>
-                    <option value="project">Project</option>
-                </select>
+                {!isFormOpen && (
+                    <button
+                        onClick={() => setIsFormOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Create New Bundle
+                    </button>
+                )}
+            </div>
 
-                <select
-                    name="target_id"
-                    value={form.target_id}
-                    onChange={handleChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!form.hosting_type || loadingItems}
-                >
-                    <option value="" disabled>Select Item to Add</option>
-                    {items.map(item => (
-                        <option key={item.id} value={item.id}>
-                            {item.title || item.name || item.domain_name}
-                        </option>
-                    ))}
-                </select>
-
-                {/* Selected Items List */}
-                {selectedItems.length > 0 && (
-                    <div className="col-span-1 md:col-span-2 space-y-2 mt-2">
-                        <p className="text-sm font-medium text-foreground">Selected Items:</p>
-                        <div className="flex flex-wrap gap-2">
-                            {selectedItems.map(item => (
-                                <div key={item.id} className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                                    <span className="capitalize text-xs font-bold opacity-70">{item.type}:</span>
-                                    <span>{item.name}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSelectedItem(item.id)}
-                                        className="ml-1 text-red-500 hover:text-red-700 font-bold"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
+            <AnimatePresence>
+                {isFormOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="bg-zinc-900/50 backdrop-blur-md rounded-3xl border border-white/5 p-6 md:p-8"
+                    >
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                {editingId ? <Pencil className="h-5 w-5 text-blue-400" /> : <Plus className="h-5 w-5 text-green-400" />}
+                                {editingId ? 'Edit Bundle' : 'Create New Bundle'}
+                            </h2>
+                            <button onClick={cancelEdit} className="p-2 text-zinc-400 hover:text-white bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+                                <X className="h-5 w-5" />
+                            </button>
                         </div>
+
+                        {error && (
+                            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3">
+                                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                                <p>{error}</p>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-400">Bundle Name</label>
+                                        <input
+                                            name="name"
+                                            value={form.name}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="e.g. Starter Pack Special"
+                                            className="w-full px-4 py-3 bg-zinc-900/50 border border-white/10 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zinc-400">Price</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">रू</span>
+                                                <input
+                                                    name="price"
+                                                    type="number"
+                                                    value={form.price}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full pl-10 pr-4 py-3 bg-zinc-900/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zinc-400">Discount %</label>
+                                            <div className="relative">
+                                                <input
+                                                    name="discount_percent"
+                                                    type="number"
+                                                    value={form.discount_percent}
+                                                    onChange={handleChange}
+                                                    className="w-full pl-4 pr-10 py-3 bg-zinc-900/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                                />
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 bg-zinc-900/50 rounded-xl border border-white/5 space-y-4">
+                                        <h3 className="text-sm font-bold text-white mb-2">Bundle Contents</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <select
+                                                    name="hosting_type"
+                                                    value={form.hosting_type}
+                                                    onChange={handleChange}
+                                                    className="w-full px-4 py-2.5 bg-zinc-800 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50"
+                                                >
+                                                    <option value="" disabled>Add Type...</option>
+                                                    <option value="service" className="bg-zinc-900">Service</option>
+                                                    <option value="hosting" className="bg-zinc-900">Hosting Plan</option>
+                                                    <option value="domain" className="bg-zinc-900">Domain</option>
+                                                    <option value="project" className="bg-zinc-900">Project</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <select
+                                                    name="target_id"
+                                                    value={form.target_id}
+                                                    onChange={handleChange}
+                                                    disabled={!form.hosting_type || loadingItems}
+                                                    className="w-full px-4 py-2.5 bg-zinc-800 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <option value="" disabled>
+                                                        {loadingItems ? 'Loading...' : 'Select Item...'}
+                                                    </option>
+                                                    {items.map(item => (
+                                                        <option key={item.id} value={item.id} className="bg-zinc-900">
+                                                            {item.title || item.name || item.domain_name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Selected Items Chips */}
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            {selectedItems.length === 0 ? (
+                                                <p className="text-xs text-zinc-600 italic">No items added yet</p>
+                                            ) : (
+                                                selectedItems.map(item => (
+                                                    <div key={item.id} className="flex items-center gap-2 pl-3 pr-2 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md group">
+                                                        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">{item.type}</span>
+                                                        <span className="text-sm text-zinc-300 max-w-[150px] truncate">{item.name}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeSelectedItem(item.id)}
+                                                            className="p-0.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-8">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${form.is_active ? 'bg-green-500 border-green-500' : 'border-zinc-600 group-hover:border-zinc-500'}`}>
+                                                {form.is_active && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                                            </div>
+                                            <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} className="hidden" />
+                                            <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Active Status</span>
+                                        </label>
+
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${form.show_on_home ? 'bg-blue-500 border-blue-500' : 'border-zinc-600 group-hover:border-zinc-500'}`}>
+                                                {form.show_on_home && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                                            </div>
+                                            <input type="checkbox" name="show_on_home" checked={form.show_on_home} onChange={handleChange} className="hidden" />
+                                            <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Show on Home</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-400">Description</label>
+                                        <div className="bg-zinc-900/50 rounded-xl border border-white/10 overflow-hidden min-h-[200px]">
+                                            <RichTextEditor
+                                                content={form.description}
+                                                onChange={(content) => setForm(prev => ({ ...prev, description: content }))}
+                                                className="prose-invert"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-400">Cover Image</label>
+                                        <div className="bg-zinc-900/50 rounded-xl border border-white/10 p-4">
+                                            <ThumbnailUpload
+                                                label=""
+                                                currentUrl={form.poster_url}
+                                                onUploadComplete={(url) => setForm(prev => ({ ...prev, poster_url: url }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5 flex gap-4 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={cancelEdit}
+                                    className="px-6 py-2.5 rounded-xl font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                                >
+                                    {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    {editingId ? 'Update Offer' : 'Create Offer'}
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className="space-y-4">
+                {success && (
+                    <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                        <p>{success}</p>
                     </div>
                 )}
-                <Input name="price" placeholder="Price" type="number" value={form.price} onChange={handleChange} required />
-                <Input name="discount_percent" placeholder="Discount %" type="number" value={form.discount_percent} onChange={handleChange} />
 
-                <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Description</label>
-                    <RichTextEditor
-                        content={form.description}
-                        onChange={(content) => setForm(prev => ({ ...prev, description: content }))}
-                    />
-                </div>
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="w-10 h-10 rounded-full border-t-2 border-r-2 border-blue-500 animate-spin"></div>
+                    </div>
+                ) : offers.length === 0 ? (
+                    <div className="text-center py-20 bg-zinc-900/30 rounded-3xl border border-white/5 border-dashed">
+                        <div className="w-16 h-16 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto mb-4">
+                            <ShoppingBag className="h-8 w-8 text-zinc-600" />
+                        </div>
+                        <h3 className="text-white font-bold mb-1">No Offers Found</h3>
+                        <p className="text-zinc-500 text-sm">Create your first bundle offer to get started.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {offers.map(offer => (
+                            <motion.div
+                                layout
+                                key={offer.id}
+                                className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl border border-white/5 hover:border-white/10 transition-all overflow-hidden group flex flex-col"
+                            >
+                                <div className="aspect-[16/9] relative bg-zinc-800 overflow-hidden">
+                                    {offer.poster_url ? (
+                                        <img
+                                            src={offer.poster_url}
+                                            alt={offer.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <ShoppingBag className="h-12 w-12 text-zinc-700" />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-3 right-3 flex gap-2">
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${offer.is_active ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                                            {offer.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    {offer.discount_percent > 0 && (
+                                        <div className="absolute bottom-3 right-3">
+                                            <span className="px-3 py-1 rounded-full bg-red-600 shadow-lg text-white text-xs font-bold">
+                                                -{offer.discount_percent}% OFF
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
 
-                <div className="col-span-2">
-                    <ThumbnailUpload
-                        label="Offer Poster"
-                        currentUrl={form.poster_url}
-                        onUploadComplete={(url) => setForm(prev => ({ ...prev, poster_url: url }))}
-                    />
-                </div>
-                <div className="flex gap-6 mb-4">
-                    <label className="flex items-center space-x-2">
-                        <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} />
-                        <span className="text-foreground">Active</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                        <input type="checkbox" name="show_on_home" checked={form.show_on_home} onChange={handleChange} />
-                        <span className="text-foreground">Show on Home</span>
-                    </label>
-                </div>
-                <div className="col-span-2 flex gap-4">
-                    <Button type="submit" className="flex-1">
-                        {editingId ? 'Update Bundle Offer' : 'Create Bundle Offer'}
-                    </Button>
-                    {editingId && (
-                        <Button type="button" variant="secondary" onClick={cancelEdit} className="bg-gray-600 hover:bg-gray-500 text-white">
-                            Cancel
-                        </Button>
-                    )}
-                </div>
-            </form>
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Existing Offers</h2>
-            {loading ? (
-                <p className="text-muted-foreground">Loading…</p>
-            ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                    {offers.map(offer => (
-                        <Card key={offer.id}>
-                            <CardHeader>
-                                <CardTitle>{offer.name}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {offer.poster_url && (
-                                    <img src={offer.poster_url} alt={offer.name} className="w-full h-40 object-cover rounded-md mb-4" />
-                                )}
-                                <div className="prose prose-sm dark:prose-invert mb-2" dangerouslySetInnerHTML={{ __html: offer.description }} />
-                                <p>Type: {offer.hosting_type}</p>
-                                <p>Price: रू {offer.price}</p>
-                                <p>Discount: {offer.discount_percent}%</p>
-                                <p>Status: {offer.is_active ? 'Active' : 'Inactive'}</p>
-                            </CardContent>
-                            <div className="p-6 pt-0 flex justify-end">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => editOffer(offer)}
-                                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-100 mr-2"
-                                >
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteOffer(offer.id)}
-                                    className="text-red-500 hover:text-red-600 hover:bg-red-100"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            )}
-        </div >
+                                <div className="p-6 flex flex-col flex-1">
+                                    <div className="flex-1 mb-6">
+                                        <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{offer.name}</h3>
+                                        <div className="flex items-baseline gap-2 mb-4">
+                                            <span className="text-2xl font-bold text-blue-400">
+                                                <span className="text-sm align-top mr-0.5">रू</span>
+                                                {offer.price.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="prose prose-sm prose-invert line-clamp-2 text-zinc-400 text-sm">
+                                            <div dangerouslySetInnerHTML={{ __html: offer.description }} />
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4 border-t border-white/5 flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={() => editOffer(offer)}
+                                            className="p-2 rounded-lg text-blue-400 hover:text-white hover:bg-blue-600 transition-colors"
+                                            title="Edit"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteOffer(offer.id)}
+                                            className="p-2 rounded-lg text-red-400 hover:text-white hover:bg-red-600 transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
     )
 }
-
