@@ -94,21 +94,25 @@ export default function GenericCheckoutPage() {
                 const { data } = await supabase.from('projects').select('*').eq('slug', id).single()
                 if (data) itemData = { id: data.id, name: data.title, price: data.price || 0, currency: data.currency || 'NPR' }
             } else if (type === 'domains') {
-                // For domains, usually the ID is the domain name itself in a registration flow, 
-                // but if we are buying a specific domain from a list, it acts like a product.
-                // If the user came from a "Check Domain" page, 'id' might be the domain string.
-                // let's assume 'id' is passed as the domain name for now if it's not a UUID.
-                // But for this generic page, let's assume we are buying a domain PROVISIONING service or an existing premium domain.
-                // Let's assume standard domain registration for now: 
-                // If type is 'domains', ID might be 'register' and query param has 'domain'.
+                // For domains logic...
                 const domain = searchParams.get('domain')
                 if (domain) {
                     itemData = { id: 'new-domain', name: domain, price: 1500, currency: 'NPR', description: 'Domain Registration' }
                     setDomainName(domain)
                 } else {
-                    // Check if it's a UUID from table
                     const { data } = await supabase.from('domains').select('*').eq('id', id).single()
                     if (data) itemData = { id: data.id, name: data.domain_name, price: data.price }
+                }
+            } else if (type === 'bundles') {
+                const { data } = await supabase.from('bundle_offers').select('*').eq('id', id).single()
+                if (data) {
+                    itemData = {
+                        id: data.id,
+                        name: data.name,
+                        price: data.price,
+                        currency: 'NPR',
+                        description: `Bundle Offer: ${data.name}`
+                    }
                 }
             }
 

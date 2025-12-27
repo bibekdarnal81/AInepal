@@ -119,11 +119,13 @@ function ProfilePageContent() {
         const [
             { data: services },
             { data: projects },
-            { data: domains }
+            { data: domains },
+            { data: bundles }
         ] = await Promise.all([
             supabase.from('service_orders').select('*, services(title)').eq('user_id', userId).order('created_at', { ascending: false }),
             supabase.from('project_orders').select('*, projects(title)').eq('user_id', userId).order('created_at', { ascending: false }),
-            supabase.from('domain_orders').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+            supabase.from('domain_orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+            supabase.from('bundle_orders').select('*, bundle_offers(name)').eq('user_id', userId).order('created_at', { ascending: false })
         ])
 
         const allGenericOrders: GenericOrder[] = [
@@ -147,6 +149,14 @@ function ProfilePageContent() {
                 id: o.id,
                 item_title: o.domain_name,
                 item_type: 'domain',
+                amount: o.amount,
+                status: o.status,
+                created_at: o.created_at
+            })) || []),
+            ...(bundles?.map(o => ({
+                id: o.id,
+                item_title: o.bundle_offers?.name || 'Bundle Offer',
+                item_type: 'bundle',
                 amount: o.amount,
                 status: o.status,
                 created_at: o.created_at

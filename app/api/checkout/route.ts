@@ -89,6 +89,21 @@ export async function POST(req: Request) {
 
             if (error) throw error
             orderId = data.id
+
+        } else if (type === 'bundles') {
+            const { data, error } = await supabase.from('bundle_orders').insert({
+                user_id: user.id,
+                bundle_id: itemId,
+                amount,
+                payment_method_id: paymentMethodId,
+                payment_proof_url: paymentProofUrl,
+                transaction_id: transactionId,
+                status: 'pending'
+            }).select('id').single()
+
+            if (error) throw error
+            orderId = data.id
+
         } else {
             return NextResponse.json({ error: 'Invalid order type' }, { status: 400 })
         }

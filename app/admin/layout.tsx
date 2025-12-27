@@ -288,7 +288,7 @@ export default function AdminLayout({
             title: 'Hosting & Domains',
             items: [
                 { name: 'Hosting Plans', href: '/admin/hosting', icon: Globe },
-                { name: 'Hosting Orders', href: '/admin/hosting/orders', icon: ShoppingBag },
+
                 { name: 'Bundle Offers', href: '/admin/bundle-offers', icon: Tag },
                 { name: 'Domains', href: '/admin/domains', icon: Network },
             ]

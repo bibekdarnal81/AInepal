@@ -14,33 +14,7 @@ export function BuyBundleButton({ bundleId, price }: BuyBundleButtonProps) {
     const router = useRouter();
 
     const handleBuy = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch('/api/bundles/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bundleId }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    router.push('/login?next=/bundles/' + bundleId);
-                    return;
-                }
-                throw new Error(data.error || 'Failed to initiate purchase');
-            }
-
-            // Redirect to profile orders tab
-            router.push(`/profile?tab=orders&new_order=true`);
-
-        } catch (error) {
-            console.error('Purchase failed:', error);
-            alert('Failed to process request. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        router.push(`/checkout/bundles/${bundleId}`);
     };
 
     return (

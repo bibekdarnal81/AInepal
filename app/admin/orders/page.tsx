@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Search, Filter, Eye } from 'lucide-react'
+import { Search, Filter, Eye, X } from 'lucide-react'
 
 interface Order {
     id: string
@@ -16,6 +16,7 @@ interface Order {
     currency: string
     status: string
     created_at: string
+    payment_proof_url?: string | null
     profiles?: {
         display_name: string
         email?: string
@@ -27,6 +28,7 @@ export default function AdminOrdersPage() {
     const [loading, setLoading] = useState(true)
     const [filterStatus, setFilterStatus] = useState('all')
     const [searchQuery, setSearchQuery] = useState('')
+    const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const supabase = createClient()
 
     useEffect(() => {
@@ -34,89 +36,145 @@ export default function AdminOrdersPage() {
     }, [filterStatus])
 
     const fetchOrders = async () => {
+        setLoading(true)
         try {
-            // First, try the standard query with profiles join
-            let query = supabase
-                .from('orders')
-                .select(`
-                    *,
-                    profiles!orders_user_id_fkey (
-                        display_name
-                    )
-                `)
-                .order('created_at', { ascending: false })
+            // 1. Fetch all orders (without joining profiles to avoid DB errors)
+            const results = await Promise.allSettled([
+                supabase.from('hosting_orders').select('*, hosting_plans(name)').order('created_at', { ascending: false }),
+                supabase.from('service_orders').select('*, services(title)').order('created_at', { ascending: false }),
+                supabase.from('project_orders').select('*, projects(title)').order('created_at', { ascending: false }),
+                supabase.from('domain_orders').select('*').order('created_at', { ascending: false }),
+                supabase.from('bundle_orders').select('*, bundle_offers(name)').order('created_at', { ascending: false })
+            ])
+
+            const hosting = results[0].status === 'fulfilled' && !results[0].value.error ? results[0].value.data : []
+            const services = results[1].status === 'fulfilled' && !results[1].value.error ? results[1].value.data : []
+            const projects = results[2].status === 'fulfilled' && !results[2].value.error ? results[2].value.data : []
+            const domains = results[3].status === 'fulfilled' && !results[3].value.error ? results[3].value.data : []
+            const bundles = results[4].status === 'fulfilled' && !results[4].value.error ? results[4].value.data : []
+
+            // 2. Collect all User IDs
+            const allUserIds = new Set<string>([
+                ...(hosting?.map((o: any) => o.user_id) || []),
+                ...(services?.map((o: any) => o.user_id) || []),
+                ...(projects?.map((o: any) => o.user_id) || []),
+                ...(domains?.map((o: any) => o.user_id) || []),
+                ...(bundles?.map((o: any) => o.user_id) || [])
+            ])
+
+            // 3. Fetch Profiles separately
+            let profilesMap: Record<string, any> = {}
+            if (allUserIds.size > 0) {
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, display_name, email')
+                    .in('id', Array.from(allUserIds))
+
+                if (profiles) {
+                    profilesMap = profiles.reduce((acc, profile) => {
+                        acc[profile.id] = profile
+                        return acc
+                    }, {} as Record<string, any>)
+                }
+            }
+
+            // 4. Combine Data
+            const allOrders: Order[] = [
+                ...(hosting?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'hosting',
+                    item_title: o.hosting_plans?.name || 'Hosting Plan',
+                    amount: o.amount || o.price || 0,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
+                })) || []),
+                ...(services?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'service',
+                    item_title: o.services?.title || 'Service',
+                    amount: o.amount,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
+                })) || []),
+                ...(projects?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'project',
+                    item_title: o.projects?.title || 'Project',
+                    amount: o.amount,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
+                })) || []),
+                ...(domains?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'domain',
+                    item_title: o.domain_name,
+                    amount: o.amount,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
+                })) || []),
+                ...(bundles?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'bundle',
+                    item_title: o.bundle_offers?.name || 'Bundle Offer',
+                    amount: o.amount,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
+                })) || [])
+            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
             if (filterStatus !== 'all') {
-                query = query.eq('status', filterStatus)
+                setOrders(allOrders.filter(o => o.status === filterStatus))
+            } else {
+                setOrders(allOrders)
             }
 
-            const { data, error } = await query
-
-            if (error) {
-                console.error('Error fetching orders with profiles join:', {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code
-                })
-
-                // Fallback: Fetch orders without profile join, then fetch profiles separately
-                console.log('Attempting fallback query without profiles join...')
-                let fallbackQuery = supabase
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-
-                if (filterStatus !== 'all') {
-                    fallbackQuery = fallbackQuery.eq('status', filterStatus)
-                }
-
-                const { data: ordersData, error: ordersError } = await fallbackQuery
-
-                if (ordersError) {
-                    console.error('Error in fallback query:', ordersError)
-                    setLoading(false)
-                    return
-                }
-
-                // Fetch all unique user profiles
-                if (ordersData && ordersData.length > 0) {
-                    const userIds = [...new Set(ordersData.map(o => o.user_id))]
-                    const { data: profilesData } = await supabase
-                        .from('profiles')
-                        .select('id, display_name')
-                        .in('id', userIds)
-
-                    // Map profiles to orders
-                    const ordersWithProfiles = ordersData.map(order => ({
-                        ...order,
-                        profiles: profilesData?.find(p => p.id === order.user_id) || null
-                    }))
-
-                    setOrders(ordersWithProfiles)
-                }
-                setLoading(false)
-                return
-            }
-
-            if (data) {
-                setOrders(data)
-            }
         } catch (err) {
-            console.error('Unexpected error fetching orders:', err)
+            console.error('Error fetching orders:', err)
         } finally {
             setLoading(false)
         }
     }
 
-    const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const updateOrderStatus = async (orderId: string, newStatus: string, itemType: string) => {
+        let table = ''
+        switch (itemType) {
+            case 'hosting': table = 'hosting_orders'; break;
+            case 'service': table = 'service_orders'; break;
+            case 'project': table = 'project_orders'; break;
+            case 'domain': table = 'domain_orders'; break;
+            case 'bundle': table = 'bundle_orders'; break;
+            default: return;
+        }
+
         const { error } = await supabase
-            .from('orders')
-            .update({ status: newStatus, updated_at: new Date().toISOString() })
+            .from(table)
+            .update({ status: newStatus })
             .eq('id', orderId)
 
         if (!error) {
             fetchOrders()
+        } else {
+            alert('Failed to update status')
         }
     }
 
@@ -135,6 +193,30 @@ export default function AdminOrdersPage() {
 
     return (
         <div className="space-y-6">
+            {selectedImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div
+                        className="relative max-w-4xl max-h-[90vh] p-2 bg-card rounded-lg overflow-hidden"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setSelectedImage(null)}
+                            className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 rounded-full p-2 text-white transition-colors z-10"
+                        >
+                            <X size={20} />
+                        </button>
+                        <img
+                            src={selectedImage}
+                            alt="Payment Proof"
+                            className="max-w-full max-h-[85vh] object-contain rounded"
+                        />
+                    </div>
+                </div>
+            )}
+
             <div>
                 <h1 className="text-3xl font-bold text-foreground">Orders Management</h1>
                 <p className="text-muted-foreground mt-1">View and manage all customer orders</p>
@@ -209,6 +291,7 @@ export default function AdminOrdersPage() {
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Item</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Type</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Amount</th>
+                                    <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Proof</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Status</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Date</th>
                                     <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">Actions</th>
@@ -230,9 +313,21 @@ export default function AdminOrdersPage() {
                                             रू {order.amount.toLocaleString('en-NP')}
                                         </td>
                                         <td className="px-6 py-4">
+                                            {order.payment_proof_url ? (
+                                                <button
+                                                    onClick={() => setSelectedImage(order.payment_proof_url!)}
+                                                    className="text-primary hover:underline text-sm font-medium"
+                                                >
+                                                    View
+                                                </button>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">-</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <select
                                                 value={order.status}
-                                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                onChange={(e) => updateOrderStatus(order.id, e.target.value, order.item_type)}
                                                 className={`px-3 py-1 text-xs rounded-full font-medium border-0 cursor-pointer ${order.status === 'paid'
                                                     ? 'bg-green-500/10 text-green-500'
                                                     : order.status === 'pending'
@@ -263,6 +358,6 @@ export default function AdminOrdersPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 }
