@@ -13,49 +13,49 @@ const tweets = [
     {
         name: "Jonah Seguin",
         handle: "@jonahseguin",
-        content: "We went from $2000 on AWS to <$200 on @ NextNepal.",
+        content: "We went from $2000 on AWS to <$200 on @ Dunzo.",
         avatar: "J"
     },
     {
         name: "Daniel Moretti",
         handle: "@dmorettiv",
-        content: "@ NextNepal streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
+        content: "@ Dunzo streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
         avatar: "D"
     },
     {
         name: "Pingback Inc",
         handle: "@pingbackoficial",
-        content: "As CTO at Pingback, speed of iteration is everything for us. @ NextNepal has become our go-to platform for rapid experimentation and testing new ideas.",
+        content: "As CTO at Pingback, speed of iteration is everything for us. @ Dunzo has become our go-to platform for rapid experimentation and testing new ideas.",
         avatar: "P"
     },
     {
         name: "Aaron S",
         handle: "@aaronShaki",
-        content: "Typically, I avoid using PaaS but the team at @ NextNepal is boosting development velocity so significantly that it's hard to ignore",
+        content: "Typically, I avoid using PaaS but the team at @ Dunzo is boosting development velocity so significantly that it's hard to ignore",
         avatar: "A"
     },
     {
         name: "John Nunemaker",
         handle: "@jnunemaker",
-        content: "I've moved $4.5k/mo from AWS and $1k/mo from Heroku in the past month and my @ NextNepal bill is like $300/mo.",
+        content: "I've moved $4.5k/mo from AWS and $1k/mo from Heroku in the past month and my @ Dunzo bill is like $300/mo.",
         avatar: "J"
     },
     {
         name: "Juan Manuel Pérez",
         handle: "@juanmapfont",
-        content: "Tracking changes, scaling when needed, and handling infrastructure has never been simpler. @ NextNepal is exactly what I had been looking for over the years.",
+        content: "Tracking changes, scaling when needed, and handling infrastructure has never been simpler. @ Dunzo is exactly what I had been looking for over the years.",
         avatar: "J"
     },
     {
         name: "Common",
         handle: "@commondotxyz",
-        content: "We cut our hosting costs by 75% migrating from Heroku to @ NextNepal. 1. autoscaling key services 2. transient PR environments 3. running fewer instances",
+        content: "We cut our hosting costs by 75% migrating from Heroku to @ Dunzo. 1. autoscaling key services 2. transient PR environments 3. running fewer instances",
         avatar: "C"
     },
     {
         name: "Teo",
         handle: "@teodor_io",
-        content: "@ NextNepal is really really good. Being able to deploy straight from a Github repo, detecting a root Dockerfile and using that to build, no need for any complex cicd.",
+        content: "@ Dunzo is really really good. Being able to deploy straight from a Github repo, detecting a root Dockerfile and using that to build, no need for any complex cicd.",
         avatar: "T"
     }
 ];
@@ -69,7 +69,7 @@ const TweetCard = ({ tweet, delay }: { tweet: typeof tweets[0]; delay: number })
         transition={{ delay }}
     >
         <div className="flex items-start gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold flex-shrink-0">
                 {tweet.avatar}
             </div>
             <div className="min-w-0">
@@ -103,11 +103,11 @@ export function TweetsSection() {
                     </h2>
                     <motion.a
                         href="#"
-                        className="inline-flex items-center gap-2 text-violet-400 font-medium hover:text-violet-300 transition-colors"
+                        className="inline-flex items-center gap-2 text-teal-400 font-medium hover:text-teal-300 transition-colors"
                         {...fadeInUp}
                         transition={{ delay: 0.2 }}
                     >
-                        Join nearly 2M developers building with  NextNepal →
+                        Join nearly 2M developers building with  Dunzo →
                     </motion.a>
                 </motion.div>
 

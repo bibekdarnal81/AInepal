@@ -19,13 +19,13 @@ export function Hero() {
             {/* 2. Ambient Gradient Blobs (Cloud effect) */}
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                 {/* Top Center - Indigo/Violet */}
-                <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-blob" />
+                <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-emerald-600/20 rounded-full blur-[120px] mix-blend-screen animate-blob" />
 
                 {/* Top Right - Fuchsia */}
                 <div className="absolute top-[10%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/15 rounded-full blur-[100px] mix-blend-screen animate-blob delay-2000" />
 
                 {/* Bottom Left - Blue/Purple */}
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-violet-600/15 rounded-full blur-[100px] mix-blend-screen animate-blob delay-4000" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-teal-600/15 rounded-full blur-[100px] mix-blend-screen animate-blob delay-4000" />
             </div>
 
             {/* 3. Vignette Overlay for focus */}
@@ -38,7 +38,7 @@ export function Hero() {
                 {/* Badge */}
                 <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20 cursor-default">
-                        <Sparkles className="w-4 h-4 text-indigo-400" />
+                        <Sparkles className="w-4 h-4 text-teal-400" />
                         <span className="text-sm font-medium text-gray-300 tracking-wide">
                             New: Global Edge Network 2.0
                         </span>
@@ -48,7 +48,7 @@ export function Hero() {
                 {/* Headline */}
                 <h1 className="max-w-5xl mx-auto text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <span className="block mb-2">Infrastructure for</span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 animate-gradient-flow bg-[length:200%_auto]">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-teal-400 to-fuchsia-400 animate-gradient-flow bg-[length:200%_auto]">
                         high-scale ambition.
                     </span>
                 </h1>
@@ -96,9 +96,9 @@ export function Hero() {
                 </div>
             </div>
 
-            <div className="absolute bottom-20 right-20 hidden lg:block w-48 p-3 rounded-lg border border-indigo-500/20 bg-indigo-900/10 backdrop-blur-md animate-float-medium">
+            <div className="absolute bottom-20 right-20 hidden lg:block w-48 p-3 rounded-lg border border-indigo-500/20 bg-emerald-900/10 backdrop-blur-md animate-float-medium">
                 <div className="flex items-center gap-2 text-indigo-300 text-xs font-mono">
-                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
                     Build completed (23ms)
                 </div>
             </div>

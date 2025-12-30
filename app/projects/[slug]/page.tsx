@@ -237,7 +237,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                             <p className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-2">License Price</p>
                                             <div className="flex items-baseline gap-1 mb-6">
                                                 <span className="text-4xl font-bold text-white">
-                                                    {project.currency === 'NPR' ? 'Rs ' : '$'}
+                                                    {project.currency === 'NPR' ? 'रू ' : '$'}
                                                     {project.price.toLocaleString('en-US')}
                                                 </span>
                                             </div>

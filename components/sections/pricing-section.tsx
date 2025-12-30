@@ -21,12 +21,12 @@ const plans = [
     },
     {
         name: 'Developer',
-        price: '$20',
+        price: 'रू 2,000',
         period: 'per month',
         description: 'For professional developers and small teams',
         features: [
             'Unlimited execution time',
-            '8 GB RAM',
+            '4 GB RAM',
             '100 GB disk',
             'Priority support',
             'Custom domains',
@@ -38,13 +38,13 @@ const plans = [
     },
     {
         name: 'Team',
-        price: '$50',
+        price: 'रू 10,000',
         period: 'per month',
         description: 'For growing teams and production workloads',
         features: [
             'Everything in Developer',
-            '32 GB RAM',
-            '500 GB disk',
+            '16 GB RAM',
+            '300 GB disk',
             '24/7 support',
             'SSO & RBAC',
             'Dedicated resources',
@@ -74,8 +74,8 @@ export function PricingSection() {
                         <div
                             key={plan.name}
                             className={`relative glass rounded-2xl p-8 ${plan.highlighted
-                                    ? 'border-2 border-purple-500 shadow-2xl shadow-purple-500/20'
-                                    : ''
+                                ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/20'
+                                : ''
                                 }`}
                         >
                             {plan.highlighted && (
@@ -96,7 +96,7 @@ export function PricingSection() {
                             <ul className="space-y-4 mb-8">
                                 {plan.features.map((feature) => (
                                     <li key={feature} className="flex items-start gap-3">
-                                        <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                                        <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                                         <span className="text-gray-300">{feature}</span>
                                     </li>
                                 ))}
@@ -105,8 +105,8 @@ export function PricingSection() {
                             <Link
                                 href="#signup"
                                 className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all transform hover:scale-105 ${plan.highlighted
-                                        ? 'bg-white text-black hover:bg-gray-200'
-                                        : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
+                                    ? 'bg-white text-black hover:bg-gray-200'
+                                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
                                     }`}
                             >
                                 {plan.cta}
@@ -118,7 +118,7 @@ export function PricingSection() {
                 <div className="mt-12 text-center">
                     <p className="text-gray-400">
                         All plans include SSL, DDoS protection, and automatic backups.{' '}
-                        <Link href="#compare" className="text-purple-400 hover:text-purple-300 underline">
+                        <Link href="#compare" className="text-emerald-400 hover:text-emerald-300 underline">
                             Compare plans
                         </Link>
                     </p>

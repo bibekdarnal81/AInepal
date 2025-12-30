@@ -326,7 +326,7 @@ export default function AdminLayout({
                             <span className="text-white font-bold text-sm">R</span>
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-white tracking-wide">NextNepal</p>
+                            <p className="text-sm font-bold text-white tracking-wide">Dunzo</p>
                             <p className="text-[10px] text-zinc-500 font-medium">ADMIN DASHBOARD</p>
                         </div>
                     </Link>

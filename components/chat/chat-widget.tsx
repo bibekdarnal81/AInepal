@@ -365,9 +365,9 @@ export function ChatWidget() {
             >
                 <div className="relative">
                     {/* Pulsing ring */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full animate-pulse opacity-75"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-emerald-500 to-cyan-500 rounded-full animate-pulse opacity-75"></div>
                     {/* Main button */}
-                    <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]">
+                    <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 via-emerald-600 to-cyan-600 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]">
                         <MessageSquare className="h-7 w-7 text-white" />
                         {/* Online indicator */}
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 border-4 border-white rounded-full animate-bounce"></div>
@@ -381,12 +381,12 @@ export function ChatWidget() {
         <>
             <div className="fixed bottom-6 right-6 z-50 w-[420px] max-w-[calc(100vw-3rem)] bg-white dark:bg-gray-900 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex flex-col h-[650px] transition-all duration-500 ease-out animate-in slide-in-from-bottom-8 fade-in">
                 {/* Header */}
-                <div className="relative p-5 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-t-3xl overflow-hidden">
+                <div className="relative p-5 bg-gradient-to-br from-blue-600 via-emerald-600 to-cyan-600 rounded-t-3xl overflow-hidden">
                     {/* Animated background */}
                     <div className="absolute inset-0 opacity-30">
-                        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+                        <div className="absolute top-0 -left-4 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
                         <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-                        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+                        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
                     </div>
 
                     <div className="relative flex items-center justify-between">
@@ -478,7 +478,7 @@ export function ChatWidget() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-800/50 dark:to-gray-900">
                             {messages.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
+                                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-blue-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center">
                                         <MessageSquare className="h-10 w-10 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">No messages yet</p>
@@ -492,7 +492,7 @@ export function ChatWidget() {
                                     >
                                         {msg.is_admin && (
                                             <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden shadow-md ${msg.is_ai_response
-                                                ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                                                ? 'bg-gradient-to-br from-emerald-500 to-cyan-500'
                                                 : 'bg-gradient-to-br from-blue-500 to-cyan-500'
                                                 }`}>
                                                 {msg.is_ai_response ? (
@@ -532,7 +532,7 @@ export function ChatWidget() {
                                                     <div
                                                         className={`rounded-3xl px-5 py-3 shadow-md transition-all duration-200 ${msg.is_admin
                                                             ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-md'
-                                                            : 'bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-tr-md shadow-lg'
+                                                            : 'bg-gradient-to-br from-blue-600 via-emerald-600 to-cyan-600 text-white rounded-tr-md shadow-lg'
                                                             }`}
                                                     >
                                                         <p className="text-[15px] leading-relaxed font-normal">{msg.message}</p>
@@ -556,7 +556,7 @@ export function ChatWidget() {
                                         </div>
 
                                         {!msg.is_admin && userProfile?.avatar_url && (
-                                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-md ring-2 ring-purple-200 dark:ring-purple-800">
+                                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-md ring-2 ring-emerald-200 dark:ring-emerald-800">
                                                 <Image
                                                     src={userProfile.avatar_url}
                                                     alt={userProfile.display_name}
@@ -572,7 +572,7 @@ export function ChatWidget() {
                             {/* AI Typing Indicator */}
                             {aiTyping && (
                                 <div className="flex gap-3 justify-start animate-in fade-in slide-in-from-bottom-2">
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-md">
                                         <Bot className="h-5 w-5 text-white" />
                                     </div>
                                     <div className="max-w-[75%]">
@@ -618,7 +618,7 @@ export function ChatWidget() {
 
                         {/* Input */}
                         <form onSubmit={handleSendMessage} className="p-5 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-3xl">
-                            <div className="flex gap-2 items-center bg-gray-100 dark:bg-gray-800 p-2 rounded-full transition-all duration-200 focus-within:ring-2 focus-within:ring-purple-500 focus-within:bg-white dark:focus-within:bg-gray-700">
+                            <div className="flex gap-2 items-center bg-gray-100 dark:bg-gray-800 p-2 rounded-full transition-all duration-200 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white dark:focus-within:bg-gray-700">
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -629,7 +629,7 @@ export function ChatWidget() {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110"
+                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:scale-110"
                                     title="Attach image"
                                 >
                                     <Paperclip className="h-5 w-5" />
@@ -637,7 +637,7 @@ export function ChatWidget() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPaymentModal(true)}
-                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110"
+                                    className="p-2.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:scale-110"
                                     title="Payment inquiry"
                                 >
                                     <DollarSign className="h-5 w-5" />
@@ -653,7 +653,7 @@ export function ChatWidget() {
                                 <button
                                     type="submit"
                                     disabled={(!newMessage.trim() && !selectedImage) || uploading}
-                                    className="p-3 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 shadow-md"
+                                    className="p-3 bg-gradient-to-br from-blue-600 via-emerald-600 to-cyan-600 text-white rounded-full hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 shadow-md"
                                 >
                                     {uploading ? (
                                         <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
@@ -877,7 +877,7 @@ function PaymentInquiryModal({ onClose, onSubmit }: { onClose: () => void, onSub
                         <button
                             type="submit"
                             disabled={submitting || !itemName.trim()}
-                            className="flex-1 px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                            className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
                         >
                             {submitting ? 'Submitting...' : 'Submit Inquiry'}
                         </button>
@@ -974,7 +974,7 @@ function CatalogBrowse({ onClose, onPurchase }: { onClose: () => void, onPurchas
                         key={cat}
                         onClick={() => setCategory(cat)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${category === cat
-                            ? 'bg-gradient-to-r from-violet-600 to-pink-600 text-white'
+                            ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
                             : 'bg-secondary text-foreground hover:bg-secondary/80'
                             }`}
                     >
@@ -1029,7 +1029,7 @@ function CatalogBrowse({ onClose, onPurchase }: { onClose: () => void, onPurchas
                                         <button
                                             onClick={() => handleBuyNow(item)}
                                             disabled={purchasing === item.id}
-                                            className="px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg text-sm hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
+                                            className="px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg text-sm hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
                                         >
                                             {purchasing === item.id ? 'Processing...' : 'Buy Now'}
                                         </button>

@@ -7,15 +7,15 @@ const steps = [
         number: '01',
         icon: GitBranch,
         title: 'Connect your repo',
-        description: 'Link your GitHub or GitLab repository.  NextNepal automatically detects your stack.',
-        code: ' NextNepal init',
+        description: 'Link your GitHub or GitLab repository.  Dunzo automatically detects your stack.',
+        code: ' Dunzo init',
     },
     {
         number: '02',
         icon: Zap,
         title: 'Configure & Deploy',
         description: 'Set environment variables and deploy with a single command. Zero config needed.',
-        code: ' NextNepal up',
+        code: ' Dunzo up',
     },
     {
         number: '03',
@@ -30,7 +30,7 @@ export function HowItWorksSection() {
     return (
         <section className="relative py-32 px-6 overflow-hidden">
             {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent" />
 
             <div className="mx-auto max-w-7xl relative z-10">
                 <div className="text-center mb-20">
@@ -50,15 +50,15 @@ export function HowItWorksSection() {
                             <div key={step.number} className="relative">
                                 {/* Connector line */}
                                 {idx < steps.length - 1 && (
-                                    <div className="absolute left-8 top-24 w-0.5 h-32 bg-gradient-to-b from-purple-500 to-transparent hidden lg:block" />
+                                    <div className="absolute left-8 top-24 w-0.5 h-32 bg-gradient-to-b from-emerald-500 to-transparent hidden lg:block" />
                                 )}
 
                                 <div className="grid lg:grid-cols-2 gap-8 items-center">
                                     {/* Left side - Info */}
                                     <div className={`space-y-6 ${idx % 2 === 1 ? 'lg:order-2' : ''}`}>
                                         <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                                                <Icon className="w-8 h-8 text-purple-400" />
+                                            <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                                <Icon className="w-8 h-8 text-emerald-400" />
                                             </div>
                                             <span className="text-6xl font-bold text-white/5">{step.number}</span>
                                         </div>
@@ -77,7 +77,7 @@ export function HowItWorksSection() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex gap-2">
-                                                        <span className="text-purple-400">$</span>
+                                                        <span className="text-emerald-400">$</span>
                                                         <span className="text-gray-300">{step.code}</span>
                                                     </div>
                                                     {idx === 2 ? (
@@ -85,7 +85,7 @@ export function HowItWorksSection() {
                                                             <div className="text-green-400 pl-4">{step.code}</div>
                                                             <div className="flex gap-2 mt-2">
                                                                 <span className="text-cyan-400">🚀</span>
-                                                                <span className="text-gray-300">https://your-app.up. NextNepal.app</span>
+                                                                <span className="text-gray-300">https://your-app.up. Dunzo.app</span>
                                                             </div>
                                                         </>
                                                     ) : (

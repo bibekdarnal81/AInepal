@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         }
     }
 
-    const title = `${service.title} | Rusha Services`
+    const title = `${service.title} | Dunzo Services`
     const description = service.description || `Explore our ${service.title} service. Professional solutions for your business.`
     const ogImage = service.thumbnail_url || '/og-services.jpg'
 
@@ -103,8 +103,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         description: service.description,
         provider: {
             '@type': 'Organization',
-            name: 'Rusha',
-            url: process.env.NEXT_PUBLIC_APP_URL || 'https://rusha.co'
+            name: 'Dunzo',
+            url: process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'
         },
         offers: {
             '@type': 'Offer',
@@ -169,7 +169,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                                         {service.currency === 'USD' && '$'}
                                         {service.currency === 'EUR' && '€'}
                                         {service.currency === 'GBP' && '£'}
-                                        {service.currency === 'NPR' && 'Rs '}
+                                        {service.currency === 'NPR' && 'रू '}
                                         {service.price.toLocaleString()}
                                     </div>
                                     <div className="text-lg text-zinc-500 mb-1">/ starting price</div>

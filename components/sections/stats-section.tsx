@@ -69,11 +69,11 @@ const AnimatedCounter = ({ value, label }: { value: string; label: string }) => 
 
 export function StatsSection() {
     const stats = [
-        { label: 'USERS', value: '1,949,773' },
-        { label: 'SERVICES', value: '5,723,749' },
-        { label: 'DEPLOYS', value: '17,544,912' },
-        { label: 'REQUESTS', value: '69,764,325,945' },
-        { label: 'LOGS', value: '286,069,528,101' },
+        { label: 'USERS', value: '00,00,100' },
+        { label: 'SERVICES', value: '0,000,049' },
+        { label: 'DEPLOYS', value: '00,000,040' },
+        { label: 'REQUESTS', value: '00,000,000,100' },
+        { label: 'LOGS', value: '00,000,000,100' },
     ];
 
     return (
@@ -93,7 +93,7 @@ export function StatsSection() {
                     transition={{ duration: 0.5 }}
                 >
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                        17.5M+ deploys per month{' '}
+                        20+ deploys per month{' '}
                         <span className="text-gray-400">(and counting)</span>
                     </h2>
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">

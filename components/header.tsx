@@ -103,13 +103,14 @@ export function Header() {
 
                     {/* Logo */}
                     <div className="flex lg:flex-1">
-                        <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center transform group-hover:rotate-6 transition-transform">
-                                <span className="text-white font-bold">N</span>
-                            </div>
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 group-hover:to-primary transition-all">
-                                NextNepal
-                            </span>
+                        <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2.5 group">
+                            <Image
+                                src="/logo.png"
+                                alt="Dunzo"
+                                width={120}
+                                height={40}
+                                className="h-10 w-auto object-contain"
+                            />
                         </Link>
                     </div>
 
@@ -156,7 +157,7 @@ export function Header() {
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                                     className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-secondary/30 hover:bg-secondary/50 border border-border/50 transition-all"
                                 >
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center overflow-hidden">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center overflow-hidden">
                                         {avatarUrl ? (
                                             <Image
                                                 src={avatarUrl}
@@ -262,11 +263,14 @@ export function Header() {
                             className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-xl"
                         >
                             <div className="flex items-center justify-between p-6 border-b border-border/50">
-                                <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
-                                        <span className="text-white font-bold">N</span>
-                                    </div>
-                                    <span className="text-xl font-bold">NextNepal</span>
+                                <Link href="/" className="-m-1.5 p-1.5 flex items-center">
+                                    <Image
+                                        src="/logo.jpg"
+                                        alt="Dunzo"
+                                        width={120}
+                                        height={40}
+                                        className="h-10 w-auto object-contain"
+                                    />
                                 </Link>
                                 <button
                                     type="button"
@@ -298,7 +302,7 @@ export function Header() {
                                     {user ? (
                                         <>
                                             <div className="flex items-center gap-4 px-3 py-2">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center text-white font-bold">
                                                     {avatarUrl ? (
                                                         <Image
                                                             src={avatarUrl}

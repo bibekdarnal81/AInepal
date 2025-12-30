@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rusha.co'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'
     const supabase = await createClient()
 
     // Get all published services

@@ -38,10 +38,10 @@ const TabButton = ({
         className="relative flex flex-col gap-3 pt-4 focus:outline-none rounded-t min-w-[80px] md:min-w-[100px]"
     >
         <div className="flex gap-2 items-center justify-center px-2 md:px-4">
-            <div className={`text-lg ${isActive ? 'text-pink-500' : 'text-gray-400'}`}>
+            <div className={`text-lg ${isActive ? 'text-cyan-500' : 'text-gray-400'}`}>
                 {tab.icon}
             </div>
-            <p className={`text-xs md:text-sm font-medium ${isActive ? 'text-pink-600' : 'text-gray-500'}`}>
+            <p className={`text-xs md:text-sm font-medium ${isActive ? 'text-cyan-600' : 'text-gray-500'}`}>
                 {tab.label}
             </p>
         </div>
@@ -51,7 +51,7 @@ const TabButton = ({
             <div className={`absolute inset-0 ${isActive ? 'bg-gray-200/20 h-2' : 'bg-gray-200/10 h-0.5 top-[3px]'}`} />
             {isActive && (
                 <motion.div
-                    className="bg-pink-500 h-full absolute left-0 top-0"
+                    className="bg-cyan-500 h-full absolute left-0 top-0"
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.1, ease: "linear" }}
@@ -773,13 +773,13 @@ export function HeroWithTabs() {
                     </h1>
 
                     <h2 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
-                        NextNepal simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
+                        Dunzo simplifies your infrastructure stack from servers to observability with a single, scalable, easy-to-use platform.
                     </h2>
 
                     <div className="flex flex-wrap gap-4">
                         <Link
                             href="/new"
-                            className="inline-flex px-6 py-3 text-lg font-medium text-white rounded-lg bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-200"
+                            className="inline-flex px-6 py-3 text-lg font-medium text-white rounded-lg bg-gradient-to-r from-cyan-600 via-emerald-600 to-emerald-600 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-200"
                         >
                             Deploy a new project
                         </Link>

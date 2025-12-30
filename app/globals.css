@@ -46,41 +46,41 @@
 :root {
   --radius: 0.75rem;
 
-  /*  NextNepal.com Dark Theme Colors */
-  --background: #0a0a0a;
+  /* Dunzo Modern Software Company Theme - Teal/Emerald */
+  --background: #0a0f0d;
   --foreground: #ffffff;
 
   /* Card backgrounds with slight elevation */
-  --card: #1a1a1a;
+  --card: #121a16;
   --card-foreground: #ffffff;
 
-  --popover: #1a1a1a;
+  --popover: #121a16;
   --popover-foreground: #ffffff;
 
-  /* Primary purple gradient accent */
-  --primary: #8b5cf6;
+  /* Primary teal/emerald matching logo */
+  --primary: #10b981;
   --primary-foreground: #ffffff;
 
-  /* Secondary with subtle purple tint */
-  --secondary: #27272a;
+  /* Secondary with subtle teal tint */
+  --secondary: #1a2e24;
   --secondary-foreground: #ffffff;
 
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
+  --muted: #1a2e24;
+  --muted-foreground: #94a3b8;
 
-  --accent: #8b5cf6;
+  --accent: #14b8a6;
   --accent-foreground: #ffffff;
 
   --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #8b5cf6;
+  --border: rgba(16, 185, 129, 0.15);
+  --input: rgba(16, 185, 129, 0.1);
+  --ring: #10b981;
 
-  /* Gradient colors for  NextNepal aesthetic */
-  --gradient-purple: #8b5cf6;
-  --gradient-pink: #ec4899;
+  /* Gradient colors for Dunzo modern aesthetic */
+  --gradient-teal: #14b8a6;
+  --gradient-emerald: #10b981;
   --gradient-cyan: #06b6d4;
-  --gradient-violet: #a855f7;
+  --gradient-green: #22c55e;
 }
 
 @layer base {
@@ -102,46 +102,46 @@
 @layer utilities {
 
   /* Gradient backgrounds */
-  .gradient-purple-pink {
-    background: linear-gradient(135deg, var(--gradient-purple) 0%, var(--gradient-pink) 100%);
+  .gradient-teal-emerald {
+    background: linear-gradient(135deg, var(--gradient-teal) 0%, var(--gradient-emerald) 100%);
   }
 
-  .gradient-purple-cyan {
-    background: linear-gradient(135deg, var(--gradient-purple) 0%, var(--gradient-cyan) 100%);
+  .gradient-teal-cyan {
+    background: linear-gradient(135deg, var(--gradient-teal) 0%, var(--gradient-cyan) 100%);
   }
 
-  .gradient-violet-pink {
-    background: linear-gradient(135deg, var(--gradient-violet) 0%, var(--gradient-pink) 100%);
+  .gradient-emerald-green {
+    background: linear-gradient(135deg, var(--gradient-emerald) 0%, var(--gradient-green) 100%);
   }
 
   /* Animated gradient background */
   .gradient-animated {
     background: linear-gradient(-45deg,
-        #8b5cf6,
-        #ec4899,
+        #10b981,
+        #14b8a6,
         #06b6d4,
-        #a855f7);
+        #22c55e);
     background-size: 400% 400%;
     animation: gradient-shift 15s ease infinite;
   }
 
   /* Gradient text */
   .text-gradient {
-    background: linear-gradient(135deg, var(--gradient-purple) 0%, var(--gradient-pink) 100%);
+    background: linear-gradient(135deg, var(--gradient-teal) 0%, var(--gradient-emerald) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .text-gradient-purple-cyan {
-    background: linear-gradient(135deg, var(--gradient-purple) 0%, var(--gradient-cyan) 100%);
+  .text-gradient-teal-cyan {
+    background: linear-gradient(135deg, var(--gradient-teal) 0%, var(--gradient-cyan) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .text-gradient-vibrant {
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+    background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -149,10 +149,10 @@
 
   /* Glassmorphism effect */
   .glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(16, 185, 129, 0.05);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.1);
   }
 
   .glass-hover {
@@ -160,19 +160,19 @@
   }
 
   .glass-hover:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
   }
 
   /* Glow effects */
-  .glow-purple {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  .glow-teal {
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
   }
 
-  .glow-pink {
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
 
   .glow-cyan {
@@ -183,12 +183,12 @@
   .border-gradient {
     border: 2px solid transparent;
     background: linear-gradient(var(--background), var(--background)) padding-box,
-      linear-gradient(135deg, var(--gradient-purple), var(--gradient-pink)) border-box;
+      linear-gradient(135deg, var(--gradient-teal), var(--gradient-emerald)) border-box;
   }
 
   /* Dot grid background */
   .dot-grid {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(16, 185, 129, 0.15) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 }
@@ -248,11 +248,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
   }
 }
 
@@ -659,15 +659,20 @@
 
 /* Chat Widget Animations */
 @keyframes blob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   25% {
     transform: translate(20px, -20px) scale(1.1);
   }
+
   50% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   75% {
     transform: translate(20px, 10px) scale(1.05);
   }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Twitter, Github, Linkedin, Youtube } from 'lucide-react';
 
 export function Footer() {
@@ -54,10 +55,17 @@ export function Footer() {
                 <div className="mt-12 border-t border-white/10 pt-8">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-6">
-                            <Link href="/" className="text-xl font-bold text-gradient">
-                                 NextNepal
+                            <Link href="/" className="flex items-center gap-2">
+                                <Image
+                                    src="/logo.jpg"
+                                    alt="Dunzo"
+                                    width={32}
+                                    height={32}
+                                    className="w-8 h-8 rounded-lg object-cover"
+                                />
+                                <span className="text-xl font-bold text-gradient">Dunzo</span>
                             </Link>
-                            <p className="text-sm text-gray-400">© 2025  NextNepal. All rights reserved.</p>
+                            <p className="text-sm text-gray-400">© 2025 Dunzo. All rights reserved.</p>
                         </div>
 
                         <div className="flex gap-6">

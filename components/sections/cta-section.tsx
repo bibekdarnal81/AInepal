@@ -38,7 +38,7 @@ export function CTASection() {
                         Ready to Transform Your Business?
                     </h2>
                     <p className="text-xl text-muted-foreground mb-8 text-balance">
-                        See how Rusha can streamline your operations and drive growth. Schedule a personalized demo today.
+                        See how Dunzo can streamline your operations and drive growth. Schedule a personalized demo today.
                     </p>
                     <motion.button
                         onClick={() => setIsDemoModalOpen(true)}
@@ -65,8 +65,8 @@ export function CTASection() {
                         className="group bg-card/50 border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 backdrop-blur-sm"
                     >
                         <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                                <Zap className="w-5 h-5 text-violet-500" />
+                            <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                                <Zap className="w-5 h-5 text-teal-500" />
                             </div>
                             <span className="text-sm text-muted-foreground font-medium">Fast Track</span>
                         </div>

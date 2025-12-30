@@ -56,7 +56,7 @@ export function ProductsSection() {
                         <span className="text-gradient">ship faster</span>
                     </h2>
                     <p className="text-xl text-gray-400">
-                        Deploy your apps with confidence.  NextNepal handles the infrastructure so you can focus on code.
+                        Deploy your apps with confidence.  Dunzo handles the infrastructure so you can focus on code.
                     </p>
                 </div>
 
@@ -68,8 +68,8 @@ export function ProductsSection() {
                                 key={feature.id}
                                 className="group relative glass glass-hover rounded-xl p-8 cursor-pointer"
                             >
-                                <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-purple-500/10 p-4 group-hover:bg-purple-500/20 transition-all">
-                                    <Icon className="h-8 w-8 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                                <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-emerald-500/10 p-4 group-hover:bg-emerald-500/20 transition-all">
+                                    <Icon className="h-8 w-8 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
                                 </div>
                                 <h3 className="text-xl font-semibold text-white mb-3">
                                     {feature.title}
@@ -80,7 +80,7 @@ export function ProductsSection() {
 
                                 {/* Gradient border on hover */}
                                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-sm" />
+                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 blur-sm" />
                                 </div>
                             </div>
                         );

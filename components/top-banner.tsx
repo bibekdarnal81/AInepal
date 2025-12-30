@@ -92,7 +92,7 @@ export function TopBanner() {
     return (
         <div
             ref={bannerRef}
-            className="sticky top-0 z-[60] bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-900 text-white transition-all duration-300"
+            className="sticky top-0 z-[60] bg-gradient-to-r from-emerald-900 via-emerald-900 to-emerald-900 text-white transition-all duration-300"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >

@@ -81,7 +81,7 @@ export function EvolveSection() {
                             <div className="flex items-center gap-3">
                                 <span className="text-gray-400">Replaces</span>
                                 <div className="flex gap-2">
-                                    <div className="w-7 h-7 rounded bg-violet-500/20 flex items-center justify-center text-sm text-violet-400 font-medium">V</div>
+                                    <div className="w-7 h-7 rounded bg-teal-500/20 flex items-center justify-center text-sm text-teal-400 font-medium">V</div>
                                     <div className="w-7 h-7 rounded bg-blue-500/20 flex items-center justify-center text-sm text-blue-400 font-medium">H</div>
                                 </div>
                             </div>

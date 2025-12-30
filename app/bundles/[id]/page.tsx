@@ -85,10 +85,10 @@ export default async function BundlePage({ params }: { params: Promise<{ id: str
                             <div className="p-8 rounded-2xl bg-card border border-border shadow-sm">
                                 <h1 className="text-3xl font-bold mb-4 gradient-text">{bundle.name}</h1>
                                 <div className="flex items-end gap-3 mb-6">
-                                    <span className="text-4xl font-bold">Rs. {bundle.price}</span>
+                                    <span className="text-4xl font-bold">रू {bundle.price}</span>
                                     {bundle.discount_percent > 0 && (
                                         <span className="text-xl text-muted-foreground line-through mb-1">
-                                            Rs. {discountedPrice}
+                                            रू {discountedPrice}
                                         </span>
                                     )}
                                 </div>

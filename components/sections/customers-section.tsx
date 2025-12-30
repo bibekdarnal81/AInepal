@@ -17,19 +17,19 @@ const customerStories = [
         avatar: "K"
     },
     {
-        quote: " NextNepal streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
+        quote: " Dunzo streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
         name: "Daniel Moretti",
         role: "Co-Founder & CTO at Mappa",
         avatar: "D"
     },
     {
-        quote: "Services that took 1 week to configure elsewhere take 1 day to spin up in  NextNepal. Messy networking like on other cloud platforms doesn't exist on  NextNepal.",
+        quote: "Services that took 1 week to configure elsewhere take 1 day to spin up in  Dunzo. Messy networking like on other cloud platforms doesn't exist on  Dunzo.",
         name: "Daniel Lobaton",
         role: "CTO at G2X",
         avatar: "D"
     },
     {
-        quote: " NextNepal has been a revelation. We spent ~$100K per year running on AWS - we have since cut that by 90% moving to  NextNepal and get a significantly improved developer experience.",
+        quote: " Dunzo has been a revelation. We spent ~$100K per year running on AWS - we have since cut that by 90% moving to  Dunzo and get a significantly improved developer experience.",
         name: "Antoine Vulcain",
         role: "Founder & CEO at Capitalyze",
         avatar: "A"
@@ -53,11 +53,11 @@ export function CustomersSection() {
                         Trusted by the best in business
                     </h2>
                     <p className="text-gray-400 max-w-2xl mx-auto">
-                         NextNepal supports great software teams wherever they are. Hear from some of the teams building their products on  NextNepal.
+                         Dunzo supports great software teams wherever they are. Hear from some of the teams building their products on  Dunzo.
                     </p>
                     <motion.a
                         href="#"
-                        className="inline-flex items-center gap-2 text-violet-400 font-medium hover:text-violet-300 transition-colors mt-4"
+                        className="inline-flex items-center gap-2 text-teal-400 font-medium hover:text-teal-300 transition-colors mt-4"
                         {...fadeInUp}
                         transition={{ delay: 0.2 }}
                     >
@@ -80,7 +80,7 @@ export function CustomersSection() {
                                 "{story.quote}"
                             </p>
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold">
                                     {story.avatar}
                                 </div>
                                 <div>

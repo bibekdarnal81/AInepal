@@ -246,7 +246,7 @@ function ProfilePageContent() {
             <header className="border-b border-border bg-card">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Link href="/" className="text-xl font-bold text-foreground">
-                        NextNepal
+                        Dunzo
                     </Link>
                     <button
                         onClick={handleLogout}
@@ -453,7 +453,7 @@ function ProfilePageContent() {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="font-semibold text-foreground">
-                                                            Rs. {order.amount.toLocaleString('en-NP')}
+                                                            रू {order.amount.toLocaleString('en-NP')}
                                                         </p>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'paid' ? 'bg-green-500/10 text-green-500' :
                                                             order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
@@ -479,7 +479,7 @@ function ProfilePageContent() {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="font-semibold text-foreground">
-                                                            Rs. {order.price.toLocaleString('en-NP')}
+                                                            रू {order.price.toLocaleString('en-NP')}
                                                         </p>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${order.status === 'active' ? 'bg-green-500/10 text-green-500' :
                                                             order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :

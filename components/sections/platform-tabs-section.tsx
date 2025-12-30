@@ -37,10 +37,10 @@ const TabButton = ({
         className="relative flex flex-col gap-3 pt-4 focus:outline-none focus-visible:bg-gray-100/5 rounded-t min-w-[100px]"
     >
         <div className="flex gap-2 items-center justify-center px-4">
-            <div className={`text-lg ${isActive ? 'text-pink-500' : 'text-gray-400'}`}>
+            <div className={`text-lg ${isActive ? 'text-cyan-500' : 'text-gray-400'}`}>
                 {tab.icon}
             </div>
-            <p className={`text-sm font-medium ${isActive ? 'text-pink-600' : 'text-gray-500'}`}>
+            <p className={`text-sm font-medium ${isActive ? 'text-cyan-600' : 'text-gray-500'}`}>
                 {tab.label}
             </p>
         </div>
@@ -50,7 +50,7 @@ const TabButton = ({
             <div className={`absolute inset-0 ${isActive ? 'bg-gray-700 h-2' : 'bg-gray-800 h-0.5 top-[3px]'}`} />
             {isActive && (
                 <motion.div
-                    className="bg-pink-500 h-full"
+                    className="bg-cyan-500 h-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.1, ease: "linear" }}
@@ -215,7 +215,7 @@ const TabContent = ({ tabId }: { tabId: TabId }) => {
             return (
                 <div className="flex items-center justify-center h-[500px] text-gray-400">
                     <div className="text-center">
-                        <Cloud className="w-16 h-16 mx-auto mb-4 text-pink-500/50" />
+                        <Cloud className="w-16 h-16 mx-auto mb-4 text-cyan-500/50" />
                         <p className="text-lg">Deploy your services with one click</p>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ const TabContent = ({ tabId }: { tabId: TabId }) => {
             return (
                 <div className="flex items-center justify-center h-[500px] text-gray-400">
                     <div className="text-center">
-                        <BarChart2 className="w-16 h-16 mx-auto mb-4 text-pink-500/50" />
+                        <BarChart2 className="w-16 h-16 mx-auto mb-4 text-cyan-500/50" />
                         <p className="text-lg">Scale your infrastructure automatically</p>
                     </div>
                 </div>
@@ -235,7 +235,7 @@ const TabContent = ({ tabId }: { tabId: TabId }) => {
             return (
                 <div className="flex items-center justify-center h-[500px] text-gray-400">
                     <div className="text-center">
-                        <Gauge className="w-16 h-16 mx-auto mb-4 text-pink-500/50" />
+                        <Gauge className="w-16 h-16 mx-auto mb-4 text-cyan-500/50" />
                         <p className="text-lg">Monitor performance in real-time</p>
                     </div>
                 </div>
@@ -244,7 +244,7 @@ const TabContent = ({ tabId }: { tabId: TabId }) => {
             return (
                 <div className="flex items-center justify-center h-[500px] text-gray-400">
                     <div className="text-center">
-                        <Rocket className="w-16 h-16 mx-auto mb-4 text-pink-500/50" />
+                        <Rocket className="w-16 h-16 mx-auto mb-4 text-cyan-500/50" />
                         <p className="text-lg">Evolve with PR environments</p>
                     </div>
                 </div>

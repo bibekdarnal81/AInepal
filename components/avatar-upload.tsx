@@ -91,7 +91,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete, userId }: Ava
     return (
         <div className="flex items-center gap-6">
             <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center border-4 border-border">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center border-4 border-border">
                     {preview ? (
                         <Image
                             src={preview}

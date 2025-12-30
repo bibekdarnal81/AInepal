@@ -151,7 +151,7 @@ export default function ServicesPage() {
                                                         {service.currency === 'USD' && '$'}
                                                         {service.currency === 'EUR' && '€'}
                                                         {service.currency === 'GBP' && '£'}
-                                                        {service.currency === 'NPR' && 'Rs. '}
+                                                        {service.currency === 'NPR' && 'रू '}
                                                         {service.price.toLocaleString()}
                                                     </span>
                                                     <span className="text-sm text-zinc-500 mb-1.5 ml-1">/ project</span>

@@ -42,19 +42,19 @@ export function PlatformSection() {
                     <motion.div className="relative" {...fadeInUp}>
                         {/* Glowing vertical rail */}
                         <div className="absolute left-0 top-0 bottom-0 w-1">
-                            <div className="absolute inset-0 bg-gradient-to-b from-violet-600 via-violet-500 to-violet-600/50 rounded-full" />
-                            <div className="absolute inset-0 bg-violet-500 rounded-full blur-md opacity-60" />
-                            <div className="absolute inset-0 bg-violet-400 rounded-full blur-xl opacity-40" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-teal-600 via-teal-500 to-teal-600/50 rounded-full" />
+                            <div className="absolute inset-0 bg-teal-500 rounded-full blur-md opacity-60" />
+                            <div className="absolute inset-0 bg-teal-400 rounded-full blur-xl opacity-40" />
                             {/* Glowing orb at top */}
-                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-violet-400 rounded-full shadow-lg shadow-violet-500/50" />
+                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-teal-400 rounded-full shadow-lg shadow-teal-500/50" />
                             {/* Glowing orb at bottom */}
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-violet-400 rounded-full shadow-lg shadow-violet-500/50" />
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-teal-400 rounded-full shadow-lg shadow-teal-500/50" />
                         </div>
 
                         {/* Content */}
                         <div className="pl-8 space-y-6">
                             <motion.span
-                                className="text-violet-400 text-sm font-medium tracking-wide"
+                                className="text-teal-400 text-sm font-medium tracking-wide"
                                 {...fadeIn}
                             >
                                 Network and Connect
@@ -73,13 +73,13 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                 NextNepal provides automated service discovery, blazing fast
+                                 Dunzo provides automated service discovery, blazing fast
                                 networking, and support for any protocol, all out of the box.
                             </motion.p>
 
                             <motion.a
                                 href="#"
-                                className="inline-flex items-center gap-2 text-white font-medium hover:text-violet-300 transition-colors"
+                                className="inline-flex items-center gap-2 text-white font-medium hover:text-teal-300 transition-colors"
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.3 }}
                             >
@@ -94,7 +94,7 @@ export function PlatformSection() {
                                 transition={{ duration: 0.5, delay: 0.4 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    <span className="text-violet-400 font-mono font-semibold">50ms p95</span>
+                                    <span className="text-teal-400 font-mono font-semibold">50ms p95</span>
                                     <span className="text-gray-500 text-sm">global network RTT</span>
                                 </div>
                             </motion.div>
@@ -111,8 +111,8 @@ export function PlatformSection() {
                                     <div className="w-6 h-6 rounded bg-orange-500/20 flex items-center justify-center">
                                         <span className="text-xs text-orange-400">🔥</span>
                                     </div>
-                                    <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
-                                        <span className="text-xs text-purple-400">⚡</span>
+                                    <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
+                                        <span className="text-xs text-emerald-400">⚡</span>
                                     </div>
                                     <div className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center">
                                         <span className="text-xs text-blue-400">N</span>
@@ -177,7 +177,7 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
                             >
-                                 NextNepal dynamically scales highly performant servers, storage, and networking to meet application demands.
+                                 Dunzo dynamically scales highly performant servers, storage, and networking to meet application demands.
                             </motion.p>
                             <motion.a
                                 href="#"

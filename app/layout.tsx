@@ -15,34 +15,52 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://rusha.co'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'),
   title: {
-    default: "Rusha - Digital Solutions for Your Business",
-    template: "%s | Rusha"
+    default: "Dunzo - Modern Software Solutions & Digital Services",
+    template: "%s | Dunzo"
   },
-  description: "Transform your business with our comprehensive digital solutions designed to drive growth and innovation. Web Development, SEO, and more.",
+  description: "Dunzo delivers cutting-edge software solutions, web development, cloud hosting, and digital services. Transform your business with our modern tech stack and expert team.",
+  keywords: [
+    "software development",
+    "web development",
+    "cloud hosting",
+    "digital solutions",
+    "tech company",
+    "modern software",
+    "Dunzo",
+    "SaaS",
+    "web applications",
+    "API development",
+    "full-stack development",
+    "digital transformation"
+  ],
+  authors: [{ name: "Dunzo Team" }],
+  creator: "Dunzo",
+  publisher: "Dunzo",
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    siteName: 'Rusha',
-    title: 'Rusha - Digital Solutions for Your Business',
-    description: 'Transform your business with our comprehensive digital solutions.',
+    siteName: 'Dunzo',
+    title: 'Dunzo - Modern Software Solutions & Digital Services',
+    description: 'Transform your business with cutting-edge software solutions, web development, and cloud hosting. Built by experts, designed for scale.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/logo.jpg',
         width: 1200,
         height: 630,
-        alt: 'Rusha Digital Solutions',
+        alt: 'Dunzo - Modern Software Solutions',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rusha - Digital Solutions for Your Business',
-    description: 'Transform your business with our comprehensive digital solutions.',
-    images: ['/og-image.jpg'],
-    creator: '@rusha',
+    title: 'Dunzo - Modern Software Solutions & Digital Services',
+    description: 'Transform your business with cutting-edge software solutions, web development, and cloud hosting.',
+    images: ['/logo.jpg'],
+    creator: '@dunzotech',
+    site: '@dunzotech',
   },
   robots: {
     index: true,
@@ -54,6 +72,12 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  alternates: {
+    canonical: '/',
+  },
+  verification: {
+    google: 'your-google-verification-code',
   },
 };
 

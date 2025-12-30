@@ -2,19 +2,19 @@
 
 const testimonials = [
     {
-        quote: " NextNepal transformed how we ship. What used to take days now takes minutes. It's genuinely magical.",
+        quote: " Dunzo transformed how we ship. What used to take days now takes minutes. It's genuinely magical.",
         author: "Sarah Chen",
         role: "CTO at TechCorp",
         avatar: "SC",
     },
     {
-        quote: "Best developer experience I've had in years.  NextNepal just works, and that's exactly what I need.",
+        quote: "Best developer experience I've had in years.  Dunzo just works, and that's exactly what I need.",
         author: "Marcus Rodriguez",
         role: "Indie Developer",
         avatar: "MR",
     },
     {
-        quote: "We migrated our entire infrastructure to  NextNepal and saved 60% on ops costs. The team loves it.",
+        quote: "We migrated our entire infrastructure to  Dunzo and saved 60% on ops costs. The team loves it.",
         author: "Emily Taylor",
         role: "Engineering Lead at StartupXYZ",
         avatar: "ET",
@@ -53,7 +53,7 @@ export function TestimonialsSection() {
                         <span className="text-gradient">developers</span>
                     </h2>
                     <p className="text-xl text-gray-400 text-center mb-16">
-                        See what teams are saying about  NextNepal
+                        See what teams are saying about  Dunzo
                     </p>
 
                     <div className="grid md:grid-cols-3 gap-8">
@@ -63,7 +63,7 @@ export function TestimonialsSection() {
                                 className="glass glass-hover rounded-xl p-8"
                             >
                                 <div className="mb-6">
-                                    <svg className="w-10 h-10 text-purple-400 opacity-50" fill="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-10 h-10 text-emerald-400 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                                     </svg>
                                 </div>
@@ -91,7 +91,7 @@ export function TestimonialsSection() {
                             Ready to ship faster?
                         </h3>
                         <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                            Join thousands of developers deploying with  NextNepal
+                            Join thousands of developers deploying with  Dunzo
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a

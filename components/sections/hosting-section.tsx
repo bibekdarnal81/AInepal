@@ -56,7 +56,7 @@ export function HostingSection() {
             <div className="container px-4 mx-auto">
                 <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
                     <div>
-                        <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
+                        <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-600 mb-4">
                             Premium Hosting Solutions
                         </h2>
                         <p className="text-muted-foreground text-lg max-w-xl">
@@ -83,11 +83,11 @@ export function HostingSection() {
                             transition={{ delay: idx * 0.1 }}
                             className="relative group h-full"
                         >
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur" />
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur" />
                             <div className="relative h-full bg-card border border-border rounded-xl p-8 hover:border-primary/50 transition-colors flex flex-col">
                                 <div className="mb-6">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className={`p-3 rounded-lg ${plan.type === 'dedicated' ? 'bg-purple-500/10 text-purple-500' :
+                                        <div className={`p-3 rounded-lg ${plan.type === 'dedicated' ? 'bg-emerald-500/10 text-emerald-500' :
                                                 plan.type === 'vps' ? 'bg-blue-500/10 text-blue-500' :
                                                     'bg-green-500/10 text-green-500'
                                             }`}>

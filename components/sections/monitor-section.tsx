@@ -114,7 +114,7 @@ export function MonitorSection() {
                             {...fadeInUp}
                             transition={{ delay: 0.2 }}
                         >
-                             NextNepal provides precise logging, metrics, alerting, profiles, traces,
+                             Dunzo provides precise logging, metrics, alerting, profiles, traces,
                             and trend inspection without any code changes.
                         </motion.p>
 
@@ -142,8 +142,8 @@ export function MonitorSection() {
                                 <div className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center">
                                     <span className="text-xs text-blue-400">G</span>
                                 </div>
-                                <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
-                                    <span className="text-xs text-purple-400">S</span>
+                                <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
+                                    <span className="text-xs text-emerald-400">S</span>
                                 </div>
                             </div>
                         </motion.div>

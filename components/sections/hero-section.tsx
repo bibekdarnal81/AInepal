@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 /**
- * Hero Section -  NextNepal-inspired design
+ * Hero Section -  Dunzo-inspired design
  * Clean, minimal, with product mockup and company logos
  */
 export function HeroSection() {
@@ -36,7 +36,7 @@ export function HeroSection() {
                     </h1>
 
                     <p className="text-lg text-gray-400 mb-8 leading-relaxed max-w-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                        NextNepal simplifies your infrastructure stack from servers to
+                        Dunzo simplifies your infrastructure stack from servers to
                         observability with a single, scalable, easy-to-use platform.
                     </p>
 
@@ -45,7 +45,7 @@ export function HeroSection() {
                         <Link href="#deploy">
                             <Button
                                 size="lg"
-                                className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-[1.02]"
+                                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-[1.02]"
                             >
                                 Deploy a new project
                             </Button>
@@ -68,7 +68,7 @@ export function HeroSection() {
                         <button
                             key={tab}
                             className={`flex items-center gap-2 pb-2 transition-colors ${i === 2
-                                ? 'text-violet-400 border-b-2 border-violet-400'
+                                ? 'text-teal-400 border-b-2 border-teal-400'
                                 : 'text-gray-500 hover:text-gray-300'
                                 }`}
                         >
@@ -106,15 +106,15 @@ export function HeroSection() {
                         {/* Service Cards */}
                         <div className="relative flex flex-col gap-6 max-w-md mx-auto">
                             {/* Backend Service */}
-                            <div className="bg-gray-900/80 border border-violet-500/30 rounded-lg p-4 backdrop-blur-sm">
+                            <div className="bg-gray-900/80 border border-teal-500/30 rounded-lg p-4 backdrop-blur-sm">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-6 h-6 rounded bg-violet-600 flex items-center justify-center">
+                                    <div className="w-6 h-6 rounded bg-teal-600 flex items-center justify-center">
                                         <span className="text-xs">⬡</span>
                                     </div>
                                     <span className="text-white font-medium">backend</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs">
-                                    <span className="px-2 py-1 rounded bg-violet-900/50 text-violet-300">High CPU usage</span>
+                                    <span className="px-2 py-1 rounded bg-teal-900/50 text-teal-300">High CPU usage</span>
                                 </div>
                             </div>
 
@@ -161,8 +161,8 @@ export function HeroSection() {
             {/* Bottom Section - Mission Statement */}
             <div className="relative border-t border-gray-900 mt-16">
                 {/* Glowing line effect */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-64 bg-gradient-to-b from-violet-500/50 to-transparent" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-64 bg-gradient-to-b from-teal-500/50 to-transparent" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
 
                 <div className="max-w-7xl mx-auto px-6 py-24">
                     <div className="max-w-lg">
@@ -179,8 +179,8 @@ export function HeroSection() {
                             With instant deployments and effortless scale, a better
                             way to deploy applications is now boarding.
                         </p>
-                        <p className="text-violet-400 font-medium">
-                            Welcome to  NextNepal.
+                        <p className="text-teal-400 font-medium">
+                            Welcome to  Dunzo.
                         </p>
                     </div>
                 </div>

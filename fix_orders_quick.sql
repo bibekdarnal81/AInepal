@@ -29,7 +29,7 @@ SELECT
     'USD',
     'paid'
 FROM auth.users u
-WHERE u.email = 'admin@NextNepal.com'
+WHERE u.email = 'admin@Dunzo.com'
 AND NOT EXISTS (SELECT 1 FROM public.orders)
 LIMIT 1;
 
