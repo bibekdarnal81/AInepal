@@ -44,7 +44,8 @@ export default function AdminOrdersPage() {
                 supabase.from('service_orders').select('*, services(title)').order('created_at', { ascending: false }),
                 supabase.from('project_orders').select('*, projects(title)').order('created_at', { ascending: false }),
                 supabase.from('domain_orders').select('*').order('created_at', { ascending: false }),
-                supabase.from('bundle_orders').select('*, bundle_offers(name)').order('created_at', { ascending: false })
+                supabase.from('bundle_orders').select('*, bundle_offers(name)').order('created_at', { ascending: false }),
+                supabase.from('class_orders').select('*, classes(title)').order('created_at', { ascending: false })
             ])
 
             const hosting = results[0].status === 'fulfilled' && !results[0].value.error ? results[0].value.data : []
@@ -52,6 +53,7 @@ export default function AdminOrdersPage() {
             const projects = results[2].status === 'fulfilled' && !results[2].value.error ? results[2].value.data : []
             const domains = results[3].status === 'fulfilled' && !results[3].value.error ? results[3].value.data : []
             const bundles = results[4].status === 'fulfilled' && !results[4].value.error ? results[4].value.data : []
+            const classes = results[5].status === 'fulfilled' && !results[5].value.error ? results[5].value.data : []
 
             // 2. Collect all User IDs
             const allUserIds = new Set<string>([
@@ -59,7 +61,8 @@ export default function AdminOrdersPage() {
                 ...(services?.map((o: any) => o.user_id) || []),
                 ...(projects?.map((o: any) => o.user_id) || []),
                 ...(domains?.map((o: any) => o.user_id) || []),
-                ...(bundles?.map((o: any) => o.user_id) || [])
+                ...(bundles?.map((o: any) => o.user_id) || []),
+                ...(classes?.map((o: any) => o.user_id) || [])
             ])
 
             // 3. Fetch Profiles separately
@@ -139,6 +142,18 @@ export default function AdminOrdersPage() {
                     created_at: o.created_at,
                     payment_proof_url: o.payment_proof_url,
                     profiles: profilesMap[o.user_id]
+                })) || []),
+                ...(classes?.map((o: any) => ({
+                    id: o.id,
+                    user_id: o.user_id,
+                    item_type: 'class',
+                    item_title: o.classes?.title || 'Class Enrollment',
+                    amount: o.amount,
+                    currency: 'NPR',
+                    status: o.status,
+                    created_at: o.created_at,
+                    payment_proof_url: o.payment_proof_url,
+                    profiles: profilesMap[o.user_id]
                 })) || [])
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
@@ -163,6 +178,7 @@ export default function AdminOrdersPage() {
             case 'project': table = 'project_orders'; break;
             case 'domain': table = 'domain_orders'; break;
             case 'bundle': table = 'bundle_orders'; break;
+            case 'class': table = 'class_orders'; break;
             default: return;
         }
 

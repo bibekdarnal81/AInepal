@@ -92,7 +92,7 @@ export default function ProjectsPage() {
     });
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-blue-500/30 font-sans">
+        <div className="min-h-screen bg-background text-primary selection:bg-primary/20 font-sans">
             <Header />
 
             <main className="relative pt-24 pb-20 min-h-screen">
@@ -110,7 +110,7 @@ export default function ProjectsPage() {
                         transition={{ duration: 0.6 }}
                         className="mb-12 text-center"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/50 border border-white/10 text-zinc-400 text-sm font-medium mb-6 backdrop-blur-sm">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/60 border border-border/60 text-muted text-sm font-medium mb-6 backdrop-blur-sm">
                             <FolderKanban className="h-4 w-4" />
                             <span>Our Portfolio</span>
                         </div>
@@ -118,7 +118,7 @@ export default function ProjectsPage() {
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">
                             Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Impact</span>
                         </h1>
-                        <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
+                        <p className="text-lg text-muted max-w-2xl mx-auto">
                             Explore our collection of digital products, client projects, and open-source contributions.
                         </p>
                     </motion.div>
@@ -132,13 +132,13 @@ export default function ProjectsPage() {
                     >
                         {/* Search Bar */}
                         <div className="relative max-w-2xl mx-auto">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
                             <input
                                 type="text"
                                 placeholder="Search by name, technology, or description..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 bg-zinc-900/50 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all backdrop-blur-sm"
+                                className="w-full pl-12 pr-4 py-4 bg-card border border-border/60 rounded-2xl text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all backdrop-blur-sm"
                             />
                         </div>
 
@@ -147,8 +147,8 @@ export default function ProjectsPage() {
                             <button
                                 onClick={() => setSelectedCategory('all')}
                                 className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === 'all'
-                                    ? 'bg-white text-black border-white shadow-lg shadow-white/10 scale-105'
-                                    : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-white/20'
+                                    ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105'
+                                    : 'bg-secondary/60 border-border/60 text-muted hover:bg-secondary/80 hover:text-primary hover:border-border'
                                     }`}
                             >
                                 All Projects
@@ -168,8 +168,8 @@ export default function ProjectsPage() {
                                         key={category.id}
                                         onClick={() => setSelectedCategory(category.id)}
                                         className={`group px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${isActive
-                                            ? 'bg-zinc-800 border-zinc-700 text-white shadow-lg scale-105'
-                                            : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-white/20'
+                                            ? 'bg-secondary border-border text-primary shadow-lg scale-105'
+                                            : 'bg-secondary/60 border-border/60 text-muted hover:bg-secondary/80 hover:text-primary hover:border-border'
                                             }`}
                                         style={isActive ? { borderColor: category.color } : {}}
                                     >
@@ -178,7 +178,7 @@ export default function ProjectsPage() {
                                             style={isActive || !isActive ? { color: isActive ? category.color : undefined } : {}}
                                         />
                                         {category.name}
-                                        <span className={`text-xs ml-1 ${isActive ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                                        <span className={`text-xs ml-1 ${isActive ? 'text-muted' : 'text-muted'}`}>
                                             {projectCount}
                                         </span>
                                     </button>
@@ -196,12 +196,12 @@ export default function ProjectsPage() {
                             </div>
                         </div>
                     ) : filteredProjects.length === 0 ? (
-                        <div className="text-center py-20 bg-zinc-900/30 rounded-3xl border border-white/5 mx-auto max-w-2xl">
-                            <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Search className="h-8 w-8 text-zinc-500" />
+                        <div className="text-center py-20 bg-card rounded-3xl border border-border/60 mx-auto max-w-2xl">
+                            <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="h-8 w-8 text-muted" />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
-                            <p className="text-zinc-400">
+                            <h3 className="text-xl font-bold text-primary mb-2">No projects found</h3>
+                            <p className="text-muted">
                                 {searchQuery ? `We couldn't find anything matching "${searchQuery}"` : 'This category is empty right now.'}
                             </p>
                             <button
@@ -227,10 +227,10 @@ export default function ProjectsPage() {
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.9 }}
                                             key={project.id}
-                                            className="group bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 flex flex-col"
+                                            className="group bg-card border border-border/60 rounded-2xl overflow-hidden hover:border-border hover:shadow-xl hover:shadow-black/10 transition-all duration-300 flex flex-col"
                                         >
                                             {/* Thumbnail */}
-                                            <Link href={`/projects/${project.slug}`} className="block relative aspect-video w-full overflow-hidden bg-black/50 group cursor-pointer">
+                                            <Link href={`/projects/${project.slug}`} className="block relative aspect-video w-full overflow-hidden bg-secondary/60 group cursor-pointer">
                                                 {project.thumbnail_url ? (
                                                     <img
                                                         src={project.thumbnail_url}
@@ -238,8 +238,8 @@ export default function ProjectsPage() {
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-zinc-800">
-                                                        <Icons.Image className="h-10 w-10 text-zinc-600" />
+                                                    <div className="w-full h-full flex items-center justify-center bg-secondary">
+                                                        <Icons.Image className="h-10 w-10 text-muted" />
                                                     </div>
                                                 )}
 
@@ -247,7 +247,7 @@ export default function ProjectsPage() {
                                                 {categoryInfo && (
                                                     <div className="absolute top-4 left-4">
                                                         <span
-                                                            className="px-2.5 py-1 text-xs font-semibold rounded-md backdrop-blur-md border border-white/10 shadow-lg"
+                                                            className="px-2.5 py-1 text-xs font-semibold rounded-md backdrop-blur-md border border-border/60 shadow-lg"
                                                             style={{
                                                                 backgroundColor: `${categoryInfo.color}30`, // 30% opacity
                                                                 color: categoryInfo.color,
@@ -263,12 +263,12 @@ export default function ProjectsPage() {
                                             {/* Content */}
                                             <div className="p-6 flex flex-col flex-1">
                                                 <Link href={`/projects/${project.slug}`}>
-                                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-1">
+                                                    <h3 className="text-xl font-bold text-primary mb-2 group-hover:text-blue-500 transition-colors line-clamp-1">
                                                         {project.title}
                                                     </h3>
                                                 </Link>
 
-                                                <p className="text-zinc-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+                                                <p className="text-muted text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
                                                     {project.description || "No description available."}
                                                 </p>
 
@@ -278,13 +278,13 @@ export default function ProjectsPage() {
                                                         {project.tech_stack.slice(0, 3).map((tech: string, idx: number) => (
                                                             <span
                                                                 key={idx}
-                                                                className="px-2 py-1 text-[10px] uppercase tracking-wider font-semibold bg-white/5 text-zinc-300 border border-white/5 rounded"
+                                                                className="px-2 py-1 text-[10px] uppercase tracking-wider font-semibold bg-secondary text-secondary border border-border/60 rounded"
                                                             >
                                                                 {tech}
                                                             </span>
                                                         ))}
                                                         {project.tech_stack.length > 3 && (
-                                                            <span className="px-2 py-1 text-[10px] text-zinc-500">
+                                                            <span className="px-2 py-1 text-[10px] text-muted">
                                                                 +{project.tech_stack.length - 3}
                                                             </span>
                                                         )}
@@ -292,7 +292,7 @@ export default function ProjectsPage() {
                                                 )}
 
                                                 {/* Actions */}
-                                                <div className="pt-4 border-t border-white/5 flex items-center gap-3">
+                                                <div className="pt-4 border-t border-border/60 flex items-center gap-3">
                                                     {project.price && project.price > 0 ? (
                                                         <BuyButton
                                                             itemType="project"
@@ -311,7 +311,7 @@ export default function ProjectsPage() {
                                                                     href={project.demo_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors"
+                                                                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
                                                                 >
                                                                     <ExternalLink className="h-3.5 w-3.5" />
                                                                     View Demo
@@ -322,7 +322,7 @@ export default function ProjectsPage() {
                                                                     href={project.github_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-800 text-white border border-white/5 rounded-lg font-medium text-sm hover:bg-zinc-700 transition-colors"
+                                                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-primary border border-border/60 rounded-lg font-medium text-sm hover:bg-secondary/80 transition-colors"
                                                                 >
                                                                     <Github className="h-3.5 w-3.5" />
                                                                     Code

@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,23 +26,6 @@ export function Header() {
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    useEffect(() => {
-        checkUser();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                checkAdminStatus(session.user.id);
-                fetchAvatar(session.user.id);
-            } else {
-                setIsAdmin(false);
-                setAvatarUrl('');
-            }
-        });
-
-        return () => subscription.unsubscribe();
     }, []);
 
     const checkUser = async () => {
@@ -73,6 +57,25 @@ export function Header() {
         setIsAdmin(profile?.is_admin || false);
     };
 
+    useEffect(() => {
+        (async () => {
+            await checkUser();
+        })();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (session?.user) {
+                checkAdminStatus(session.user.id);
+                fetchAvatar(session.user.id);
+            } else {
+                setIsAdmin(false);
+                setAvatarUrl('');
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
         setUser(null);
@@ -82,6 +85,8 @@ export function Header() {
 
     const navigation = [
         { name: 'Services', href: '/services' },
+        { name: 'Classes', href: '/classes' },
+        { name: 'Careers', href: '/careers' },
         { name: 'Projects', href: '/projects' },
         { name: 'Blog', href: '/blog' },
     ];
@@ -150,6 +155,7 @@ export function Header() {
 
                     {/* Right Side Actions */}
                     <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center gap-4">
+                        <ThemeToggle />
                         {user ? (
                             // Logged in - Show user menu
                             <div className="relative">
@@ -272,14 +278,17 @@ export function Header() {
                                         className="h-10 w-auto object-contain"
                                     />
                                 </Link>
-                                <button
-                                    type="button"
-                                    className="-m-2.5 rounded-full p-2.5 text-foreground hover:bg-secondary/50 transition-colors"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    <span className="sr-only">Close menu</span>
-                                    <X className="h-6 w-6" aria-hidden="true" />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <ThemeToggle />
+                                    <button
+                                        type="button"
+                                        className="-m-2.5 rounded-full p-2.5 text-foreground hover:bg-secondary/50 transition-colors"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <span className="sr-only">Close menu</span>
+                                        <X className="h-6 w-6" aria-hidden="true" />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex flex-col p-6 space-y-6">

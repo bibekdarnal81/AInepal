@@ -62,7 +62,7 @@ const tweets = [
 
 const TweetCard = ({ tweet, delay }: { tweet: typeof tweets[0]; delay: number }) => (
     <motion.div
-        className="bg-zinc-900/80 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all hover:bg-zinc-900"
+        className="bg-card border border-border/60 rounded-xl p-4 hover:border-border transition-all"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -73,21 +73,21 @@ const TweetCard = ({ tweet, delay }: { tweet: typeof tweets[0]; delay: number })
                 {tweet.avatar}
             </div>
             <div className="min-w-0">
-                <p className="text-white font-medium text-sm">{tweet.name}</p>
-                <p className="text-gray-500 text-xs">{tweet.handle}</p>
+                <p className="text-primary font-medium text-sm">{tweet.name}</p>
+                <p className="text-muted text-xs">{tweet.handle}</p>
             </div>
             {/* Twitter/X icon */}
-            <svg className="w-4 h-4 text-gray-500 ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-muted ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
         </div>
-        <p className="text-gray-300 text-sm leading-relaxed">{tweet.content}</p>
+        <p className="text-secondary text-sm leading-relaxed">{tweet.content}</p>
     </motion.div>
 );
 
 export function TweetsSection() {
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-black">
+        <section className="relative py-32 px-6 overflow-hidden bg-background">
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
             </div>
@@ -98,12 +98,12 @@ export function TweetsSection() {
                     className="text-center mb-12"
                     {...fadeInUp}
                 >
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
                         …and loved by developers
                     </h2>
                     <motion.a
                         href="#"
-                        className="inline-flex items-center gap-2 text-teal-400 font-medium hover:text-teal-300 transition-colors"
+                        className="inline-flex items-center gap-2 text-teal-500 font-medium hover:text-teal-400 transition-colors"
                         {...fadeInUp}
                         transition={{ delay: 0.2 }}
                     >

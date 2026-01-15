@@ -62,8 +62,12 @@ export default function ThumbnailUpload({
             }
 
             const data = await response.json();
-            setThumbnailUrl(data.file.url);
-            onUploadComplete(data.file.url);
+            const fileUrl = data?.file?.url || data?.url;
+            if (!fileUrl) {
+                throw new Error('Upload response missing file URL');
+            }
+            setThumbnailUrl(fileUrl);
+            onUploadComplete(fileUrl);
             setUploadSuccess(true);
 
             // Reset success message after 3 seconds

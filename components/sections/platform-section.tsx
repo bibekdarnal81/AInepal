@@ -28,7 +28,7 @@ const staggerContainer = {
 
 export function PlatformSection() {
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-black">
+        <section className="relative py-20 px-3 overflow-hidden bg-background">
             {/* Subtle background */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
@@ -61,7 +61,7 @@ export function PlatformSection() {
                             </motion.span>
 
                             <motion.h2
-                                className="text-3xl md:text-4xl font-bold text-white leading-tight"
+                                className="text-3xl md:text-4xl font-bold text-primary leading-tight"
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.1 }}
                             >
@@ -69,17 +69,17 @@ export function PlatformSection() {
                             </motion.h2>
 
                             <motion.p
-                                className="text-gray-400 leading-relaxed"
+                                className="text-muted leading-relaxed"
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                 Dunzo provides automated service discovery, blazing fast
+                                Dunzo provides automated service discovery, blazing fast
                                 networking, and support for any protocol, all out of the box.
                             </motion.p>
 
                             <motion.a
                                 href="#"
-                                className="inline-flex items-center gap-2 text-white font-medium hover:text-teal-300 transition-colors"
+                                className="inline-flex items-center gap-2 text-primary font-medium hover:text-teal-500 transition-colors"
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.3 }}
                             >
@@ -89,13 +89,13 @@ export function PlatformSection() {
 
                             {/* Stats row */}
                             <motion.div
-                                className="flex items-center gap-6 pt-6 border-t border-zinc-800"
+                                className="flex items-center gap-6 pt-6 border-t border-border"
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.4 }}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-teal-400 font-mono font-semibold">50ms p95</span>
-                                    <span className="text-gray-500 text-sm">global network RTT</span>
+                                    <span className="text-muted text-sm">global network RTT</span>
                                 </div>
                             </motion.div>
 
@@ -105,7 +105,7 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.5 }}
                             >
-                                <span className="text-gray-500 text-sm">Replaces</span>
+                                <span className="text-muted text-sm">Replaces</span>
                                 <div className="flex items-center gap-3">
                                     {/* Placeholder tech icons */}
                                     <div className="w-6 h-6 rounded bg-orange-500/20 flex items-center justify-center">
@@ -140,76 +140,7 @@ export function PlatformSection() {
                     </motion.div>
                 </div>
 
-                {/* Scale and Grow Section */}
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
-                    {/* Left side - Scaling Visualization */}
-                    <motion.div
-                        className="relative order-2 lg:order-1"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                    >
-                        <ScaleDiagramSVG />
-                    </motion.div>
 
-                    {/* Right side - Scale and Grow */}
-                    <motion.div
-                        className="space-y-8 order-1 lg:order-2"
-                        {...fadeInUp}
-                    >
-                        <div>
-                            <motion.h3
-                                className="text-cyan-400 font-semibold mb-4"
-                                {...fadeIn}
-                            >
-                                Scale and Grow
-                            </motion.h3>
-                            <motion.h2
-                                className="text-4xl font-bold text-white mb-4"
-                                {...fadeInUp}
-                                transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                            >
-                                Scale your applications with intuitive vertical and horizontal scaling
-                            </motion.h2>
-                            <motion.p
-                                className="text-gray-400 leading-relaxed mb-4"
-                                {...fadeInUp}
-                                transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-                            >
-                                 Dunzo dynamically scales highly performant servers, storage, and networking to meet application demands.
-                            </motion.p>
-                            <motion.a
-                                href="#"
-                                className="text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-2"
-                                {...fadeInUp}
-                                transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-                            >
-                                Learn More →
-                            </motion.a>
-                        </div>
-
-                        {/* Stats */}
-                        <motion.div
-                            className="glass rounded-lg p-4 font-mono text-sm border border-white/10"
-                            {...fadeInUp}
-                            transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-cyan-400 font-bold">1000 vCPU</span>
-                                    <span className="text-gray-400 text-xs">instances</span>
-                                </div>
-                                <div className="flex gap-1">
-                                    <span className="px-2 py-1 bg-white/5 rounded text-xs text-gray-400">Replicas</span>
-                                    <Server className="w-4 h-4 text-gray-400" />
-                                    <Database className="w-4 h-4 text-gray-400" />
-                                    <Globe className="w-4 h-4 text-gray-400" />
-                                </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                </div>
             </div>
         </section>
     );

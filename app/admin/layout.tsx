@@ -14,6 +14,8 @@ import {
     X,
     FolderKanban,
     Briefcase,
+    BriefcaseBusiness,
+    GraduationCap,
     MessageSquare,
     ShoppingBag,
     Mail,
@@ -24,7 +26,9 @@ import {
     Globe,
     Network,
     Image as ImageIcon,
-    CreditCard
+    LayoutTemplate,
+    CreditCard,
+    Sparkles
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -268,8 +272,12 @@ export default function AdminLayout({
                 { name: 'Post Categories', href: '/admin/posts/categories', icon: Tag },
                 { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
                 { name: 'Portfolios', href: '/admin/portfolios', icon: ImageIcon },
+                { name: 'Templates', href: '/admin/templates', icon: LayoutTemplate },
                 { name: 'Categories', href: '/admin/categories', icon: FolderKanban },
                 { name: 'Services', href: '/admin/services', icon: Briefcase },
+                { name: 'AI Tools', href: '/admin/ai-tool', icon: Sparkles },
+                { name: 'Classes', href: '/admin/classes', icon: GraduationCap },
+                { name: 'Careers', href: '/admin/careers', icon: BriefcaseBusiness },
             ]
         },
         {

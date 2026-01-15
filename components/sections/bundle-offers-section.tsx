@@ -54,10 +54,10 @@ export function BundleOffersSection() {
                         <Sparkles className="w-4 h-4" />
                         <span>Special Offers</span>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                    <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6">
                         Exclusive <span className="text-gradient">Bundles</span>
                     </h2>
-                    <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-lg text-muted max-w-2xl mx-auto">
                         Get the best value with our curated packages of services, projects, and hosting.
                     </p>
                 </div>
@@ -65,7 +65,7 @@ export function BundleOffersSection() {
                 {loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-96 rounded-2xl bg-white/5 animate-pulse" />
+                            <div key={i} className="h-96 rounded-2xl bg-muted/30 animate-pulse" />
                         ))}
                     </div>
                 ) : (
@@ -73,10 +73,10 @@ export function BundleOffersSection() {
                         {offers.map((offer) => (
                             <div
                                 key={offer.id}
-                                className="group relative bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1"
+                                className="group relative bg-card border border-border/60 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1"
                             >
                                 {/* Poster Image */}
-                                <div className="relative h-48 w-full overflow-hidden bg-gray-900">
+                                <div className="relative h-48 w-full overflow-hidden bg-muted/40">
                                     {offer.poster_url ? (
                                         <img
                                             src={offer.poster_url}
@@ -84,7 +84,7 @@ export function BundleOffersSection() {
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-600 bg-gray-800">
+                                        <div className="w-full h-full flex items-center justify-center text-muted bg-muted/60">
                                             <span className="text-4xl">🎁</span>
                                         </div>
                                     )}
@@ -100,10 +100,10 @@ export function BundleOffersSection() {
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <h3 className="text-xl font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">
+                                            <h3 className="text-xl font-bold text-primary mb-1 group-hover:text-emerald-500 transition-colors">
                                                 {offer.name}
                                             </h3>
-                                            <p className="text-xs text-gray-400 uppercase tracking-wider">
+                                            <p className="text-xs text-muted uppercase tracking-wider">
                                                 {offer.hosting_type} Bundle
                                             </p>
                                         </div>
@@ -111,22 +111,22 @@ export function BundleOffersSection() {
 
                                     {/* Description Preview */}
                                     <div
-                                        className="text-gray-400 text-sm mb-6 line-clamp-3 prose prose-sm prose-invert"
+                                        className="text-muted text-sm mb-6 line-clamp-3 prose prose-sm prose-invert"
                                         dangerouslySetInnerHTML={{ __html: offer.description }}
                                     />
 
                                     <div className="flex items-center justify-between mt-auto">
                                         <div className="flex flex-col">
-                                            <span className="text-sm text-gray-500 line-through">
+                                            <span className="text-sm text-muted line-through">
                                                 Rs. {Math.round(offer.price / (1 - offer.discount_percent / 100))}
                                             </span>
-                                            <span className="text-2xl font-bold text-white">
+                                            <span className="text-2xl font-bold text-primary">
                                                 Rs. {offer.price}
                                             </span>
                                         </div>
                                         <Link
                                             href={`/bundles/${offer.id}`} // Assuming we'll make a detail page or just link to checkout
-                                            className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-emerald-500 text-white transition-all duration-300 group-hover:scale-110"
+                                            className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary hover:bg-emerald-500 text-primary hover:text-white transition-all duration-300 group-hover:scale-110"
                                         >
                                             <ArrowRight className="w-5 h-5" />
                                         </Link>

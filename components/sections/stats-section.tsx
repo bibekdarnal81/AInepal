@@ -33,7 +33,7 @@ const AnimatedCounter = ({ value, label }: { value: string; label: string }) => 
 
     return (
         <motion.div
-            className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0"
+            className="flex items-center justify-between py-4 border-b border-border/40 last:border-b-0"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -44,7 +44,7 @@ const AnimatedCounter = ({ value, label }: { value: string; label: string }) => 
                 {label.split('').map((char, i) => (
                     <div
                         key={i}
-                        className="w-8 h-10 bg-zinc-900/80 rounded border border-white/10 flex items-center justify-center text-gray-400 font-mono text-sm tracking-widest"
+                        className="w-8 h-10 bg-card rounded border border-border/60 flex items-center justify-center text-muted font-mono text-sm tracking-widest"
                     >
                         {char}
                     </div>
@@ -56,7 +56,7 @@ const AnimatedCounter = ({ value, label }: { value: string; label: string }) => 
                 {displayValue.split('').map((char, i) => (
                     <div
                         key={i}
-                        className={`w-8 h-10 rounded flex items-center justify-center font-mono text-lg ${char === ',' ? 'w-4 text-gray-500' : 'bg-zinc-900/80 border border-white/10 text-white'
+                        className={`w-8 h-10 rounded flex items-center justify-center font-mono text-lg ${char === ',' ? 'w-4 text-muted' : 'bg-card border border-border/60 text-primary'
                             }`}
                     >
                         {char}
@@ -77,7 +77,7 @@ export function StatsSection() {
     ];
 
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-black">
+        <section className="relative py-32 px-6 overflow-hidden bg-background">
             {/* Subtle background */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
@@ -92,11 +92,11 @@ export function StatsSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4">
                         20+ deploys per month{' '}
-                        <span className="text-gray-400">(and counting)</span>
+                        <span className="text-muted">(and counting)</span>
                     </h2>
-                    <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                    <p className="text-muted text-lg max-w-2xl mx-auto">
                         Real-time usage showing totals for users and services, along with 30-day deploys, requests, and logs.
                     </p>
                 </motion.div>

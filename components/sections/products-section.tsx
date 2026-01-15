@@ -51,11 +51,11 @@ export function ProductsSection() {
         <section className="relative py-24 px-6" id="products">
             <div className="mx-auto max-w-7xl">
                 <div className="mx-auto max-w-2xl text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-primary mb-6">
                         Everything you need to{' '}
                         <span className="text-gradient">ship faster</span>
                     </h2>
-                    <p className="text-xl text-gray-400">
+                    <p className="text-xl text-muted">
                         Deploy your apps with confidence.  Dunzo handles the infrastructure so you can focus on code.
                     </p>
                 </div>
@@ -71,10 +71,10 @@ export function ProductsSection() {
                                 <div className="mb-6 inline-flex items-center justify-center rounded-lg bg-emerald-500/10 p-4 group-hover:bg-emerald-500/20 transition-all">
                                     <Icon className="h-8 w-8 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
                                 </div>
-                                <h3 className="text-xl font-semibold text-white mb-3">
+                                <h3 className="text-xl font-semibold text-primary mb-3">
                                     {feature.title}
                                 </h3>
-                                <p className="text-gray-400 leading-relaxed">
+                                <p className="text-muted leading-relaxed">
                                     {feature.description}
                                 </p>
 

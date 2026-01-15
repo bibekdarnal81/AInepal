@@ -14,7 +14,8 @@ export async function POST(req: Request) {
             billingCycle, // Hosting specific
             domainName,   // Domain specific
             years,        // Domain specific
-            requirements  // Service specific
+            requirements,  // Service specific
+            enroll // Class enrollment details
         } = await req.json()
 
         // Get authenticated user
@@ -99,6 +100,26 @@ export async function POST(req: Request) {
                 payment_proof_url: paymentProofUrl,
                 transaction_id: transactionId,
                 status: 'pending'
+            }).select('id').single()
+
+            if (error) throw error
+            orderId = data.id
+        } else if (type === 'classes') {
+            const { data, error } = await supabase.from('class_orders').insert({
+                user_id: user.id,
+                class_id: itemId,
+                amount,
+                payment_method_id: paymentMethodId,
+                payment_proof_url: paymentProofUrl,
+                transaction_id: transactionId,
+                status: 'pending',
+                full_name: enroll?.fullName || null,
+                email: enroll?.email || null,
+                mobile: enroll?.mobile || null,
+                address: enroll?.address || null,
+                college_name: enroll?.collegeName || null,
+                other_course: enroll?.otherCourse || null,
+                remarks: enroll?.remarks || null
             }).select('id').single()
 
             if (error) throw error

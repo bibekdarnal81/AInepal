@@ -6,7 +6,7 @@ import Link from 'next/link';
 const plans = [
     {
         name: 'Starter',
-        price: '$0',
+        price: 'रू 2,000',
         period: 'forever',
         description: 'Perfect for side projects and experimentation',
         features: [
@@ -21,7 +21,7 @@ const plans = [
     },
     {
         name: 'Developer',
-        price: 'रू 2,000',
+        price: 'रू 5,000',
         period: 'per month',
         description: 'For professional developers and small teams',
         features: [
@@ -60,11 +60,11 @@ export function PricingSection() {
         <section className="relative py-32 px-6">
             <div className="mx-auto max-w-7xl">
                 <div className="text-center mb-16">
-                    <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+                    <h2 className="text-5xl md:text-6xl font-bold text-primary mb-6">
                         Simple,{' '}
                         <span className="text-gradient">transparent pricing</span>
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-xl text-muted max-w-2xl mx-auto">
                         Start for free. Scale when you need to. No hidden fees.
                     </p>
                 </div>
@@ -79,17 +79,17 @@ export function PricingSection() {
                                 }`}
                         >
                             {plan.highlighted && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-purple-pink rounded-full text-xs font-semibold text-white">
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-purple-pink rounded-full text-xs font-semibold text-inverse">
                                     Most Popular
                                 </div>
                             )}
 
                             <div className="mb-8">
-                                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                                <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
+                                <h3 className="text-2xl font-bold text-primary mb-2">{plan.name}</h3>
+                                <p className="text-muted text-sm mb-6">{plan.description}</p>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-bold text-white">{plan.price}</span>
-                                    <span className="text-gray-400">/ {plan.period}</span>
+                                    <span className="text-5xl font-bold text-primary">{plan.price}</span>
+                                    <span className="text-muted">/ {plan.period}</span>
                                 </div>
                             </div>
 
@@ -97,7 +97,7 @@ export function PricingSection() {
                                 {plan.features.map((feature) => (
                                     <li key={feature} className="flex items-start gap-3">
                                         <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                        <span className="text-gray-300">{feature}</span>
+                                        <span className="text-secondary">{feature}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -105,8 +105,8 @@ export function PricingSection() {
                             <Link
                                 href="#signup"
                                 className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all transform hover:scale-105 ${plan.highlighted
-                                    ? 'bg-white text-black hover:bg-gray-200'
-                                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
+                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                    : 'bg-secondary text-primary border border-border hover:bg-secondary/80'
                                     }`}
                             >
                                 {plan.cta}
@@ -116,9 +116,9 @@ export function PricingSection() {
                 </div>
 
                 <div className="mt-12 text-center">
-                    <p className="text-gray-400">
+                    <p className="text-muted">
                         All plans include SSL, DDoS protection, and automatic backups.{' '}
-                        <Link href="#compare" className="text-emerald-400 hover:text-emerald-300 underline">
+                        <Link href="#compare" className="text-accent hover:text-primary underline">
                             Compare plans
                         </Link>
                     </p>

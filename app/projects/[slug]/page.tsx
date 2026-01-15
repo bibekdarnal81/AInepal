@@ -67,7 +67,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="relative w-16 h-16">
                     <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin"></div>
                     <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin-reverse"></div>
@@ -78,15 +78,15 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
     if (!project) {
         return (
-            <div className="min-h-screen bg-black text-white">
+            <div className="min-h-screen bg-background text-primary">
                 <Header />
                 <main className="py-32">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-                        <h1 className="text-4xl font-bold text-white mb-4">Project Not Found</h1>
-                        <p className="text-zinc-400 mb-8">The project you're looking for doesn't exist or has been removed.</p>
+                        <h1 className="text-4xl font-bold text-primary mb-4">Project Not Found</h1>
+                        <p className="text-muted mb-8">The project you're looking for doesn't exist or has been removed.</p>
                         <Link
                             href="/projects"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors"
                         >
                             <ArrowLeft className="h-5 w-5" />
                             Back to Projects
@@ -104,14 +104,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
         : Icons.FolderKanban
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30">
+        <div className="min-h-screen bg-background text-primary font-sans selection:bg-primary/20">
             <Header />
             <main className="pt-28 pb-20">
                 <div className="mx-auto max-w-6xl px-6 lg:px-8">
                     {/* Back Button */}
                     <Link
                         href="/projects"
-                        className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-10 group"
+                        className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors mb-10 group"
                     >
                         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                         Back to Projects
@@ -134,11 +134,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                 </span>
                             </div>
                         )}
-                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                        <h1 className="text-4xl md:text-6xl font-bold text-primary mb-6 leading-tight">
                             {project.title}
                         </h1>
                         {project.description && (
-                            <p className="text-xl md:text-2xl text-zinc-400 max-w-4xl leading-relaxed font-light">
+                            <p className="text-xl md:text-2xl text-muted max-w-4xl leading-relaxed font-light">
                                 {project.description}
                             </p>
                         )}
@@ -146,7 +146,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
                     {/* Project Image */}
                     {project.thumbnail_url && (
-                        <div className="aspect-video w-full overflow-hidden rounded-3xl bg-zinc-900 border border-white/5 shadow-2xl shadow-blue-900/10 mb-16 relative group">
+                        <div className="aspect-video w-full overflow-hidden rounded-3xl bg-card border border-border/60 shadow-2xl shadow-blue-900/10 mb-16 relative group">
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <img
                                 src={project.thumbnail_url}
@@ -162,11 +162,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                             {/* Project Content */}
                             {project.content && (
                                 <div className="space-y-6">
-                                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                    <h2 className="text-2xl font-bold text-primary flex items-center gap-3">
                                         <div className="w-1 h-8 bg-blue-500 rounded-full" />
                                         About This Project
                                     </h2>
-                                    <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-400 prose-strong:text-white prose-ul:text-zinc-400 prose-li:marker:text-blue-500">
+                                    <div className="prose prose-lg max-w-none prose-headings:text-primary prose-p:text-muted prose-strong:text-primary prose-ul:text-muted prose-li:marker:text-blue-500 dark:prose-invert">
                                         <div
                                             dangerouslySetInnerHTML={{ __html: project.content }}
                                         />
@@ -177,13 +177,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                             {/* Features */}
                             {project.features && project.features.length > 0 && (
                                 <div className="space-y-6">
-                                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                    <h2 className="text-2xl font-bold text-primary flex items-center gap-3">
                                         <div className="w-1 h-8 bg-purple-500 rounded-full" />
                                         Key Features
                                     </h2>
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         {project.features.map((feature, idx) => (
-                                            <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-zinc-900/30 border border-white/5 hover:border-white/10 transition-colors">
+                                            <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border/60 hover:border-border transition-colors">
                                                 <div className="mt-1 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
                                                     <svg
                                                         className="h-3 w-3 text-green-400"
@@ -195,7 +195,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
-                                                <span className="text-zinc-300 text-sm leading-relaxed font-medium">
+                                                <span className="text-secondary text-sm leading-relaxed font-medium">
                                                     {feature}
                                                 </span>
                                             </div>
@@ -207,7 +207,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                             {/* Tech Stack */}
                             {project.tech_stack && project.tech_stack.length > 0 && (
                                 <div className="space-y-6">
-                                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                    <h2 className="text-2xl font-bold text-primary flex items-center gap-3">
                                         <div className="w-1 h-8 bg-orange-500 rounded-full" />
                                         Technologies Used
                                     </h2>
@@ -215,10 +215,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                         {project.tech_stack.map((tech, idx) => (
                                             <div
                                                 key={idx}
-                                                className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 border border-white/10 rounded-lg group hover:border-blue-500/50 transition-colors"
+                                                className="flex items-center gap-2 px-4 py-2.5 bg-secondary border border-border/60 rounded-lg group hover:border-blue-500/50 transition-colors"
                                             >
-                                                <Code2 className="h-4 w-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
-                                                <span className="text-zinc-300 font-mono text-sm group-hover:text-white transition-colors">{tech}</span>
+                                                <Code2 className="h-4 w-4 text-muted group-hover:text-blue-500 transition-colors" />
+                                                <span className="text-secondary font-mono text-sm group-hover:text-primary transition-colors">{tech}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -230,13 +230,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                         <div className="lg:col-span-1">
                             <div className="sticky top-28 space-y-6">
                                 {/* Actions Card */}
-                                <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+                                <div className="bg-card backdrop-blur-xl border border-border/60 rounded-2xl p-6 shadow-xl">
                                     {/* Price & Purchase */}
                                     {project.price && project.price > 0 && (
                                         <div className="mb-8">
-                                            <p className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-2">License Price</p>
+                                            <p className="text-sm font-medium text-muted uppercase tracking-wider mb-2">License Price</p>
                                             <div className="flex items-baseline gap-1 mb-6">
-                                                <span className="text-4xl font-bold text-white">
+                                                <span className="text-4xl font-bold text-primary">
                                                     {project.currency === 'NPR' ? 'रू ' : '$'}
                                                     {project.price.toLocaleString('en-US')}
                                                 </span>
@@ -247,7 +247,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                                 itemTitle={project.title}
                                                 itemSlug={project.slug}
                                                 amount={project.price}
-                                                className="w-full py-4 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-colors"
+                                                className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors"
                                             >
                                                 Purchase License
                                             </BuyButton>
@@ -275,7 +275,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                                 href={project.github_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center justify-between px-4 py-3 bg-zinc-800 border border-white/5 hover:bg-zinc-700 text-zinc-300 rounded-xl transition-all group"
+                                                className="flex items-center justify-between px-4 py-3 bg-secondary border border-border/60 hover:bg-secondary/80 text-secondary rounded-xl transition-all group"
                                             >
                                                 <span className="font-medium flex items-center gap-2">
                                                     <Github className="h-4 w-4" />
@@ -291,7 +291,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                                     detail: { itemType: 'project', itemTitle: project.title }
                                                 }))
                                             }}
-                                            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-zinc-400 hover:text-white transition-colors border-t border-white/5 pt-4"
+                                            className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-muted hover:text-primary transition-colors border-t border-border/60 pt-4"
                                         >
                                             <MessageSquare className="h-4 w-4" />
                                             <span>Ask a Question</span>
@@ -300,13 +300,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                 </div>
 
                                 {/* Metadata Card */}
-                                <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6">
-                                    <h3 className="text-sm font-bold text-white mb-4">Project Details</h3>
+                                <div className="bg-card border border-border/60 rounded-2xl p-6">
+                                    <h3 className="text-sm font-bold text-primary mb-4">Project Details</h3>
 
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between text-sm">
-                                            <span className="text-zinc-500">Published</span>
-                                            <span className="text-zinc-300 font-medium">
+                                            <span className="text-muted">Published</span>
+                                            <span className="text-secondary font-medium">
                                                 {new Date(project.created_at).toLocaleDateString('en-US', {
                                                     month: 'long',
                                                     day: 'numeric',
@@ -316,13 +316,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                         </div>
 
                                         {project.tags && project.tags.length > 0 && (
-                                            <div className="pt-4 border-t border-white/5">
-                                                <span className="text-xs font-medium text-zinc-500 block mb-3 uppercase tracking-wider">Tags</span>
+                                            <div className="pt-4 border-t border-border/60">
+                                                <span className="text-xs font-medium text-muted block mb-3 uppercase tracking-wider">Tags</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {project.tags.map((tag, idx) => (
                                                         <span
                                                             key={idx}
-                                                            className="px-2.5 py-1 bg-zinc-800 text-zinc-400 rounded-md text-xs border border-white/5"
+                                                            className="px-2.5 py-1 bg-secondary text-muted rounded-md text-xs border border-border/60"
                                                         >
                                                             #{tag}
                                                         </span>

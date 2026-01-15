@@ -39,7 +39,7 @@ export function BookDemoModal({ isOpen, onClose }: BookDemoModalProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto grid place-items-center p-4"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto flex items-start sm:items-center justify-center p-0 sm:p-4"
                     >
                         {/* Modal */}
                         <motion.div
@@ -47,29 +47,30 @@ export function BookDemoModal({ isOpen, onClose }: BookDemoModalProps) {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg sm:max-w-2xl bg-card border-0 sm:border border-border sm:rounded-2xl shadow-2xl overflow-hidden my-0 sm:my-8 max-h-screen sm:max-h-[90vh] flex flex-col"
                         >
-                            {/* Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-border bg-muted/40">
+                            {/* Header - Fixed */}
+                            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border bg-muted/40 flex-shrink-0">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                                        <Calendar className="h-6 w-6 text-primary" />
-                                        Book a Demo
+                                    <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+                                        <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                                        Book a Free Demo
                                     </h2>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                         See how we can help your business grow.
                                     </p>
                                 </div>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                                    className="p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+                                    aria-label="Close modal"
                                 >
                                     <X className="h-5 w-5 text-muted-foreground" />
                                 </button>
                             </div>
 
-                            {/* Body */}
-                            <div className="p-6">
+                            {/* Body - Scrollable */}
+                            <div className="p-4 sm:p-6 overflow-y-auto flex-1">
                                 <BookDemoForm onSuccess={handleSuccess} />
                             </div>
                         </motion.div>

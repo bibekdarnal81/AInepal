@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalChatWidget } from '@/components/chat/conditional-chat-widget';
+import { ThemeScript } from '@/components/theme-script';
 import { TopBanner } from '@/components/top-banner';
 
 const geistSans = Geist({
@@ -87,11 +88,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ThemeScript />
         <TopBanner />
         {children}
         <ConditionalChatWidget />

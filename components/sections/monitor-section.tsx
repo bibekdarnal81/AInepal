@@ -18,15 +18,15 @@ const fadeIn = {
 
 // Logging console mockup component
 const LogConsole = () => (
-    <div className="bg-zinc-900/90 rounded-lg border border-white/10 overflow-hidden">
+    <div className="bg-card rounded-lg border border-border/60 overflow-hidden">
         {/* Console header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-zinc-900">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/60 bg-card">
             <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-green-500/80" />
             </div>
-            <span className="text-sm text-gray-400 ml-2">Logs</span>
+            <span className="text-sm text-muted ml-2">Logs</span>
         </div>
 
         {/* Log entries */}
@@ -51,9 +51,9 @@ const LogConsole = () => (
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.05 }}
                 >
-                    <span className="text-gray-600">{log.time}</span>
+                    <span className="text-muted">{log.time}</span>
                     <span className={`w-12 ${log.color}`}>[{log.level}]</span>
-                    <span className="text-gray-300">{log.msg}</span>
+                    <span className="text-secondary">{log.msg}</span>
                 </motion.div>
             ))}
         </div>
@@ -62,9 +62,9 @@ const LogConsole = () => (
 
 // Metrics chart mockup
 const MetricsChart = () => (
-    <div className="bg-zinc-900/90 rounded-lg border border-white/10 p-4">
+    <div className="bg-card rounded-lg border border-border/60 p-4">
         <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-400">Response Time (ms)</span>
+            <span className="text-sm text-muted">Response Time (ms)</span>
             <span className="text-xs text-green-400">avg: 45ms</span>
         </div>
         <div className="h-24 flex items-end gap-1">
@@ -84,7 +84,7 @@ const MetricsChart = () => (
 
 export function MonitorSection() {
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-black">
+        <section className="relative py-32 px-6 overflow-hidden bg-background">
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
             </div>
@@ -100,7 +100,7 @@ export function MonitorSection() {
                                     Monitor and Observe
                                 </motion.h3>
                                 <motion.h2
-                                    className="text-3xl md:text-4xl font-bold text-white"
+                                    className="text-3xl md:text-4xl font-bold text-primary"
                                     {...fadeInUp}
                                     transition={{ delay: 0.1 }}
                                 >
@@ -110,7 +110,7 @@ export function MonitorSection() {
                         </div>
 
                         <motion.p
-                            className="text-gray-400 leading-relaxed ml-4"
+                            className="text-muted leading-relaxed ml-4"
                             {...fadeInUp}
                             transition={{ delay: 0.2 }}
                         >
@@ -120,7 +120,7 @@ export function MonitorSection() {
 
                         <motion.a
                             href="#"
-                            className="inline-flex items-center gap-2 text-white font-medium hover:text-orange-300 transition-colors ml-4"
+                            className="inline-flex items-center gap-2 text-primary font-medium hover:text-orange-500 transition-colors ml-4"
                             {...fadeInUp}
                             transition={{ delay: 0.3 }}
                         >
@@ -134,7 +134,7 @@ export function MonitorSection() {
                             {...fadeInUp}
                             transition={{ delay: 0.4 }}
                         >
-                            <span className="text-gray-500 text-sm">Replaces</span>
+                            <span className="text-muted text-sm">Replaces</span>
                             <div className="flex items-center gap-3">
                                 <div className="w-6 h-6 rounded bg-orange-500/20 flex items-center justify-center">
                                     <span className="text-xs text-orange-400">D</span>

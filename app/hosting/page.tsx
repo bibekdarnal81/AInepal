@@ -66,7 +66,7 @@ export default function HostingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-background text-primary">
             <Header />
             <div className="pt-24 pb-20">
                 {/* Hero Section */}
@@ -75,7 +75,7 @@ export default function HostingPage() {
                         <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-6">
                             Premium Web Hosting Solutions
                         </h1>
-                        <p className="text-xl text-gray-400 mb-8">
+                        <p className="text-xl text-muted mb-8">
                             blazing fast speeds, ironclad security, and 24/7 expert support.
                             Choose the perfect home for your website.
                         </p>
@@ -85,7 +85,7 @@ export default function HostingPage() {
                 {/* Tabs */}
                 <div className="container mx-auto px-4 mb-16">
                     <div className="flex justify-center mb-12">
-                        <div className="inline-flex bg-white/5 p-1 rounded-xl backdrop-blur-sm border border-white/10">
+                        <div className="inline-flex bg-secondary/60 p-1 rounded-xl backdrop-blur-sm border border-border/60">
                             {(['shared', 'vps', 'dedicated'] as const).map((tab) => {
                                 const Icon = tabContent[tab].icon
                                 return (
@@ -94,7 +94,7 @@ export default function HostingPage() {
                                         onClick={() => setActiveTab(tab)}
                                         className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${activeTab === tab
                                             ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            : 'text-muted hover:text-primary hover:bg-secondary/80'
                                             }`}
                                     >
                                         <Icon className="w-4 h-4" />
@@ -107,15 +107,15 @@ export default function HostingPage() {
 
                     <div className="flex flex-col items-center mb-12 gap-6">
                         <h2 className="text-3xl font-bold">{tabContent[activeTab].title}</h2>
-                        <p className="text-gray-400 max-w-2xl text-center">{tabContent[activeTab].description}</p>
+                        <p className="text-muted max-w-2xl text-center">{tabContent[activeTab].description}</p>
 
                         {/* Billing Toggle */}
-                        <div className="flex items-center gap-4 bg-white/5 p-1 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-4 bg-secondary/60 p-1 rounded-xl border border-border/60">
                             <button
                                 onClick={() => setBillingCycle('monthly')}
                                 className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${billingCycle === 'monthly'
                                     ? 'bg-blue-600 text-white shadow-lg'
-                                    : 'text-gray-400 hover:text-white'
+                                    : 'text-muted hover:text-primary'
                                     }`}
                             >
                                 Monthly
@@ -124,11 +124,11 @@ export default function HostingPage() {
                                 onClick={() => setBillingCycle('yearly')}
                                 className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${billingCycle === 'yearly'
                                     ? 'bg-blue-600 text-white shadow-lg'
-                                    : 'text-gray-400 hover:text-white'
+                                    : 'text-muted hover:text-primary'
                                     }`}
                             >
                                 Yearly
-                                <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded text-white">Save 2 months</span>
+                                <span className="ml-2 text-xs bg-primary/10 px-1.5 py-0.5 rounded text-primary">Save 2 months</span>
                             </button>
                         </div>
                     </div>
@@ -139,10 +139,10 @@ export default function HostingPage() {
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                         </div>
                     ) : filteredPlans.length === 0 ? (
-                        <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10 max-w-2xl mx-auto">
-                            <Server className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                        <div className="text-center py-20 bg-card rounded-2xl border border-border/60 max-w-2xl mx-auto">
+                            <Server className="w-16 h-16 text-muted mx-auto mb-4" />
                             <h3 className="text-xl font-bold mb-2">No plans available</h3>
-                            <p className="text-gray-400">
+                            <p className="text-muted">
                                 We currently don't have any active {activeTab} hosting plans.
                                 Please check back later or contact us for custom solutions.
                             </p>
@@ -155,14 +155,14 @@ export default function HostingPage() {
                                     className="relative group"
                                 >
                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur"></div>
-                                    <div className="relative h-full bg-gray-900 border border-white/10 rounded-xl p-8 hover:border-white/20 transition-colors flex flex-col">
+                                    <div className="relative h-full bg-card border border-border/60 rounded-xl p-8 hover:border-border transition-colors flex flex-col">
                                         <div className="mb-6">
                                             <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                                             <div className="flex items-baseline gap-1">
                                                 <span className="text-4xl font-bold text-blue-400">
                                                     रू {(billingCycle === 'yearly' ? (plan.price_yearly || plan.price * 10) : plan.price).toLocaleString('en-NP')}
                                                 </span>
-                                                <span className="text-gray-400">/{billingCycle === 'yearly' ? 'yr' : 'mo'}</span>
+                                                <span className="text-muted">/{billingCycle === 'yearly' ? 'yr' : 'mo'}</span>
                                             </div>
                                             {billingCycle === 'yearly' && (
                                                 <div className="mt-2 text-sm text-green-400">
@@ -172,16 +172,16 @@ export default function HostingPage() {
                                         </div>
 
                                         <div className="space-y-4 mb-8 flex-1">
-                                            <div className="flex items-center gap-3 text-gray-300">
+                                            <div className="flex items-center gap-3 text-secondary">
                                                 <Database className="w-5 h-5 text-blue-500" />
                                                 <span><strong>{plan.storage_gb} GB</strong> Storage</span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-gray-300">
+                                            <div className="flex items-center gap-3 text-secondary">
                                                 <Zap className="w-5 h-5 text-yellow-500" />
                                                 <span><strong>{plan.bandwidth_text}</strong> Bandwidth</span>
                                             </div>
                                             {plan.features.map((feature, i) => (
-                                                <div key={i} className="flex items-center gap-3 text-gray-300">
+                                                <div key={i} className="flex items-center gap-3 text-secondary">
                                                     <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
                                                     <span>{feature}</span>
                                                 </div>
@@ -190,7 +190,7 @@ export default function HostingPage() {
 
                                         <Link
                                             href={`/checkout/hosting/${plan.slug}?billing=${billingCycle}`}
-                                            className="block w-full py-3 text-center bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                            className="block w-full py-3 text-center bg-secondary hover:bg-secondary/80 border border-border/60 rounded-lg font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
                                         >
                                             Get Started
                                         </Link>
@@ -202,14 +202,14 @@ export default function HostingPage() {
                 </div>
 
                 {/* Features Section */}
-                <div className="container mx-auto px-4 py-20 border-t border-white/10">
+                <div className="container mx-auto px-4 py-20 border-t border-border/60">
                     <div className="grid md:grid-cols-3 gap-12 text-center">
                         <div>
                             <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <Shield className="w-8 h-8 text-blue-500" />
                             </div>
                             <h3 className="text-xl font-bold mb-3">Secure & Reliable</h3>
-                            <p className="text-gray-400">
+                            <p className="text-muted">
                                 Advanced security measures and 99.9% uptime guarantee to keep your site safe and online.
                             </p>
                         </div>
@@ -218,7 +218,7 @@ export default function HostingPage() {
                                 <Cpu className="w-8 h-8 text-purple-500" />
                             </div>
                             <h3 className="text-xl font-bold mb-3">High Performance</h3>
-                            <p className="text-gray-400">
+                            <p className="text-muted">
                                 Powered by latest generation hardware and NVMe SSDs for lightning fast load times.
                             </p>
                         </div>
@@ -227,7 +227,7 @@ export default function HostingPage() {
                                 <Check className="w-8 h-8 text-green-500" />
                             </div>
                             <h3 className="text-xl font-bold mb-3">24/7 Support</h3>
-                            <p className="text-gray-400">
+                            <p className="text-muted">
                                 Our expert support team is always available to help you with any issues or questions.
                             </p>
                         </div>

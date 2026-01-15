@@ -16,6 +16,8 @@ import { PlatformSection } from '@/components/sections/platform-section';
 import { PortfoliosSection } from '@/components/sections/portfolios-section';
 import { TechStackSection } from '@/components/sections/tech-stack-section';
 import { HostingSection } from '@/components/sections/hosting-section';
+import { ClassesSection } from '@/components/sections/classes-section';
+import { CareersSection } from '@/components/sections/careers-section';
 
 // JSON-LD Structured Data for SEO
 const jsonLd = {
@@ -92,16 +94,18 @@ export default function Home() {
 
           <HeroWithTabs />
           <ServicesSection />
+          <ClassesSection />
+          <CareersSection />
           <TechStackSection />
           <ProjectsSection />
           <PortfoliosSection />
 
-          <PostsSection />
-          <MonitorSection />
+          {/* <PostsSection /> */}
+          {/* <MonitorSection /> */}
           <PlatformSection />
-          <EvolveSection />
+          {/* <EvolveSection /> */}
           <CustomersSection />
-          <TweetsSection />
+          {/* <TweetsSection /> */}
           <StatsSection />
           <CTASection />
           <HostingSection />

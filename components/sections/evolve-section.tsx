@@ -39,7 +39,7 @@ const GlowingRail = () => (
 
 export function EvolveSection() {
     return (
-        <section className="relative py-24 px-6 overflow-hidden bg-black">
+        <section className="relative py-24 px-6 overflow-hidden bg-background">
             {/* Background grid */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
@@ -59,13 +59,13 @@ export function EvolveSection() {
                             Evolve and Collaborate
                         </span>
 
-                        <h2 className="text-4xl md:text-5xl font-bold text-white leading-[1.1]">
+                        <h2 className="text-4xl md:text-5xl font-bold text-primary leading-[1.1]">
                             Accelerate development with PR environments, baremetal builds, and automatic infrastructure versioning
                         </h2>
 
-                        <p className="text-gray-400 text-lg leading-relaxed">
+                        <p className="text-muted text-lg leading-relaxed">
                             Seamlessly evolve your infrastructure with forking, automatic versioning, and baremetal for faster-than-cloud build times.{' '}
-                            <a href="#" className="text-white font-medium hover:text-emerald-300 transition-colors inline-flex items-center gap-1">
+                            <a href="#" className="text-primary font-medium hover:text-emerald-500 transition-colors inline-flex items-center gap-1">
                                 Learn More <span>→</span>
                             </a>
                         </p>
@@ -75,11 +75,11 @@ export function EvolveSection() {
                             <div className="flex items-center gap-2">
                                 <TrendingUp className="w-5 h-5 text-emerald-400" />
                                 <span className="text-emerald-400 font-bold text-xl">50%</span>
-                                <span className="text-gray-400">faster builds</span>
+                                <span className="text-muted">faster builds</span>
                             </div>
-                            <div className="h-6 w-px bg-gray-700" />
+                            <div className="h-6 w-px bg-border" />
                             <div className="flex items-center gap-3">
-                                <span className="text-gray-400">Replaces</span>
+                                <span className="text-muted">Replaces</span>
                                 <div className="flex gap-2">
                                     <div className="w-7 h-7 rounded bg-teal-500/20 flex items-center justify-center text-sm text-teal-400 font-medium">V</div>
                                     <div className="w-7 h-7 rounded bg-blue-500/20 flex items-center justify-center text-sm text-blue-400 font-medium">H</div>

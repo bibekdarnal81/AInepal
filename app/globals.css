@@ -46,9 +46,136 @@
 :root {
   --radius: 0.75rem;
 
+  /* Light theme */
+  --background: #f7faf9;
+  --foreground: #0b1b15;
+
+  /* Typography tokens */
+  --font-size-xs: 0.75rem;
+  --line-height-xs: 1rem;
+  --font-size-sm: 0.875rem;
+  --line-height-sm: 1.25rem;
+  --font-size-base: 1rem;
+  --line-height-base: 1.5rem;
+  --font-size-lg: 1.125rem;
+  --line-height-lg: 1.75rem;
+  --font-size-xl: 1.25rem;
+  --line-height-xl: 1.75rem;
+  --font-size-2xl: 1.5rem;
+  --line-height-2xl: 2rem;
+  --font-size-3xl: 1.875rem;
+  --line-height-3xl: 2.25rem;
+  --font-size-4xl: 2.25rem;
+  --line-height-4xl: 2.5rem;
+  --font-size-5xl: 3rem;
+  --line-height-5xl: 1;
+
+  /* Text color tokens */
+  --text-primary: #0b1b15;
+  --text-secondary: #1e3329;
+  --text-muted: #5b7284;
+  --text-inverse: #ffffff;
+  --text-accent: #0d9488;
+  --text-success: #16a34a;
+  --text-warning: #d97706;
+  --text-danger: #dc2626;
+
+  /* Diagram tokens */
+  --diagram-bg: #f2f6f5;
+  --diagram-panel: #f7faf9;
+  --diagram-surface: #ffffff;
+  --diagram-surface-strong: #edf2f0;
+  --diagram-border: #cddad4;
+  --diagram-border-strong: #b7c7c0;
+  --diagram-text-primary: #0b1b15;
+  --diagram-text-muted: #5b7284;
+  --diagram-text-subtle: #8da0ad;
+  --diagram-text-soft: #a6b3bc;
+  --diagram-dot: rgba(11, 27, 21, 0.12);
+  --diagram-accent: #1d4ed8;
+  --diagram-accent-strong: #2563eb;
+  --diagram-accent-surface: #e1ecff;
+  --diagram-success: #15803d;
+  --diagram-success-strong: #16a34a;
+  --diagram-success-border: #b7dfc7;
+  --diagram-success-surface: #e6f6ee;
+  --diagram-success-line: #1f8a5a;
+  --diagram-info: #1e40af;
+  --diagram-violet: #7c3aed;
+  --diagram-warning: #d97706;
+  --diagram-danger: #dc2626;
+
+  --card: #ffffff;
+  --card-foreground: #0b1b15;
+
+  --popover: #ffffff;
+  --popover-foreground: #0b1b15;
+
+  /* Primary teal/emerald matching logo */
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+
+  /* Secondary with subtle teal tint */
+  --secondary: #e8f3ef;
+  --secondary-foreground: #0b1b15;
+
+  --muted: #edf5f2;
+  --muted-foreground: #5b7284;
+
+  --accent: #14b8a6;
+  --accent-foreground: #0b1b15;
+
+  --destructive: #ef4444;
+  --border: rgba(16, 185, 129, 0.2);
+  --input: rgba(16, 185, 129, 0.15);
+  --ring: #10b981;
+
+  /* Gradient colors for Dunzo modern aesthetic */
+  --gradient-teal: #14b8a6;
+  --gradient-emerald: #10b981;
+  --gradient-cyan: #06b6d4;
+  --gradient-green: #22c55e;
+}
+
+.dark {
   /* Dunzo Modern Software Company Theme - Teal/Emerald */
   --background: #0a0f0d;
   --foreground: #ffffff;
+
+  /* Text color tokens */
+  --text-primary: #ffffff;
+  --text-secondary: #d0e2da;
+  --text-muted: #94a3b8;
+  --text-inverse: #0a0f0d;
+  --text-accent: #2dd4bf;
+  --text-success: #4ade80;
+  --text-warning: #fbbf24;
+  --text-danger: #f87171;
+
+  /* Diagram tokens */
+  --diagram-bg: #0D0C14;
+  --diagram-panel: #13111C;
+  --diagram-surface: #181622;
+  --diagram-surface-strong: #201F2D;
+  --diagram-border: #ffffff;
+  --diagram-border-strong: #33323E;
+  --diagram-text-primary: #F7F7F8;
+  --diagram-text-muted: #868593;
+  --diagram-text-subtle: #535260;
+  --diagram-text-soft: #A1A0AB;
+  --diagram-dot: rgba(255, 255, 255, 0.06);
+  --diagram-accent: #1D4596;
+  --diagram-accent-strong: #5E8EED;
+  --diagram-accent-surface: #0F1B33;
+  --diagram-success: #42946E;
+  --diagram-success-strong: #72C09C;
+  --diagram-success-border: #1C362A;
+  --diagram-success-surface: #161D1A;
+  --diagram-success-line: #367859;
+  --diagram-info: #336791;
+  --diagram-violet: #853BCE;
+  --diagram-warning: #EAB308;
+  --diagram-danger: #D82C20;
 
   /* Card backgrounds with slight elevation */
   --card: #121a16;
@@ -145,6 +272,85 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Typography utility tokens */
+  .text-xs {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-xs);
+  }
+
+  .text-sm {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-sm);
+  }
+
+  .text-base {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+  }
+
+  .text-lg {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-lg);
+  }
+
+  .text-xl {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-xl);
+  }
+
+  .text-2xl {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-2xl);
+  }
+
+  .text-3xl {
+    font-size: var(--font-size-3xl);
+    line-height: var(--line-height-3xl);
+  }
+
+  .text-4xl {
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-4xl);
+  }
+
+  .text-5xl {
+    font-size: var(--font-size-5xl);
+    line-height: var(--line-height-5xl);
+  }
+
+  /* Text color utilities */
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  .text-inverse {
+    color: var(--text-inverse);
+  }
+
+  .text-accent {
+    color: var(--text-accent);
+  }
+
+  .text-success {
+    color: var(--text-success);
+  }
+
+  .text-warning {
+    color: var(--text-warning);
+  }
+
+  .text-danger {
+    color: var(--text-danger);
   }
 
   /* Glassmorphism effect */

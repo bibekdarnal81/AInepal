@@ -38,7 +38,7 @@ const customerStories = [
 
 export function CustomersSection() {
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-black">
+        <section className="relative py-32 px-6 overflow-hidden bg-background">
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 dot-grid" />
             </div>
@@ -49,15 +49,15 @@ export function CustomersSection() {
                     className="text-center mb-16"
                     {...fadeInUp}
                 >
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
                         Trusted by the best in business
                     </h2>
-                    <p className="text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-muted max-w-2xl mx-auto">
                          Dunzo supports great software teams wherever they are. Hear from some of the teams building their products on  Dunzo.
                     </p>
                     <motion.a
                         href="#"
-                        className="inline-flex items-center gap-2 text-teal-400 font-medium hover:text-teal-300 transition-colors mt-4"
+                        className="inline-flex items-center gap-2 text-teal-500 font-medium hover:text-teal-400 transition-colors mt-4"
                         {...fadeInUp}
                         transition={{ delay: 0.2 }}
                     >
@@ -70,13 +70,13 @@ export function CustomersSection() {
                     {customerStories.map((story, i) => (
                         <motion.div
                             key={i}
-                            className="bg-zinc-900/50 border border-white/10 rounded-xl p-6 hover:border-white/20 transition-colors"
+                            className="bg-card border border-border/60 rounded-xl p-6 hover:border-border transition-colors"
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
                         >
-                            <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                            <p className="text-secondary text-lg leading-relaxed mb-6">
                                 "{story.quote}"
                             </p>
                             <div className="flex items-center gap-4">
@@ -84,8 +84,8 @@ export function CustomersSection() {
                                     {story.avatar}
                                 </div>
                                 <div>
-                                    <p className="text-white font-medium">{story.name}</p>
-                                    <p className="text-gray-500 text-sm">{story.role}</p>
+                                    <p className="text-primary font-medium">{story.name}</p>
+                                    <p className="text-muted text-sm">{story.role}</p>
                                 </div>
                             </div>
                         </motion.div>
