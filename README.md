@@ -154,4 +154,5 @@ await deleteFile('path/to/file.jpg');
 - If using public URLs, ensure public access is enabled on your bucket
 - If using presigned URLs, they expire after 1 hour by default
 
-#  Dunzo
+#  AINepal
+# Ainepal
