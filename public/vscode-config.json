@@ -1,0 +1,26 @@
+{
+    "name": "AINepal Chat Extension",
+    "version": "1.0.0",
+    "auth": {
+        "loginUrl": "http://localhost:3000/vscode/auth",
+        "tokenUrl": "http://localhost:3000/api/vscode/auth/token"
+    },
+    "api": {
+        "chatUrl": "http://localhost:3000/api/vscode/chat",
+        "headers": {
+            "Authorization": "Bearer <YOUR_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "payload": {
+            "prompt": "Your question",
+            "modelId": "default",
+            "fileName": "optional_filename.ts",
+            "selection": "optional_selected_code",
+            "language": "optional_language_id"
+        }
+    },
+    "links": {
+        "documentation": "http://localhost:3000/docs",
+        "support": "http://localhost:3000/support"
+    }
+}

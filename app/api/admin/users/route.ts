@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
             membershipId?: mongoose.Types.ObjectId
             membershipStatus?: string
             membershipExpiresAt?: Date | null
+            advancedCredits?: number
         }>
 
         return NextResponse.json({
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
                 membershipId: u.membershipId ? u.membershipId.toString() : null,
                 membershipStatus: u.membershipStatus || 'none',
                 membershipExpiresAt: u.membershipExpiresAt || null,
+                advancedCredits: u.advancedCredits || 0
             })),
             pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
         })
@@ -66,7 +68,7 @@ export async function PUT(request: NextRequest) {
     try {
         if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         await dbConnect()
-        const { id, isAdmin: newAdminStatus, isSuspended, membershipId, membershipStatus } = await request.json()
+        const { id, isAdmin: newAdminStatus, isSuspended, membershipId, membershipStatus, advancedCreditsToAdd } = await request.json()
         if (!id || !mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
 
         const updateData: Record<string, unknown> = {}
@@ -120,11 +122,18 @@ export async function PUT(request: NextRequest) {
             }
         }
 
-        if (Object.keys(updateData).length === 0) {
+        if (Object.keys(updateData).length === 0 && !advancedCreditsToAdd) {
             return NextResponse.json({ error: 'No updates provided' }, { status: 400 })
         }
 
-        const user = await User.findByIdAndUpdate(id, updateData, { new: true })
+        const updateOperation: {
+            $set?: Record<string, unknown>
+            $inc?: { advancedCredits: number }
+        } = {}
+        if (Object.keys(updateData).length > 0) updateOperation.$set = updateData
+        if (typeof advancedCreditsToAdd === 'number') updateOperation.$inc = { advancedCredits: advancedCreditsToAdd }
+
+        const user = await User.findByIdAndUpdate(id, updateOperation, { new: true })
         if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 })
         return NextResponse.json({ success: true })
     } catch (error) {

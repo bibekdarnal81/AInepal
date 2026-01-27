@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
 
         // Determine provider
         let provider = 'google'
-        if (model && (model.includes('gpt') || model.includes('dall-e') || model.includes('openai'))) {
+        const lowerModel = model.toLowerCase()
+        if (model && (lowerModel.includes('gpt') || lowerModel.includes('dall-e') || lowerModel.includes('openai'))) {
             provider = 'openai'
         }
 

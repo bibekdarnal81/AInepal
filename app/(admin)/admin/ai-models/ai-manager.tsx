@@ -35,6 +35,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
     const [models, setModels] = useState(initialModels)
     const [keys, setKeys] = useState(initialKeys)
     const [loading, setLoading] = useState(false)
+    const [filterType, setFilterType] = useState('all')
 
     // Form States
     const [newModel, setNewModel] = useState({
@@ -369,11 +370,26 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
 
                     {/* Models List */}
                     <div className="bg-card border border-border rounded-xl p-6">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Bot className="w-5 h-5" /> Configured Models
-                        </h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <Bot className="w-5 h-5" /> Models
+                            </h3>
+                            <select
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                                className="bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-primary"
+                            >
+                                <option value="all">All Models</option>
+                                <option value="image">Image Generation</option>
+                                <option value="video">Video Generation</option>
+                            </select>
+                        </div>
                         <div className="space-y-3">
-                            {models.map(model => (
+                            {models.filter(m => {
+                                if (filterType === 'image') return m.supportsImageGeneration;
+                                if (filterType === 'video') return m.supportsVideoGeneration;
+                                return true;
+                            }).map(model => (
                                 <div key={model._id} className={`flex items-center justify-between p-3 rounded-lg border group ${model.disabled ? 'bg-red-500/10 border-red-500/30' : 'bg-secondary/30 border-border/50'}`}>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
@@ -409,9 +425,13 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                                     </div>
                                 </div>
                             ))}
-                            {models.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center py-4">No models configured.</p>
-                            )}
+                            {models.filter(m => {
+                                if (filterType === 'image') return m.supportsImageGeneration;
+                                if (filterType === 'video') return m.supportsVideoGeneration;
+                                return true;
+                            }).length === 0 && (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No matching models found.</p>
+                                )}
                         </div>
                     </div>
                 </div>

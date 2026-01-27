@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { User, LogOut } from "lucide-react"
+import { User, LogOut, Monitor } from "lucide-react"
 import Link from "next/link"
+import { GenerateTokenButton } from "@/components/settings/generate-token-button"
 
 export default async function DashboardSettingsPage() {
     const session = await getServerSession(authOptions)
@@ -53,6 +54,18 @@ export default async function DashboardSettingsPage() {
                             Sign Out
                         </Link>
                     </div>
+                </div>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <Monitor className="w-5 h-5 text-primary" />
+                    IDE Connections
+                </h2>
+                <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                        Connect your VS Code extension to access AI features directly in your editor.
+                    </p>
+                    <GenerateTokenButton />
                 </div>
             </div>
         </div>

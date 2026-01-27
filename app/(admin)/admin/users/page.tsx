@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { Search, Loader2, ChevronLeft, ChevronRight, Users, Shield, ShieldOff, User, Trash2, Ban, CheckCircle, MessageSquare } from 'lucide-react'
+import React, { useEffect, useState, useRef } from 'react'
+import { Search, Loader2, ChevronLeft, ChevronRight, Users, Shield, ShieldOff, User, Trash2, Ban, CheckCircle, MessageSquare, Coins, Plus, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserData {
@@ -17,6 +17,7 @@ interface UserData {
     membershipId?: string | null
     membershipStatus?: 'none' | 'active' | 'trialing' | 'canceled' | 'expired'
     membershipExpiresAt?: string | null
+    advancedCredits?: number
 }
 
 interface Membership {
@@ -24,6 +25,48 @@ interface Membership {
     name: string
     durationDays: number
     isActive: boolean
+}
+
+function UserActions({ user, toggleAdmin, toggleSuspended, deleteUser }: { user: UserData, toggleAdmin: (id: string, s: boolean) => void, toggleSuspended: (id: string, s: boolean) => void, deleteUser: (id: string) => void }) {
+    const [isOpen, setIsOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                setIsOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [ref])
+
+    return (
+        <div className="relative" ref={ref}>
+            <button onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                <MoreHorizontal className="h-4 w-4" />
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                    <div className="p-1 space-y-0.5">
+                        <button onClick={() => { setIsOpen(false); toggleAdmin(user.id, user.isAdmin) }} className={`w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 transition-colors ${user.isAdmin ? 'text-red-500 hover:bg-red-500/10' : 'text-green-500 hover:bg-green-500/10'}`}>
+                            {user.isAdmin ? <><ShieldOff className="h-4 w-4" /> Remove Admin</> : <><Shield className="h-4 w-4" /> Make Admin</>}
+                        </button>
+                        <button onClick={() => { setIsOpen(false); toggleSuspended(user.id, user.isSuspended) }} className={`w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 transition-colors ${user.isSuspended ? 'text-green-500 hover:bg-green-500/10' : 'text-orange-500 hover:bg-orange-500/10'}`}>
+                            {user.isSuspended ? <><CheckCircle className="h-4 w-4" /> Activate User</> : <><Ban className="h-4 w-4" /> Suspend User</>}
+                        </button>
+                        <Link href={`/admin/chat?userId=${user.id}`} className="w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 text-blue-500 hover:bg-blue-500/10 transition-colors">
+                            <MessageSquare className="h-4 w-4" /> Message User
+                        </Link>
+                        <div className="h-px bg-border my-1" />
+                        <button onClick={() => { setIsOpen(false); deleteUser(user.id) }} className="w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 text-red-500 hover:bg-red-500/10 transition-colors">
+                            <Trash2 className="h-4 w-4" /> Delete User
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
 }
 
 export default function AdminUsersPage() {
@@ -96,6 +139,28 @@ export default function AdminUsersPage() {
         }
     }
 
+    const addCredits = async (id: string) => {
+        const amountStr = prompt('Enter amount of credits to add (use negative to deduct):')
+        if (!amountStr) return
+        const amount = parseInt(amountStr)
+        if (isNaN(amount)) {
+            alert('Invalid number')
+            return
+        }
+
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, advancedCreditsToAdd: amount }),
+            })
+            if (res.ok) fetchData()
+            else alert('Failed to add credits')
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div><h1 className="text-3xl font-bold">Users</h1><p className="text-muted-foreground mt-1">Manage registered users ({total})</p></div>
@@ -105,7 +170,7 @@ export default function AdminUsersPage() {
                 <select value={adminFilter} onChange={e => setAdminFilter(e.target.value)} className="px-4 py-2 bg-card border border-border rounded-lg"><option value="">All Users</option><option value="true">Admins Only</option><option value="false">Non-Admins</option></select>
             </div>
 
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="bg-card border border-border rounded-xl">
                 {loading ? <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : users.length === 0 ? (
                     <div className="flex flex-col items-center py-20"><Users className="h-12 w-12 text-muted-foreground mb-4" /><h3 className="text-lg font-medium">No users found</h3></div>
                 ) : (
@@ -115,6 +180,7 @@ export default function AdminUsersPage() {
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">User</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Email</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Membership</th>
+                                <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Credits</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Expires</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Role</th>
@@ -145,6 +211,21 @@ export default function AdminUsersPage() {
                                         </select>
                                     </td>
                                     <td className="px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium flex items-center gap-1">
+                                                <Coins className="h-3 w-3 text-yellow-500" />
+                                                {u.advancedCredits || 0}
+                                            </span>
+                                            <button
+                                                onClick={() => addCredits(u.id)}
+                                                className="p-1 hover:bg-primary/10 text-primary rounded transition-colors"
+                                                title="Add credits"
+                                            >
+                                                <Plus className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3">
                                         <select
                                             value={u.membershipStatus || 'none'}
                                             disabled={!u.membershipId}
@@ -167,11 +248,8 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td className="px-4 py-3 text-sm text-muted-foreground">{new Date(u.createdAt).toLocaleDateString()}</td>
                                     <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1">
-                                            <button onClick={() => toggleAdmin(u.id, u.isAdmin)} className={`p-2 rounded-lg transition-colors ${u.isAdmin ? 'hover:bg-red-500/10 text-red-500' : 'hover:bg-green-500/10 text-green-500'}`} title={u.isAdmin ? 'Remove admin' : 'Make admin'}>{u.isAdmin ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</button>
-                                            <button onClick={() => toggleSuspended(u.id, u.isSuspended)} className={`p-2 rounded-lg transition-colors ${u.isSuspended ? 'hover:bg-green-500/10 text-green-500' : 'hover:bg-orange-500/10 text-orange-500'}`} title={u.isSuspended ? 'Activate user' : 'Suspend user'}>{u.isSuspended ? <CheckCircle className="h-4 w-4" /> : <Ban className="h-4 w-4" />}</button>
-                                            <Link href={`/admin/chat?userId=${u.id}`} className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-500 transition-colors" title="Message user"><MessageSquare className="h-4 w-4" /></Link>
-                                            <button onClick={() => deleteUser(u.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors" title="Delete user"><Trash2 className="h-4 w-4" /></button>
+                                        <div className="flex justify-end">
+                                            <UserActions user={u} toggleAdmin={toggleAdmin} toggleSuspended={toggleSuspended} deleteUser={deleteUser} />
                                         </div>
                                     </td>
                                 </tr>

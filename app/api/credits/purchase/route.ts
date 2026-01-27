@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import dbConnect from '@/lib/mongodb/client'
-import { addCredits } from '@/lib/credits'
+import { addAdvancedCredits } from '@/lib/credits'
 
 export async function POST(request: NextRequest) {
     try {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
         const description = packId ? `Purchased credit pack: ${packId}` : 'Purchased credits'
 
-        const result = await addCredits(session.user.id, amount, description, {
+        const result = await addAdvancedCredits(session.user.id, amount, description, {
             packId,
             paymentMethod: 'mock',
             status: 'paid'

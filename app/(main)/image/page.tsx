@@ -1,9 +1,9 @@
-import { ImageInterface } from "@/components/home/image-interface"
-import dbConnect from "@/lib/mongodb/client"
-import { AIModel } from "@/lib/mongodb/models"
+import { ThumbnailCreator } from "@/components/image/thumbnail-creator"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
+import dbConnect from "@/lib/mongodb/client"
+import { AIModel } from "@/lib/mongodb/models"
 
 export default async function ImagePage() {
     const session = await getServerSession(authOptions)
@@ -12,17 +12,12 @@ export default async function ImagePage() {
     }
 
     await dbConnect()
-
-    // Fetch active models that support image generation (exclude disabled)
     const models = await AIModel.find({
-        isActive: true,
         supportsImageGeneration: true,
         disabled: { $ne: true }
-    }).sort({ displayOrder: 1 }).lean()
+    }).sort({ displayOrder: 1, displayName: 1 }).lean()
 
-    // Also fetch legacy models for backward compatibility if needed, or rely on admin config
-    // For now, let's pass the fetched models
-    const cleanModels = JSON.parse(JSON.stringify(models))
+    const availableModels = JSON.parse(JSON.stringify(models))
 
-    return <ImageInterface availableModels={cleanModels} />
+    return <ThumbnailCreator availableModels={availableModels} />
 }
