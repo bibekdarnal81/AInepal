@@ -1,5 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
+import dbConnect from '@/lib/mongodb/client'
+import { Post, PostCategory } from '@/lib/mongodb/models'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Calendar } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
@@ -8,21 +10,31 @@ import * as Icons from 'lucide-react'
 export const revalidate = 60 // Revalidate every 60 seconds
 
 export default async function BlogPage() {
-    const supabase = await createClient()
+    await dbConnect()
 
-    const { data: posts } = await supabase
-        .from('posts')
-        .select(`
-            *,
-            post_categories (
-                name,
-                slug,
-                color,
-                icon_name
-            )
-        `)
-        .eq('published', true)
-        .order('created_at', { ascending: false })
+    const posts = await Post.find({ isPublished: true })
+        .populate({
+            path: 'categoryId',
+            model: PostCategory,
+            select: 'name slug color iconName'
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+    const typedPosts = posts as unknown as Array<{
+        _id: string
+        title: string
+        slug: string
+        excerpt?: string
+        content?: string
+        featuredImageUrl?: string
+        createdAt: Date
+        categoryId?: {
+            name: string
+            slug: string
+            color?: string
+            iconName?: string
+        } | null
+    }>
 
     return (
         <div className="min-h-screen bg-background">
@@ -40,25 +52,28 @@ export default async function BlogPage() {
                                 <p className="text-muted-foreground">No posts yet. Check back soon!</p>
                             </div>
                         ) : (
-                            posts.map((post) => {
-                                const categoryInfo = post.post_categories as any
-                                const CategoryIcon = categoryInfo?.icon_name && (Icons as any)[categoryInfo.icon_name]
-                                    ? (Icons as any)[categoryInfo.icon_name]
-                                    : Icons.Tag
+                            typedPosts.map((post) => {
+                                const categoryInfo = post.categoryId
+                                const iconName = categoryInfo?.iconName as keyof typeof Icons | undefined
+                                const CategoryIcon = (iconName && iconName in Icons
+                                    ? Icons[iconName]
+                                    : Icons.Tag) as any
 
                                 return (
                                     <article
-                                        key={post.id}
+                                        key={post._id.toString()}
                                         className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg group"
                                     >
                                         {/* Featured Image */}
-                                        {post.featured_image_url && (
+                                        {post.featuredImageUrl && (
                                             <Link href={`/blog/${post.slug}`}>
-                                                <div className="aspect-video w-full overflow-hidden bg-secondary">
-                                                    <img
-                                                        src={post.featured_image_url}
+                                                <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+                                                    <Image
+                                                        src={post.featuredImageUrl}
                                                         alt={post.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     />
                                                 </div>
                                             </Link>
@@ -97,8 +112,8 @@ export default async function BlogPage() {
                                             <div className="flex items-center justify-between pt-4">
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <Calendar className="h-4 w-4" />
-                                                    <time dateTime={post.created_at}>
-                                                        {new Date(post.created_at).toLocaleDateString('en-US', {
+                                                    <time dateTime={post.createdAt.toString()}>
+                                                        {new Date(post.createdAt).toLocaleDateString('en-US', {
                                                             year: 'numeric',
                                                             month: 'short',
                                                             day: 'numeric'

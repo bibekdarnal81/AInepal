@@ -7,7 +7,7 @@ const plans = [
     {
         name: 'Starter',
         price: 'रू 2,000',
-        period: 'forever',
+        period: 'per month',
         description: 'Perfect for side projects and experimentation',
         features: [
             '500 hours execution time',
@@ -21,7 +21,7 @@ const plans = [
     },
     {
         name: 'Developer',
-        price: 'रू 5,000',
+        price: 'रू 10,000',
         period: 'per month',
         description: 'For professional developers and small teams',
         features: [
@@ -38,7 +38,7 @@ const plans = [
     },
     {
         name: 'Team',
-        price: 'रू 10,000',
+        price: 'रू 20,000',
         period: 'per month',
         description: 'For growing teams and production workloads',
         features: [

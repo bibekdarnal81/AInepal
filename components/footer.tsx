@@ -33,7 +33,7 @@ export function Footer() {
                         <h3 className="text-sm font-semibold text-primary mb-4">Company</h3>
                         <ul className="space-y-3">
                             <li><Link href="#about" className="text-muted hover:text-primary text-sm transition-colors">About</Link></li>
-                            <li><Link href="#careers" className="text-muted hover:text-primary text-sm transition-colors">Careers</Link></li>
+                            <li><Link href="/careers" className="text-muted hover:text-primary text-sm transition-colors">Careers</Link></li>
                             <li><Link href="#contact" className="text-muted hover:text-primary text-sm transition-colors">Contact</Link></li>
                             <li><Link href="#partners" className="text-muted hover:text-primary text-sm transition-colors">Partners</Link></li>
                             <li><Link href="#press" className="text-muted hover:text-primary text-sm transition-colors">Press Kit</Link></li>
@@ -57,15 +57,15 @@ export function Footer() {
                         <div className="flex items-center gap-6">
                             <Link href="/" className="flex items-center gap-2">
                                 <Image
-                                    src="/logo.jpg"
-                                    alt="Dunzo"
-                                    width={32}
-                                    height={32}
-                                    className="w-8 h-8 rounded-lg object-cover"
+                                    src="/logo.png"
+                                    alt="AINepal"
+                                    width={150}
+                                    height={150}
+                                    className="w-30 h-8 rounded-lg object-cover"
                                 />
-                                <span className="text-xl font-bold text-gradient">Dunzo</span>
+
                             </Link>
-                            <p className="text-sm text-muted">© 2025 Dunzo. All rights reserved.</p>
+                            <p className="text-sm text-muted">© 2026 AINepal. All rights reserved.</p>
                         </div>
 
                         <div className="flex gap-6">

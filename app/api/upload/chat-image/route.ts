@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { uploadFile } from '@/lib/r2/operations'
 
 export async function POST(request: NextRequest) {
     try {
         // Verify user is authenticated
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const session = await getServerSession(authOptions)
+        const user = session?.user
 
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -50,21 +51,10 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        // If messageId provided, create attachment record
-        if (messageId) {
-            const { error: attachmentError } = await supabase
-                .from('chat_attachments')
-                .insert({
-                    message_id: messageId,
-                    file_url: uploadResult.url,
-                    file_type: file.type,
-                    file_size: file.size
-                })
+        // Note: Legacy chat_attachments insert removed as we are migrating to MongoDB
+        // and using direct image URL in ChatMessage model if needed.
 
-            if (attachmentError) {
-                console.error('Error creating attachment record:', attachmentError)
-            }
-        }
+
 
         return NextResponse.json({
             url: uploadResult.url,
@@ -72,10 +62,11 @@ export async function POST(request: NextRequest) {
             fileType: file.type,
             fileSize: file.size
         })
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error uploading chat image:', error)
+        const message = error instanceof Error ? error.message : 'Upload failed'
         return NextResponse.json(
-            { error: error.message || 'Upload failed' },
+            { error: message },
             { status: 500 }
         )
     }

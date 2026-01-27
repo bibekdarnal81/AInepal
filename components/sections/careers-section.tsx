@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+
 import { BriefcaseBusiness, MapPin, ArrowRight } from 'lucide-react';
 
 interface CareerItem {
@@ -16,24 +16,23 @@ interface CareerItem {
 
 export function CareersSection() {
     const [careers, setCareers] = useState<CareerItem[]>([]);
-    const supabase = createClient();
+
 
     useEffect(() => {
         const fetchCareers = async () => {
-            const { data } = await supabase
-                .from('careers')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true })
-                .limit(3);
-
-            if (data) {
-                setCareers(data as CareerItem[]);
+            try {
+                const response = await fetch('/api/careers');
+                if (response.ok) {
+                    const data = await response.json();
+                    setCareers(data);
+                }
+            } catch (error) {
+                console.error('Error fetching careers:', error);
             }
         };
 
         fetchCareers();
-    }, [supabase]);
+    }, []);
 
     if (careers.length === 0) return null;
 
@@ -47,7 +46,7 @@ export function CareersSection() {
                             Careers
                         </div>
                         <h2 className="text-3xl md:text-4xl font-bold text-primary">
-                            Join the team building Dunzo
+                            Join the team building AINepal
                         </h2>
                         <p className="text-muted mt-3 max-w-2xl">
                             Open roles across product, engineering, and growth. Build with a team that ships.

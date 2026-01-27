@@ -52,7 +52,7 @@ export default function BookDemoPage() {
                                 </div>
 
                                 <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-                                    Let's build something <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">extraordinary</span> together.
+                                    Let&apos;s build something <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">extraordinary</span> together.
                                 </h1>
 
                                 <p className="text-lg text-zinc-400 mb-10 leading-relaxed font-light">
@@ -111,7 +111,7 @@ export default function BookDemoPage() {
                             >
                                 <div className="mb-8">
                                     <h2 className="text-2xl font-bold text-foreground mb-2">Request Your Demo</h2>
-                                    <p className="text-muted-foreground">Fill in the details below and we'll get back to you within 24 hours.</p>
+                                    <p className="text-muted-foreground">Fill in the details below and we&apos;ll get back to you within 24 hours.</p>
                                 </div>
 
                                 <div className="bg-card rounded-2xl border border-border/60 shadow-xl shadow-primary/5 p-6 md:p-8">

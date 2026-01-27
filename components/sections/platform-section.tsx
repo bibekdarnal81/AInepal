@@ -73,7 +73,7 @@ export function PlatformSection() {
                                 {...fadeInUp}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                Dunzo provides automated service discovery, blazing fast
+                                AINepal provides automated service discovery, blazing fast
                                 networking, and support for any protocol, all out of the box.
                             </motion.p>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, X, Check } from 'lucide-react';
 
 interface ThumbnailUploadProps {
@@ -8,6 +8,7 @@ interface ThumbnailUploadProps {
     onUploadComplete: (url: string) => void;
     label?: string;
     description?: string;
+    inputId?: string;
 }
 
 export default function ThumbnailUpload({
@@ -15,11 +16,16 @@ export default function ThumbnailUpload({
     onUploadComplete,
     label = 'Thumbnail',
     description = 'Upload image (max 10MB, formats: JPEG, PNG, WebP, GIF)',
+    inputId = 'thumbnail-upload',
 }: ThumbnailUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [thumbnailUrl, setThumbnailUrl] = useState(currentUrl || '');
     const [error, setError] = useState<string | null>(null);
     const [uploadSuccess, setUploadSuccess] = useState(false);
+
+    useEffect(() => {
+        setThumbnailUrl(currentUrl || '');
+    }, [currentUrl]);
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -105,7 +111,7 @@ export default function ThumbnailUpload({
                 {/* File Upload Button */}
                 <div className="flex gap-3">
                     <label
-                        htmlFor="thumbnail-upload"
+                        htmlFor={inputId}
                         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${uploading
                             ? 'bg-secondary text-muted-foreground cursor-wait'
                             : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -124,7 +130,7 @@ export default function ThumbnailUpload({
                         )}
                     </label>
                     <input
-                        id="thumbnail-upload"
+                        id={inputId}
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/gif"
                         onChange={handleFileChange}

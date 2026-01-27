@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import Image from 'next/image';
 import { ArrowRight, Sparkles, Tag } from 'lucide-react';
 
 interface BundleOffer {
@@ -22,20 +21,18 @@ export function BundleOffersSection() {
 
     useEffect(() => {
         const fetchOffers = async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('bundle_offers')
-                .select('*')
-                .eq('is_active', true)
-                .eq('show_on_home', true)
-                .order('created_at', { ascending: false });
-
-            if (error) {
+            try {
+                const response = await fetch('/api/bundles?showOnHome=true');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch bundle offers');
+                }
+                const data = await response.json();
+                setOffers(data);
+            } catch (error) {
                 console.error('Error fetching bundle offers:', error);
-            } else if (data) {
-                setOffers(data as BundleOffer[]);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         fetchOffers();
@@ -78,10 +75,12 @@ export function BundleOffersSection() {
                                 {/* Poster Image */}
                                 <div className="relative h-48 w-full overflow-hidden bg-muted/40">
                                     {offer.poster_url ? (
-                                        <img
+                                        <Image
                                             src={offer.poster_url}
                                             alt={offer.name}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-muted bg-muted/60">

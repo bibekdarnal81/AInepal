@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import Image from 'next/image';
+
 import { Calendar, Clock, GraduationCap, ArrowRight } from 'lucide-react';
 
 interface ClassItem {
@@ -21,25 +22,21 @@ interface ClassItem {
 
 export function ClassesSection() {
     const [classes, setClasses] = useState<ClassItem[]>([]);
-    const supabase = createClient();
-
     useEffect(() => {
         const fetchClasses = async () => {
-            const { data } = await supabase
-                .from('classes')
-                .select('*')
-                .eq('is_published', true)
-                .order('is_featured', { ascending: false })
-                .order('display_order', { ascending: true })
-                .limit(3);
-
-            if (data) {
-                setClasses(data as ClassItem[]);
+            try {
+                const response = await fetch('/api/classes');
+                if (response.ok) {
+                    const data = await response.json();
+                    setClasses(data);
+                }
+            } catch (error) {
+                console.error('Error fetching classes:', error);
             }
         };
 
         fetchClasses();
-    }, [supabase]);
+    }, []);
 
     if (classes.length === 0) return null;
 
@@ -75,12 +72,14 @@ export function ClassesSection() {
                             href={`/classes/${item.slug}`}
                             className="group rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-emerald-500/40 transition-colors"
                         >
-                            <div className="h-40 w-full bg-secondary/60 overflow-hidden">
+                            <div className="relative h-40 w-full bg-secondary/60 overflow-hidden">
                                 {item.thumbnail_url ? (
-                                    <img
+                                    <Image
                                         src={item.thumbnail_url}
                                         alt={item.title}
-                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     />
                                 ) : (
                                     <div className="h-full w-full flex items-center justify-center text-muted">

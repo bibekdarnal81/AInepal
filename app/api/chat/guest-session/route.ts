@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { randomBytes } from 'crypto'
+import dbConnect from '@/lib/mongodb/client'
+import { GuestChatSession, ChatMessage } from '@/lib/mongodb/models'
 
 export async function POST(request: NextRequest) {
     try {
@@ -34,49 +35,38 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        await dbConnect()
+
         // Generate unique session token
         const sessionToken = randomBytes(32).toString('hex')
 
-        // Create guest session in database using admin client (bypasses RLS)
-        const supabase = createAdminClient()
-        const { data: session, error } = await supabase
-            .from('guest_chat_sessions')
-            .insert({
-                guest_name: name.trim(),
-                guest_email: email.trim().toLowerCase(),
-                guest_phone: phone?.trim() || null,
-                initial_question: question?.trim() || null,
-                session_token: sessionToken
-            })
-            .select()
-            .single()
-
-        if (error) {
-            console.error('Error creating guest session:', error)
-            return NextResponse.json(
-                {
-                    error: 'Failed to create guest session',
-                    details: error.message,
-                    code: error.code,
-                    hint: error.hint
-                },
-                { status: 500 }
-            )
-        }
+        // Create guest session in database
+        const session = await GuestChatSession.create({
+            sessionToken,
+            guestName: name.trim(),
+            guestEmail: email.trim().toLowerCase(),
+            isActive: true,
+            lastActivityAt: new Date(),
+        })
 
         // If there's an initial question, create the first chat message
         if (question?.trim()) {
-            await supabase
-                .from('chat_messages')
-                .insert({
-                    guest_session_id: session.id,
-                    message: question.trim(),
-                    is_admin: false,
-                    is_read: false
-                })
+            await ChatMessage.create({
+                guestSessionId: session._id,
+                message: question.trim(),
+                isAdmin: false,
+                isRead: false
+            })
         }
 
-        return NextResponse.json(session)
+        return NextResponse.json({
+            id: session._id.toString(),
+            session_token: session.sessionToken,
+            guest_name: session.guestName,
+            guest_email: session.guestEmail,
+            is_active: session.isActive,
+            created_at: session.createdAt,
+        })
     } catch (error) {
         console.error('Error in guest session API:', error)
         return NextResponse.json(

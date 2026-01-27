@@ -38,7 +38,7 @@ export function CTASection() {
                         Ready to Transform Your Business?
                     </h2>
                     <p className="text-xl text-muted-foreground mb-8 text-balance">
-                        See how Dunzo can streamline your operations and drive growth. Schedule a personalized demo today.
+                        See how AINepal can streamline your operations and drive growth. Schedule a personalized demo today.
                     </p>
                     <motion.button
                         onClick={() => setIsDemoModalOpen(true)}

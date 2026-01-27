@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { MessageSquare, X, Send, Paperclip, DollarSign, User as UserIcon, ShoppingBag, BookOpen, Bot, Sparkles } from 'lucide-react'
 import Image from 'next/image'
-import type { User } from '@supabase/supabase-js'
 import { createGuestSession, getGuestSessionFromStorage, isValidEmail, isValidPhone, type GuestSession } from '@/lib/chat/guest-session-manager'
+import { CatalogBrowse } from '../catalog/catalog-browse'
+import { GuestChatForm } from './guest-chat-form'
 
 interface Order {
     id: string
@@ -16,8 +16,6 @@ interface Order {
     status: string
     created_at: string
 }
-
-
 
 interface ChatMessage {
     id: string
@@ -34,6 +32,14 @@ interface ChatMessage {
 interface UserProfile {
     display_name: string
     avatar_url: string
+    id: string
+}
+
+interface User {
+    id: string
+    email?: string
+    name?: string
+    image?: string
 }
 
 export function ChatWidget() {
@@ -57,7 +63,7 @@ export function ChatWidget() {
     const [aiTyping, setAiTyping] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const supabase = createClient()
+    const pollingInterval = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         const init = async () => {
@@ -65,16 +71,19 @@ export function ChatWidget() {
             checkGuestSession(currentUser)
         }
         init()
+        return () => stopPolling()
     }, [])
 
     useEffect(() => {
         if ((user || guestSession) && isOpen) {
             if (user) {
-                fetchUserProfile()
+                // fetchUserProfile() // User profile info is mainly from session now
                 fetchAdminProfile()
             }
             fetchMessages()
-            subscribeToMessages()
+            startPolling()
+        } else {
+            stopPolling()
         }
     }, [user, guestSession, isOpen])
 
@@ -96,10 +105,44 @@ export function ChatWidget() {
         }
     }, [])
 
+    const startPolling = () => {
+        if (pollingInterval.current) return
+        pollingInterval.current = setInterval(() => {
+            fetchMessages()
+        }, 3000) // Poll every 3 seconds
+    }
+
+    const stopPolling = () => {
+        if (pollingInterval.current) {
+            clearInterval(pollingInterval.current)
+            pollingInterval.current = null
+        }
+    }
+
     const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-        return user
+        try {
+            const response = await fetch('/api/auth/session')
+            const session = await response.json()
+            console.log('Chat widget - session check:', session?.user?.id, session?.user?.email);
+            if (session?.user) {
+                const userData = {
+                    id: session.user.id,
+                    email: session.user.email,
+                    name: session.user.name,
+                    image: session.user.image
+                }
+                setUser(userData)
+                setUserProfile({
+                    id: session.user.id,
+                    display_name: session.user.name || 'User',
+                    avatar_url: session.user.image || ''
+                })
+                return userData
+            }
+        } catch (error) {
+            console.error('Error checking user session:', error)
+        }
+        return null
     }
 
     const checkGuestSession = (currentUser: any) => {
@@ -112,137 +155,56 @@ export function ChatWidget() {
         }
     }
 
-    const fetchUserProfile = async () => {
-        if (!user) return
-
-        const { data } = await supabase
-            .from('profiles')
-            .select('display_name, avatar_url')
-            .eq('id', user.id)
-            .single()
-
-        if (data) {
-            setUserProfile(data)
-        }
-    }
-
     const fetchAdminProfile = async () => {
-        if (!user) return
-
-        // Get admin avatar from the first admin message's sender
-        const { data: adminMessages } = await supabase
-            .from('chat_messages')
-            .select('user_id')
-            .eq('user_id', user.id)
-            .eq('is_admin', true)
-            .limit(1)
-
-        if (adminMessages && adminMessages.length > 0) {
-            // If there are admin messages, try to get admin's avatar
-            // For now, we'll use a default approach - you can customize this
-            // to fetch the specific admin user's profile
-            const { data: profiles } = await supabase
-                .from('profiles')
-                .select('avatar_url')
-                .neq('id', user.id)
-                .limit(1)
-                .single()
-
-            if (profiles?.avatar_url) {
-                setAdminAvatar(profiles.avatar_url)
-            }
-        }
+        // Simplified: Use a default admin avatar or fetch if needed
+        // For now, hardcoded placeholder or logic can go here
+        setAdminAvatar('https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff')
     }
 
     const fetchOrders = async () => {
         if (!user) return
 
-        const { data } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-
-        if (data) {
-            setOrders(data)
+        try {
+            const response = await fetch('/api/orders')
+            if (response.ok) {
+                const data = await response.json()
+                setOrders(data)
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error)
         }
     }
-
-
 
     const fetchMessages = async () => {
         if (!user && !guestSession) return
 
-        const query = supabase
-            .from('chat_messages')
-            .select('*')
-            .order('created_at', { ascending: true })
-
+        let url = '/api/chat/messages?'
         if (user) {
-            query.eq('user_id', user.id)
+            url += `userId=${user.id}`
         } else if (guestSession) {
-            query.eq('guest_session_id', guestSession.id)
+            url += `guestSessionId=${guestSession.id}`
         }
 
-        const { data: messagesData } = await query
-
-        if (messagesData) {
-            // Fetch attachments for all messages
-            const messageIds = messagesData.map(m => m.id)
-            const { data: attachmentsData } = await supabase
-                .from('chat_attachments')
-                .select('*')
-                .in('message_id', messageIds)
-
-            // Combine messages with their attachments
-            const messagesWithAttachments = messagesData.map(msg => ({
-                ...msg,
-                attachments: attachmentsData?.filter(att => att.message_id === msg.id) || []
-            }))
-
-            setMessages(messagesWithAttachments)
-        }
-    }
-
-    const subscribeToMessages = () => {
-        if (!user && !guestSession) return
-
-        const filter = user
-            ? `user_id=eq.${user.id}`
-            : `guest_session_id=eq.${guestSession!.id}`
-
-        const channel = supabase
-            .channel('chat_messages')
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'chat_messages',
-                filter
-            }, (payload) => {
-                setMessages(prev => [...prev, payload.new as ChatMessage])
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'chat_messages',
-                filter
-            }, (payload) => {
-                setMessages(prev => prev.map(msg =>
-                    msg.id === payload.new.id ? payload.new as ChatMessage : msg
-                ))
-            })
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
+        try {
+            const response = await fetch(url)
+            if (response.ok) {
+                const data = await response.json()
+                // Only update if messages have changed to avoid re-renders/scroll jumps
+                setMessages(prev => {
+                    if (JSON.stringify(prev) !== JSON.stringify(data)) {
+                        return data
+                    }
+                    return prev
+                })
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error)
         }
     }
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-
-
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -283,38 +245,28 @@ export function ChatWidget() {
             }
 
             // Create message
-            const messageText = userMessageText || '📷 Image'
             const messageData: any = {
-                message: messageText,
-                is_admin: false,
-                is_read: false
+                message: userMessageText,
+                imageUrl: imageUrl,
+                isAdmin: false
             }
 
             if (user) {
-                messageData.user_id = user.id
+                messageData.userId = user.id
             } else if (guestSession) {
-                messageData.guest_session_id = guestSession.id
+                messageData.guestSessionId = guestSession.id
             }
 
-            const { data: newMessageData, error } = await supabase
-                .from('chat_messages')
-                .insert(messageData)
-                .select()
-                .single()
+            const response = await fetch('/api/chat/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(messageData)
+            })
 
-            if (!error && newMessageData && imageUrl) {
-                // Create attachment record
-                await supabase
-                    .from('chat_attachments')
-                    .insert({
-                        message_id: newMessageData.id,
-                        file_url: imageUrl,
-                        file_type: selectedImage?.type || 'image/jpeg',
-                        file_size: selectedImage?.size || 0
-                    })
-
-                // Refresh messages to show the image
-                fetchMessages()
+            if (response.ok) {
+                const savedMessage = await response.json()
+                setMessages(prev => [...prev, savedMessage]) // Optimistic update
+                fetchMessages() // Refresh to be sure
             }
 
             setNewMessage('')
@@ -340,8 +292,8 @@ export function ChatWidget() {
                     })
 
                     if (aiResponse.ok) {
-                        // AI response is saved to DB by the API, will appear via subscription
-                        await new Promise(resolve => setTimeout(resolve, 1000)) // Brief delay for natural feel
+                        // AI response will be fetched on next poll
+                        setTimeout(() => fetchMessages(), 1000)
                     }
                 } catch (aiError) {
                     console.error('AI agent error:', aiError)
@@ -716,7 +668,7 @@ export function ChatWidget() {
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-foreground font-semibold">
-                                                NPR {order.amount}
+                                                रु {order.amount}
                                             </span>
                                             <span className="text-muted-foreground text-xs">
                                                 {new Date(order.created_at).toLocaleDateString()}
@@ -799,426 +751,94 @@ function PaymentInquiryModal({ onClose, onSubmit }: { onClose: () => void, onSub
     }
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={onClose}>
-            <div className="bg-card border border-border rounded-xl p-6 w-96 max-w-[calc(100vw-3rem)]" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-foreground">Payment Inquiry</h3>
-                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-                        <X className="h-5 w-5" />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <DollarSign className="w-6 h-6 text-emerald-500" />
+                        Usage Payment / Inquiry
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Type
                         </label>
                         <select
                             value={inquiryType}
                             onChange={(e) => setInquiryType(e.target.value)}
-                            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                         >
-                            <option value="service">Service</option>
-                            <option value="course">Course</option>
-                            <option value="project">Project</option>
+                            <option value="service">Service Payment</option>
+                            <option value="project">Project Milestone</option>
+                            <option value="hosting">Hosting Renewal</option>
+                            <option value="other">Other Inquiry</option>
                         </select>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                            Item Name *
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Item Name / Reference
                         </label>
                         <input
                             type="text"
+                            required
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
-                            placeholder="e.g., Web Development, React Course, Custom App"
-                            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                            required
+                            placeholder="e.g. Web Development Phase 1"
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                            Budget (optional)
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Amount (रु) <span className="text-gray-400 font-normal">(Optional)</span>
                         </label>
                         <input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                            Description (optional)
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Description / Message
                         </label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Tell us more about your requirements..."
                             rows={3}
-                            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                            placeholder="Any additional details..."
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
                         />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 mt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-secondary"
+                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            disabled={submitting || !itemName.trim()}
-                            className="flex-1 px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                            disabled={submitting}
+                            className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {submitting ? 'Submitting...' : 'Submit Inquiry'}
                         </button>
                     </div>
-                </form>
-            </div>
-        </div>
-    )
-}
-
-// Catalog Browse Component
-function CatalogBrowse({ onClose, onPurchase }: { onClose: () => void, onPurchase: () => void }) {
-    const [category, setCategory] = useState<'services' | 'courses' | 'projects'>('services')
-    const [items, setItems] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-    const [purchasing, setPurchasing] = useState<string | null>(null)
-    const supabase = createClient()
-
-    useEffect(() => {
-        fetchItems()
-    }, [category])
-
-    const fetchItems = async () => {
-        setLoading(true)
-        const { data } = await supabase
-            .from(category)
-            .select('*')
-            .eq('is_published', true)
-            .order('created_at', { ascending: false })
-            .limit(20)
-
-        if (data) {
-            setItems(data)
-        }
-        setLoading(false)
-    }
-
-    const handleBuyNow = async (item: any) => {
-        setPurchasing(item.id)
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) {
-                alert('Please login to purchase')
-                setPurchasing(null)
-                return
-            }
-
-            // Create order
-            const { error } = await supabase
-                .from('orders')
-                .insert({
-                    user_id: user.id,
-                    item_type: category === 'services' ? 'service' : category === 'courses' ? 'course' : 'project',
-                    item_id: item.id,
-                    item_title: item.title,
-                    item_slug: item.slug,
-                    amount: item.price || 0,
-                    currency: 'NPR',
-                    status: 'pending'
-                })
-
-            if (error) {
-                console.error('Error creating order:', error)
-                alert('Failed to create order. Please try again.')
-            } else {
-                alert(`✅ Order created! ${item.title} - NPR ${item.price}\nCheck "My Orders" to view.`)
-                onPurchase()
-            }
-        } catch (error) {
-            console.error('Error:', error)
-            alert('Failed to create order.')
-        } finally {
-            setPurchasing(null)
-        }
-    }
-
-    return (
-        <div className="flex-1 overflow-y-auto p-4">
-            <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">Browse & Buy</h3>
-                <button
-                    onClick={onClose}
-                    className="text-sm text-primary hover:underline"
-                >
-                    Back to Chat
-                </button>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="flex gap-2 mb-4 overflow-x-auto">
-                {(['services', 'courses', 'projects'] as const).map((cat) => (
-                    <button
-                        key={cat}
-                        onClick={() => setCategory(cat)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${category === cat
-                            ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
-                            : 'bg-secondary text-foreground hover:bg-secondary/80'
-                            }`}
-                    >
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </button>
-                ))}
-            </div>
-
-            {/* Items List */}
-            {loading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto" />
-                    <p className="mt-2">Loading...</p>
-                </div>
-            ) : items.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                    <BookOpen className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No {category} available</p>
-                </div>
-            ) : (
-                <div className="space-y-3">
-                    {items.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-secondary border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
-                        >
-                            <div className="flex items-start gap-3">
-                                {item.thumbnail_url && (
-                                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-                                        <Image
-                                            src={item.thumbnail_url}
-                                            alt={item.title}
-                                            width={64}
-                                            height={64}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-foreground mb-1">
-                                        {item.title}
-                                    </h4>
-                                    {item.description && (
-                                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                            {item.description}
-                                        </p>
-                                    )}
-                                    <div className="flex items-center justify-between gap-2">
-                                        <span className="text-lg font-bold text-foreground">
-                                            NPR {item.price || 0}
-                                        </span>
-                                        <button
-                                            onClick={() => handleBuyNow(item)}
-                                            disabled={purchasing === item.id}
-                                            className="px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg text-sm hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
-                                        >
-                                            {purchasing === item.id ? 'Processing...' : 'Buy Now'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    )
-}
-
-// Guest Chat Form Component
-function GuestChatForm({ onSubmit }: { onSubmit: (session: GuestSession) => void }) {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        question: ''
-    })
-    const [errors, setErrors] = useState({
-        name: '',
-        email: '',
-        phone: ''
-    })
-    const [isSubmitting, setIsSubmitting] = useState(false)
-
-    const validateForm = (): boolean => {
-        const newErrors = {
-            name: '',
-            email: '',
-            phone: ''
-        }
-        let isValid = true
-
-        // Validate name
-        if (!formData.name.trim()) {
-            newErrors.name = 'This field is required'
-            isValid = false
-        }
-
-        // Validate email
-        if (!formData.email.trim()) {
-            newErrors.email = 'This field is required'
-            isValid = false
-        } else if (!isValidEmail(formData.email)) {
-            newErrors.email = 'Invalid email format'
-            isValid = false
-        }
-
-        // Validate phone (optional but validate format if provided)
-        if (formData.phone.trim() && !isValidPhone(formData.phone)) {
-            newErrors.phone = 'Invalid phone format'
-            isValid = false
-        }
-
-        setErrors(newErrors)
-        return isValid
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!validateForm()) return
-
-        setIsSubmitting(true)
-
-        try {
-            const session = await createGuestSession({
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone || undefined,
-                question: formData.question || undefined
-            })
-
-            if (session) {
-                onSubmit(session)
-            } else {
-                alert('Failed to start chat. Please try again.')
-            }
-        } catch (error) {
-            console.error('Error starting guest chat:', error)
-            alert('Failed to start chat. Please try again.')
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
-    const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, [field]: e.target.value }))
-        // Clear error when user starts typing
-        if (errors[field as keyof typeof errors]) {
-            setErrors(prev => ({ ...prev, [field]: '' }))
-        }
-    }
-
-    return (
-        <div className="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-orange-500 to-orange-600">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
-                <div className="mb-6">
-
-
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Name Field */}
-                    <div>
-                        <input
-                            type="text"
-                            value={formData.name}
-                            onChange={handleInputChange('name')}
-                            placeholder="* Name"
-                            className={`w-full px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                        />
-                        {errors.name && (
-                            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                        )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div>
-                        <input
-                            type="email"
-                            value={formData.email}
-                            onChange={handleInputChange('email')}
-                            placeholder="* Email"
-                            className={`w-full px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                        />
-                        {errors.email && (
-                            <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                        )}
-                    </div>
-
-                    {/* Phone Field */}
-                    <div>
-                        <div className="flex gap-2">
-                            <div className="w-24 flex items-center gap-2 px-3 py-3 bg-white border-2 border-gray-300 rounded-xl">
-                                <span className="text-2xl">🇳🇵</span>
-                                <span className="text-sm">▼</span>
-                            </div>
-                            <input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={handleInputChange('phone')}
-                                placeholder="* Phone"
-                                className={`flex-1 px-4 py-3 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
-                                    }`}
-                            />
-                        </div>
-                        {errors.phone && (
-                            <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-                        )}
-                    </div>
-
-                    {/* Question Field */}
-                    <div>
-                        <textarea
-                            value={formData.question}
-                            onChange={handleInputChange('question')}
-                            placeholder="* Question"
-                            rows={4}
-                            className="w-full px-4 py-3 bg-white border-2 border-blue-400 rounded-xl text-gray-900 placeholder-orange-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                        />
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                                Starting Chat...
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                                Start Chat
-                            </>
-                        )}
-                    </button>
                 </form>
             </div>
         </div>

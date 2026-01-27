@@ -1,141 +1,154 @@
-'use client';
+import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Clock, Users, Calendar, Sparkles, ArrowRight } from 'lucide-react'
+import dbConnect from '@/lib/mongodb/client'
+import { Class } from '@/lib/mongodb/models'
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
-import { GraduationCap, Calendar, Clock, ArrowRight } from 'lucide-react';
-
-interface ClassItem {
-    id: string;
-    title: string;
-    slug: string;
-    summary: string | null;
-    level: string | null;
-    duration: string | null;
-    start_date: string | null;
-    price: number;
-    currency: string;
-    thumbnail_url: string | null;
+interface ClassData {
+    _id: string
+    title: string
+    slug: string
+    description: string | null
+    price: number
+    currency: string
+    duration: string | null
+    schedule: string | null
+    maxStudents: number | null
+    thumbnailUrl: string | null
+    isFeatured: boolean
 }
 
-export default function ClassesPage() {
-    const [classes, setClasses] = useState<ClassItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+async function getClasses(): Promise<ClassData[]> {
+    await dbConnect()
+    const classes = await Class.find({ isActive: true })
+        .sort({ displayOrder: 1 })
+        .lean()
 
-    useEffect(() => {
-        const fetchClasses = async () => {
-            const { data } = await supabase
-                .from('classes')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true });
+    const typedClasses = classes as unknown as ClassData[]
+    return typedClasses.map((c) => ({
+        _id: c._id.toString(),
+        title: c.title,
+        slug: c.slug,
+        description: c.description || null,
+        price: c.price || 0,
+        currency: c.currency || 'NPR',
+        duration: c.duration || null,
+        schedule: c.schedule || null,
+        maxStudents: c.maxStudents || null,
+        thumbnailUrl: c.thumbnailUrl || null,
+        isFeatured: c.isFeatured || false,
+    }))
+}
 
-            if (data) {
-                setClasses(data as ClassItem[]);
-            }
-            setLoading(false);
-        };
-
-        fetchClasses();
-    }, [supabase]);
+export default async function ClassesPage() {
+    const classes = await getClasses()
 
     return (
-        <div className="min-h-screen bg-background text-primary">
+        <div className="min-h-screen bg-background">
             <Header />
-            <main className="pt-28 pb-20">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 space-y-10">
-                    <div className="text-center max-w-3xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/60 border border-border/60 text-sm text-muted mb-6">
-                            <GraduationCap className="h-4 w-4 text-emerald-500" />
-                            Classes
+
+            <main className="pt-24 pb-20">
+                {/* Hero */}
+                <section className="px-6 lg:px-8 mb-16">
+                    <div className="mx-auto max-w-4xl text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6">
+                            <Sparkles className="h-4 w-4" />
+                            <span>Learn with Experts</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-                            Classes designed to ship real products
+
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
+                            Upskill with Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Classes</span>
                         </h1>
-                        <p className="text-muted text-lg">
-                            Learn with structured sessions, practical exercises, and project-ready outcomes.
+
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Join our expert-led classes and master the skills you need to succeed in the digital world.
                         </p>
                     </div>
+                </section>
 
-                    {loading ? (
-                        <div className="flex items-center justify-center py-16">
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-                        </div>
-                    ) : classes.length === 0 ? (
-                        <div className="text-center py-16 bg-card rounded-2xl border border-border/60">
-                            <p className="text-muted">No classes available right now.</p>
-                        </div>
-                    ) : (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {classes.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href={`/classes/${item.slug}`}
-                                    className="group rounded-2xl border border-border/60 bg-card overflow-hidden hover:border-emerald-500/40 transition-colors"
-                                >
-                                    <div className="h-44 w-full bg-secondary/60 overflow-hidden">
-                                        {item.thumbnail_url ? (
-                                            <img
-                                                src={item.thumbnail_url}
-                                                alt={item.title}
-                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                        ) : (
-                                            <div className="h-full w-full flex items-center justify-center text-muted">
-                                                <GraduationCap className="h-8 w-8" />
+                {/* Classes Grid */}
+                <section className="px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl">
+                        {classes.length === 0 ? (
+                            <div className="text-center py-20 bg-card rounded-2xl border border-border">
+                                <p className="text-muted-foreground text-lg">No classes available at the moment.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {classes.map((classItem) => (
+                                    <div
+                                        key={classItem._id}
+                                        className="group flex flex-col bg-card rounded-2xl border border-border overflow-hidden hover:border-blue-500/30 transition-all"
+                                    >
+                                        {classItem.thumbnailUrl && (
+                                            <div className="relative aspect-video bg-secondary overflow-hidden">
+                                                <Image
+                                                    src={classItem.thumbnailUrl}
+                                                    alt={classItem.title}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                />
                                             </div>
                                         )}
-                                    </div>
-                                    <div className="p-6 space-y-4">
-                                        <div>
-                                            <h3 className="text-xl font-semibold text-primary group-hover:text-emerald-500 transition-colors">
-                                                {item.title}
+
+                                        <div className="flex-1 p-6">
+                                            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-400 transition-colors">
+                                                {classItem.title}
                                             </h3>
-                                            {item.summary && (
-                                                <p className="text-muted text-sm mt-2 line-clamp-2">
-                                                    {item.summary}
-                                                </p>
-                                            )}
+                                            <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                                                {classItem.description}
+                                            </p>
+
+                                            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-6">
+                                                {classItem.duration && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span>{classItem.duration}</span>
+                                                    </div>
+                                                )}
+                                                {classItem.maxStudents && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Users className="h-4 w-4" />
+                                                        <span>Max {classItem.maxStudents}</span>
+                                                    </div>
+                                                )}
+                                                {classItem.schedule && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Calendar className="h-4 w-4" />
+                                                        <span>{classItem.schedule}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-3 text-xs text-muted">
-                                            {item.start_date && (
-                                                <span className="inline-flex items-center gap-1">
-                                                    <Calendar className="h-3.5 w-3.5" />
-                                                    {new Date(item.start_date).toLocaleDateString()}
+
+                                        <div className="p-6 pt-0 mt-auto">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <span className="text-2xl font-bold text-foreground">
+                                                    {classItem.currency === 'NPR' ? 'रू ' : '$'}
+                                                    {classItem.price.toLocaleString()}
                                                 </span>
-                                            )}
-                                            {item.duration && (
-                                                <span className="inline-flex items-center gap-1">
-                                                    <Clock className="h-3.5 w-3.5" />
-                                                    {item.duration}
-                                                </span>
-                                            )}
-                                            {item.level && (
-                                                <span className="inline-flex items-center gap-1">
-                                                    <GraduationCap className="h-3.5 w-3.5" />
-                                                    {item.level}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-primary font-semibold">
-                                                {item.currency === 'NPR' ? 'रू' : '$'} {item.price?.toLocaleString() || 0}
-                                            </span>
-                                            <span className="text-emerald-500 font-medium inline-flex items-center gap-1">
-                                                View details <ArrowRight className="h-4 w-4" />
-                                            </span>
+                                            </div>
+
+                                            <Link
+                                                href={`/classes/${classItem.slug}`}
+                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                                            >
+                                                View Details
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Link>
                                         </div>
                                     </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
             </main>
+
             <Footer />
         </div>
-    );
+    )
 }

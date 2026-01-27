@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import dbConnect from '@/lib/mongodb/client'
+import { User, Service, ChatMessage, GuestChatSession } from '@/lib/mongodb/models'
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'User ID or Guest Session ID required' }, { status: 400 })
         }
 
-        const supabase = await createClient()
+        await dbConnect()
 
         // Determine if this is a guest or authenticated user
         const isGuest = !!guestSessionId
@@ -22,50 +24,31 @@ export async function POST(request: NextRequest) {
 
         if (userId) {
             // Fetch user profile for authenticated users
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('display_name')
-                .eq('id', userId)
-                .single()
-            userName = profile?.display_name || 'User'
+            const user = await User.findById(userId).select('displayName').lean()
+            userName = user?.displayName || 'User'
         } else if (guestSessionId) {
             // Fetch guest session info
-            const { data: guestSession } = await supabase
-                .from('guest_chat_sessions')
-                .select('guest_name')
-                .eq('id', guestSessionId)
-                .single()
-            userName = guestSession?.guest_name || 'Guest User'
+            const guestSession = await GuestChatSession.findById(guestSessionId).select('guestName').lean()
+            userName = guestSession?.guestName || 'Guest User'
         }
 
-        // Get business context (services, projects, courses)
-        const [servicesRes, projectsRes, coursesRes] = await Promise.all([
-            supabase.from('services').select('title, description, price, currency').eq('is_published', true).limit(10),
-            supabase.from('projects').select('title, description').eq('is_published', true).limit(5),
-            supabase.from('courses').select('title, description, price').eq('is_published', true).limit(5)
-        ])
-
-        const services = servicesRes.data || []
-        const projects = projectsRes.data || []
-        const courses = coursesRes.data || []
+        // Get business context (services)
+        const services = await Service.find({ isPublished: true })
+            .select('title description price currency')
+            .limit(10)
+            .lean()
 
         // Build context for AI
         const businessContext = `
-You are an AI assistant for Dunzo, a digital agency offering web development, app development, and online courses.
+You are an AI assistant for AINepal, a digital agency offering web development, app development, and online courses.
 
 Available Services:
-${services.map(s => `- ${s.title}: ${s.description} (${s.currency === 'NPR' ? 'रू' : '$'}${s.price.toLocaleString()})`).join('\n')}
-
-Featured Projects:
-${projects.map(p => `- ${p.title}: ${p.description}`).join('\n')}
-
-Available Courses:
-${courses.map(c => `- ${c.title}: ${c.description} (रू ${c.price})`).join('\n')}
+${services.map(s => `- ${s.title}: ${s.description} (${s.currency === 'NPR' ? 'रू' : '$'}${s.price?.toLocaleString() || 0})`).join('\n')}
 
 Current user: ${userName}${isGuest ? ' (Guest User)' : ''}
 
 Previous conversation:
-${chatHistory?.map((msg: any) => `${msg.is_admin ? 'AI' : 'User'}: ${msg.message}`).join('\n') || 'No previous messages'}
+${chatHistory?.map((msg: { is_admin: boolean; message: string }) => `${msg.is_admin ? 'AI' : 'User'}: ${msg.message}`).join('\n') || 'No previous messages'}
 
 Guidelines:
 - Be friendly, professional, and helpful
@@ -127,31 +110,28 @@ ${isGuest ? '- For guest users, you can suggest they register for better service
             message.toLowerCase().includes('speak to human') ||
             message.toLowerCase().includes('talk to admin')
 
-        // Create service role client for inserting AI messages (bypasses RLS)
-        const serviceSupabase = createServiceClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
-
-        // Save AI response to database using service role
-        const messageData: any = {
+        // Save AI response to database
+        const messageData: {
+            message: string;
+            isAdmin: boolean;
+            isRead: boolean;
+            userId?: string;
+            guestSessionId?: string;
+        } = {
             message: aiResponse,
-            is_admin: true,
-            is_ai_response: true,
-            is_read: true
+            isAdmin: true,
+            isRead: true
         }
 
         if (userId) {
-            messageData.user_id = userId
+            messageData.userId = userId
         } else if (guestSessionId) {
-            messageData.guest_session_id = guestSessionId
+            messageData.guestSessionId = guestSessionId
         }
 
-        const { error: insertError } = await serviceSupabase
-            .from('chat_messages')
-            .insert(messageData)
-
-        if (insertError) {
+        try {
+            await ChatMessage.create(messageData)
+        } catch (insertError) {
             console.error('Error saving AI response:', insertError)
         }
 

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { uploadFile } from '@/lib/r2/operations';
 
 export async function POST(req: NextRequest) {
     try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const session = await getServerSession(authOptions);
+        const user = session?.user;
 
         if (!user) {
             return NextResponse.json(
@@ -50,10 +51,11 @@ export async function POST(req: NextRequest) {
             key: result.key
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Upload Error:', error);
+        const message = error instanceof Error ? error.message : 'Error uploading file';
         return NextResponse.json(
-            { error: error.message || 'Error uploading file' },
+            { error: message },
             { status: 500 }
         );
     }

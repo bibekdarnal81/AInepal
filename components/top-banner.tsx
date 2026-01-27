@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+
 import { X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BundleOffer {
@@ -25,18 +25,17 @@ export function TopBanner() {
 
     useEffect(() => {
         const fetchOffers = async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('bundle_offers')
-                .select('id, name, price, discount_percent, show_on_home')
-                .eq('is_active', true)
-                .eq('show_on_home', true)
-                .order('created_at', { ascending: false });
-
-            if (data) {
-                setOffers(data as BundleOffer[]);
+            try {
+                const response = await fetch('/api/bundles?showOnHome=true');
+                if (response.ok) {
+                    const data = await response.json();
+                    setOffers(data);
+                }
+            } catch (error) {
+                console.error('Error fetching bundle offers:', error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         fetchOffers();

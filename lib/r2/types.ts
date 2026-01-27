@@ -16,6 +16,8 @@ export interface UploadOptions {
 export interface FileMetadata {
   /** The key (path) of the file in R2 */
   key: string;
+  /** Public or presigned URL of the file */
+  url: string;
   /** Size of the file in bytes */
   size: number;
   /** Last modified timestamp */

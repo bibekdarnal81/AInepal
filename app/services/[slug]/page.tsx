@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import * as Icons from 'lucide-react'
@@ -7,6 +7,7 @@ import { Check, Clock, Award, Zap, ArrowLeft, ArrowRight } from 'lucide-react'
 import { ServiceHeroActions } from '@/components/services/service-hero-actions'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Service {
     id: string
@@ -27,20 +28,35 @@ interface Service {
     updated_at: string
 }
 
-async function getService(slug: string) {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single()
+import dbConnect from '@/lib/mongodb/client'
+import { Service } from '@/lib/mongodb/models'
 
-    if (error || !data) {
+async function getService(slug: string) {
+    await dbConnect()
+    const service = await Service.findOne({ slug, isPublished: true }).lean()
+
+    if (!service) {
         return null
     }
 
-    return data as Service
+    return {
+        id: service._id.toString(),
+        title: service.title,
+        slug: service.slug,
+        description: service.description || null,
+        content: service.content || null,
+        price: service.price,
+        currency: service.currency,
+        icon_name: service.iconName || null,
+        thumbnail_url: service.thumbnailUrl || null,
+        features: service.features || [],
+        category: service.category || null,
+        subcategory: service.subcategory || null,
+        is_featured: service.isFeatured,
+        is_published: service.isPublished,
+        created_at: service.createdAt.toISOString(),
+        updated_at: service.updatedAt.toISOString(),
+    } as Service
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -54,7 +70,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         }
     }
 
-    const title = `${service.title} | Dunzo Services`
+    const title = `${service.title} | AINepal Services`
     const description = service.description || `Explore our ${service.title} service. Professional solutions for your business.`
     const ogImage = service.thumbnail_url || '/og-services.jpg'
 
@@ -91,9 +107,10 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         return notFound()
     }
 
-    const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
-        ? (Icons as any)[service.icon_name]
-        : Icons.Code
+    const iconName = service.icon_name as keyof typeof Icons | undefined
+    const IconComponent = (iconName && iconName in Icons
+        ? Icons[iconName]
+        : Icons.Code) as any
 
     // Structured Data (JSON-LD)
     const jsonLd = {
@@ -103,8 +120,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         description: service.description,
         provider: {
             '@type': 'Organization',
-            name: 'Dunzo',
-            url: process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'
+            name: 'AINepal',
+            url: process.env.NEXT_PUBLIC_APP_URL || 'https://AINepal.tech'
         },
         offers: {
             '@type': 'Offer',
@@ -182,10 +199,13 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                             {service.thumbnail_url && (
                                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-border/60 group">
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                                    <img
+                                    <Image
                                         src={service.thumbnail_url}
                                         alt={service.title}
-                                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                                        priority
                                     />
                                 </div>
                             )}
@@ -198,7 +218,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                     <section className="py-20 relative">
                         <div className="max-w-7xl mx-auto px-6 lg:px-8">
                             <h2 className="text-3xl font-bold text-primary mb-12 text-center">
-                                What's Included
+                                What&apos;s Included
                             </h2>
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {service.features.map((feature, index) => (
@@ -279,7 +299,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                             Ready to Get Started?
                         </h2>
                         <p className="text-xl text-muted mb-12 max-w-2xl mx-auto">
-                            Let's bring your project to life with our {service.title} service.
+                            Let&apos;s bring your project to life with our {service.title} service.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link href="/book-demo" className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-full hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">

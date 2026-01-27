@@ -1,6 +1,7 @@
 import {
     PutObjectCommand,
     DeleteObjectCommand,
+    DeleteObjectsCommand,
     GetObjectCommand,
     ListObjectsV2Command,
     HeadObjectCommand,
@@ -66,6 +67,29 @@ export async function deleteFile(key: string): Promise<DeleteResult> {
 }
 
 /**
+ * Delete multiple files from R2
+ */
+export async function deleteFiles(keys: string[]): Promise<DeleteResult[]> {
+    const client = getR2Client();
+    const bucket = getR2BucketName();
+
+    const command = new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+            Objects: keys.map(key => ({ Key: key })),
+            Quiet: false,
+        },
+    });
+
+    const response = await client.send(command);
+
+    return keys.map(key => ({
+        success: !response.Errors?.some(err => err.Key === key),
+        key,
+    }));
+}
+
+/**
  * Get a public or presigned URL for a file
  */
 export async function getFileUrl(key: string, expiresIn?: number): Promise<string> {
@@ -119,13 +143,18 @@ export async function listFiles(
 
     const response = await client.send(command);
 
-    const files: FileMetadata[] =
-        response.Contents?.map((item) => ({
-            key: item.Key!,
-            size: item.Size || 0,
-            lastModified: item.LastModified || new Date(),
-            etag: item.ETag,
-        })) || [];
+    const files: FileMetadata[] = await Promise.all(
+        (response.Contents || []).map(async (item) => {
+            const key = item.Key!;
+            return {
+                key,
+                url: await getFileUrl(key),
+                size: item.Size || 0,
+                lastModified: item.LastModified || new Date(),
+                etag: item.ETag,
+            };
+        })
+    );
 
     return {
         files,
@@ -150,6 +179,7 @@ export async function getFileMetadata(key: string): Promise<FileMetadata> {
 
     return {
         key,
+        url: await getFileUrl(key),
         size: response.ContentLength || 0,
         lastModified: response.LastModified || new Date(),
         contentType: response.ContentType,
@@ -189,7 +219,8 @@ export async function getFile(key: string): Promise<Buffer> {
 
     // Convert stream to buffer
     const chunks: Uint8Array[] = [];
-    for await (const chunk of response.Body as any) {
+    const body = response.Body as AsyncIterable<Uint8Array>
+    for await (const chunk of body) {
         chunks.push(chunk);
     }
 

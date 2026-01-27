@@ -58,10 +58,53 @@ export interface ChatResponse {
     finish_reason?: string
 }
 
-export type AiProvider = 'openai' | 'anthropic' | 'google' | 'deepseek' | 'custom'
+export type AiProvider = 'openai' | 'anthropic' | 'google' | 'deepseek' | 'perplexity' | 'xai' | 'mistral' | 'meta' | 'qwen' | 'moonshot' | 'bedrock' | 'digitalocean' | 'custom'
 
 export interface ModelCapabilities {
     streaming: boolean
     functions: boolean
     vision: boolean
+}
+
+export interface UserModelPreference {
+    id: string
+    user_id: string
+    model_id: string
+    is_active: boolean
+    display_order: number
+    custom_temperature?: number
+    custom_max_tokens?: number
+    created_at: string
+    updated_at: string
+    last_used_at?: string
+    // Joined model data
+    model?: AiModel
+}
+
+export interface MultiChatRequest {
+    message: string
+    model_ids: string[]
+    temperature?: number
+    max_tokens?: number
+    user_id?: string
+}
+
+export interface ModelResponse {
+    model_id: string
+    model_name: string
+    provider: string
+    content: string
+    error?: string
+    usage?: {
+        prompt_tokens: number
+        completion_tokens: number
+        total_tokens: number
+    }
+    finish_reason?: string
+    response_time?: number
+}
+
+export interface MultiChatResponse {
+    responses: ModelResponse[]
+    timestamp: string
 }

@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, User, LogOut, Settings, ShoppingBag, ChevronDown } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -13,12 +12,12 @@ import { ThemeToggle } from '@/components/theme-toggle';
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [user, setUser] = useState<SupabaseUser | null>(null);
-    const [avatarUrl, setAvatarUrl] = useState('');
     const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const supabase = createClient();
+    const { data: session, status } = useSession();
     const pathname = usePathname();
+
+    const user = session?.user;
+    const isAdmin = user?.isAdmin ?? false;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -28,68 +27,20 @@ export function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-        if (user) {
-            await checkAdminStatus(user.id);
-            await fetchAvatar(user.id);
-        }
-    };
-
-    const fetchAvatar = async (userId: string) => {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('avatar_url')
-            .eq('id', userId)
-            .single();
-
-        setAvatarUrl(profile?.avatar_url || '');
-    };
-
-    const checkAdminStatus = async (userId: string) => {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', userId)
-            .single();
-
-        setIsAdmin(profile?.is_admin || false);
-    };
-
-    useEffect(() => {
-        (async () => {
-            await checkUser();
-        })();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                checkAdminStatus(session.user.id);
-                fetchAvatar(session.user.id);
-            } else {
-                setIsAdmin(false);
-                setAvatarUrl('');
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-        setIsAdmin(false);
         setUserMenuOpen(false);
+        await signOut({ callbackUrl: '/' });
     };
 
     const navigation = [
         { name: 'Services', href: '/services' },
+        { name: 'Memberships', href: '/membership/upgrade' },
         { name: 'Classes', href: '/classes' },
-        { name: 'Careers', href: '/careers' },
         { name: 'Projects', href: '/projects' },
         { name: 'Blog', href: '/blog' },
     ];
+
+    const isLoading = status === 'loading';
 
     return (
         <header
@@ -100,7 +51,7 @@ export function Header() {
         >
             <div
                 className={`transition-all duration-300 w-full ${isScrolled
-                    ? 'bg-background/80 backdrop-blur-md border border-border shadow-lg rounded-full max-w-5xl mx-4'
+                    ? 'bg-background/80 backdrop-blur-md border border-border shadow-lg rounded-full max-w-7xl mx-4'
                     : 'bg-transparent border-b border-transparent'
                     }`}
             >
@@ -111,9 +62,9 @@ export function Header() {
                         <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2.5 group">
                             <Image
                                 src="/logo.png"
-                                alt="Dunzo"
-                                width={120}
-                                height={40}
+                                alt="AINepal"
+                                width={150}
+                                height={100}
                                 className="h-10 w-auto object-contain"
                             />
                         </Link>
@@ -156,7 +107,9 @@ export function Header() {
                     {/* Right Side Actions */}
                     <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center gap-4">
                         <ThemeToggle />
-                        {user ? (
+                        {isLoading ? (
+                            <div className="w-8 h-8 rounded-full bg-secondary animate-pulse" />
+                        ) : user ? (
                             // Logged in - Show user menu
                             <div className="relative">
                                 <button
@@ -164,9 +117,9 @@ export function Header() {
                                     className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-secondary/30 hover:bg-secondary/50 border border-border/50 transition-all"
                                 >
                                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center overflow-hidden">
-                                        {avatarUrl ? (
+                                        {user.image ? (
                                             <Image
-                                                src={avatarUrl}
+                                                src={user.image}
                                                 alt="Profile"
                                                 width={24}
                                                 height={24}
@@ -179,7 +132,7 @@ export function Header() {
                                         )}
                                     </div>
                                     <span className="text-xs font-medium text-foreground max-w-[100px] truncate">
-                                        {user.email?.split('@')[0]}
+                                        {user.name || user.email?.split('@')[0]}
                                     </span>
                                     <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
@@ -211,15 +164,15 @@ export function Header() {
                                                         </Link>
                                                     )}
                                                     <Link
-                                                        href="/profile"
+                                                        href="/dashboard"
                                                         className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
                                                         onClick={() => setUserMenuOpen(false)}
                                                     >
                                                         <User className="h-4 w-4 text-muted-foreground" />
-                                                        My Profile
+                                                        Dashboard
                                                     </Link>
                                                     <Link
-                                                        href="/profile?tab=orders"
+                                                        href="/dashboard/orders"
                                                         className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
                                                         onClick={() => setUserMenuOpen(false)}
                                                     >
@@ -271,8 +224,8 @@ export function Header() {
                             <div className="flex items-center justify-between p-6 border-b border-border/50">
                                 <Link href="/" className="-m-1.5 p-1.5 flex items-center">
                                     <Image
-                                        src="/logo.jpg"
-                                        alt="Dunzo"
+                                        src="/logo.png"
+                                        alt="AINepal"
                                         width={120}
                                         height={40}
                                         className="h-10 w-auto object-contain"
@@ -312,9 +265,9 @@ export function Header() {
                                         <>
                                             <div className="flex items-center gap-4 px-3 py-2">
                                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center text-white font-bold">
-                                                    {avatarUrl ? (
+                                                    {user.image ? (
                                                         <Image
-                                                            src={avatarUrl}
+                                                            src={user.image}
                                                             alt="Profile"
                                                             width={40}
                                                             height={40}
@@ -325,7 +278,7 @@ export function Header() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">{user.email}</p>
+                                                    <p className="font-medium">{user.name || user.email}</p>
                                                     <p className="text-xs text-muted-foreground p-0.5">Logged in</p>
                                                 </div>
                                             </div>
@@ -341,12 +294,12 @@ export function Header() {
                                                     </Link>
                                                 )}
                                                 <Link
-                                                    href="/profile"
+                                                    href="/dashboard"
                                                     className="flex items-center justify-center gap-2 p-3 rounded-xl bg-secondary/50 font-medium hover:bg-secondary transition-colors"
                                                     onClick={() => setMobileMenuOpen(false)}
                                                 >
                                                     <User className="h-4 w-4" />
-                                                    Profile
+                                                    Dashboard
                                                 </Link>
                                             </div>
                                             <button

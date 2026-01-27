@@ -130,7 +130,7 @@
   --input: rgba(16, 185, 129, 0.15);
   --ring: #10b981;
 
-  /* Gradient colors for Dunzo modern aesthetic */
+  /* Gradient colors for AINepal modern aesthetic */
   --gradient-teal: #14b8a6;
   --gradient-emerald: #10b981;
   --gradient-cyan: #06b6d4;
@@ -138,7 +138,7 @@
 }
 
 .dark {
-  /* Dunzo Modern Software Company Theme - Teal/Emerald */
+  /* AINepal Modern Software Company Theme - Teal/Emerald */
   --background: #0a0f0d;
   --foreground: #ffffff;
 
@@ -203,7 +203,7 @@
   --input: rgba(16, 185, 129, 0.1);
   --ring: #10b981;
 
-  /* Gradient colors for Dunzo modern aesthetic */
+  /* Gradient colors for AINepal modern aesthetic */
   --gradient-teal: #14b8a6;
   --gradient-emerald: #10b981;
   --gradient-cyan: #06b6d4;

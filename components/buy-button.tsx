@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ShoppingCart, Check } from 'lucide-react'
 
 interface BuyButtonProps {
-    itemType: 'service' | 'project'
+    itemType: 'service' | 'project' | 'course' | 'hosting' | 'class'
     itemId: string
     itemTitle: string
     itemSlug?: string
@@ -22,27 +21,29 @@ export function BuyButton({
     itemTitle,
     itemSlug,
     amount,
-    currency = 'USD',
+    currency = 'NPR',
     className = '',
     children
 }: BuyButtonProps) {
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const router = useRouter()
-    const supabase = createClient()
 
     const handlePurchase = async () => {
         // Redirect to checkout page
         let checkoutUrl = ''
 
         if (itemType === 'service') {
-            // Service uses ID for checkout lookup
             checkoutUrl = `/checkout/services/${itemId}`
         } else if (itemType === 'project') {
-            // Project uses Slug for checkout lookup
             checkoutUrl = `/checkout/projects/${itemSlug || itemId}`
+        } else if (itemType === 'class') {
+            checkoutUrl = `/checkout/classes/${itemSlug || itemId}`
+        } else if (itemType === 'hosting') {
+            checkoutUrl = `/checkout/hosting/${itemSlug || itemId}`
+        } else if (itemType === 'course') {
+            checkoutUrl = `/checkout/courses/${itemSlug || itemId}`
         } else {
-            // Fallback
             checkoutUrl = `/checkout/${itemType}s/${itemId}`
         }
 

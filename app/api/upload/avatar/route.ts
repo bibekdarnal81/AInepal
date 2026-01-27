@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 // Initialize R2 client with proper configuration for Cloudflare
 const r2Client = new S3Client({
@@ -50,10 +51,10 @@ export async function POST(request: NextRequest) {
         })
 
         // Verify user is authenticated
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const session = await getServerSession(authOptions)
+        const user = session?.user
 
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -119,10 +120,11 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json({ url: publicUrl })
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error uploading to R2:', error)
+        const message = error instanceof Error ? error.message : 'Upload failed'
         return NextResponse.json(
-            { error: error.message || 'Upload failed' },
+            { error: message },
             { status: 500 }
         )
     }
@@ -131,10 +133,10 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         // Verify user is authenticated
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const session = await getServerSession(authOptions)
+        const user = session?.user
 
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -162,10 +164,11 @@ export async function DELETE(request: NextRequest) {
         await r2Client.send(deleteCommand)
 
         return NextResponse.json({ success: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error deleting from R2:', error)
+        const message = error instanceof Error ? error.message : 'Delete failed'
         return NextResponse.json(
-            { error: error.message || 'Delete failed' },
+            { error: message },
             { status: 500 }
         )
     }

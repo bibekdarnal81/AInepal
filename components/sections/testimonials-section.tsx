@@ -2,19 +2,19 @@
 
 const testimonials = [
     {
-        quote: " Dunzo transformed how we ship. What used to take days now takes minutes. It's genuinely magical.",
+        quote: " AINepal transformed how we ship. What used to take days now takes minutes. It's genuinely magical.",
         author: "Sarah Chen",
         role: "CTO at TechCorp",
         avatar: "SC",
     },
     {
-        quote: "Best developer experience I've had in years.  Dunzo just works, and that's exactly what I need.",
+        quote: "Best developer experience I've had in years.  AINepal just works, and that's exactly what I need.",
         author: "Marcus Rodriguez",
         role: "Indie Developer",
         avatar: "MR",
     },
     {
-        quote: "We migrated our entire infrastructure to  Dunzo and saved 60% on ops costs. The team loves it.",
+        quote: "We migrated our entire infrastructure to  AINepal and saved 60% on ops costs. The team loves it.",
         author: "Emily Taylor",
         role: "Engineering Lead at StartupXYZ",
         avatar: "ET",
@@ -53,7 +53,7 @@ export function TestimonialsSection() {
                         <span className="text-gradient">developers</span>
                     </h2>
                     <p className="text-xl text-gray-400 text-center mb-16">
-                        See what teams are saying about  Dunzo
+                        See what teams are saying about  AINepal
                     </p>
 
                     <div className="grid md:grid-cols-3 gap-8">
@@ -91,7 +91,7 @@ export function TestimonialsSection() {
                             Ready to ship faster?
                         </h3>
                         <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                            Join thousands of developers deploying with  Dunzo
+                            Join thousands of developers deploying with  AINepal
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a

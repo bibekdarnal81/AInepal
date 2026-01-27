@@ -17,19 +17,19 @@ const customerStories = [
         avatar: "K"
     },
     {
-        quote: " Dunzo streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
+        quote: " AINepal streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
         name: "Daniel Moretti",
         role: "Co-Founder & CTO at Mappa",
         avatar: "D"
     },
     {
-        quote: "Services that took 1 week to configure elsewhere take 1 day to spin up in  Dunzo. Messy networking like on other cloud platforms doesn't exist on  Dunzo.",
+        quote: "Services that took 1 week to configure elsewhere take 1 day to spin up in  AINepal. Messy networking like on other cloud platforms doesn't exist on  AINepal.",
         name: "Daniel Lobaton",
         role: "CTO at G2X",
         avatar: "D"
     },
     {
-        quote: " Dunzo has been a revelation. We spent ~$100K per year running on AWS - we have since cut that by 90% moving to  Dunzo and get a significantly improved developer experience.",
+        quote: " AINepal has been a revelation. We spent ~$100K per year running on AWS - we have since cut that by 90% moving to  AINepal and get a significantly improved developer experience.",
         name: "Antoine Vulcain",
         role: "Founder & CEO at Capitalyze",
         avatar: "A"
@@ -53,7 +53,7 @@ export function CustomersSection() {
                         Trusted by the best in business
                     </h2>
                     <p className="text-muted max-w-2xl mx-auto">
-                         Dunzo supports great software teams wherever they are. Hear from some of the teams building their products on  Dunzo.
+                        AINepal supports great software teams wherever they are. Hear from some of the teams building their products on  AINepal.
                     </p>
                     <motion.a
                         href="#"

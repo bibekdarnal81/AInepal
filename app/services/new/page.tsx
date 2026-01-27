@@ -20,7 +20,7 @@ export default function NewServicePage() {
                             New service
                         </h1>
                         <p className="text-lg text-muted-foreground">
-                            Let's deploy your first service to production
+                            Let&apos;s deploy your first service to production
                         </p>
                     </div>
 

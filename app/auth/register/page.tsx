@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { SocialButtons } from '@/components/auth/social-buttons'
 
 export default function RegisterPage() {
+    const { data: session, status } = useSession()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -15,7 +17,27 @@ export default function RegisterPage() {
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const router = useRouter()
-    const supabase = createClient()
+
+    // Redirect logged-in users to dashboard
+    useEffect(() => {
+        if (status === 'authenticated' && session) {
+            router.replace('/dashboard')
+        }
+    }, [session, status, router])
+
+    // Show loading while checking session
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        )
+    }
+
+    // Don't render if authenticated (will redirect)
+    if (status === 'authenticated') {
+        return null
+    }
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -34,25 +56,34 @@ export default function RegisterPage() {
 
         setLoading(true)
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    display_name: displayName || email.split('@')[0]
-                }
-            }
-        })
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    displayName,
+                }),
+            })
 
-        if (signUpError) {
-            setError(signUpError.message)
-            setLoading(false)
-        } else {
-            setMessage('Registration successful! Please check your email to verify your account.')
-            // Optionally redirect after a delay
+            const data = await response.json()
+
+            if (!response.ok) {
+                setError(data.error || 'Registration failed')
+                setLoading(false)
+                return
+            }
+
+            setMessage('Account created successfully! Redirecting to login...')
             setTimeout(() => {
                 router.push('/auth/login')
-            }, 3000)
+            }, 2000)
+        } catch {
+            setError('An unexpected error occurred')
+            setLoading(false)
         }
     }
 
@@ -159,6 +190,8 @@ export default function RegisterPage() {
                                 </>
                             )}
                         </button>
+
+                        <SocialButtons />
                     </form>
 
                     <div className="mt-6 text-center">
@@ -178,6 +211,6 @@ export default function RegisterPage() {
                     <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                 </p>
             </div>
-        </div>
+        </div >
     )
 }

@@ -1,9 +1,31 @@
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { NextResponse } from 'next/server'
+import dbConnect from '@/lib/mongodb/client'
+import {
+    HostingOrder,
+    Order,
+    Domain,
+    User,
+    HostingPlan,
+    BundleOffer,
+    Service,
+    Class,
+    Project,
+    Membership,
+    type OrderItemType
+} from '@/lib/mongodb/models'
+import mongoose from 'mongoose'
 
 export async function POST(req: Request) {
     try {
-        const supabase = await createClient()
+        await dbConnect()
+        const session = await getServerSession(authOptions)
+
+        if (!session || !session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const {
             type,
             itemId,
@@ -18,121 +40,122 @@ export async function POST(req: Request) {
             enroll // Class enrollment details
         } = await req.json()
 
-        // Get authenticated user
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        let result
+        const userId = session.user.id
         let orderId
+        let newOrder
 
         if (type === 'hosting') {
-            const { data, error } = await supabase.from('hosting_orders').insert({
-                user_id: user.id,
-                plan_id: itemId, // hosting table uses UUID mostly or serial ID? Check migration. 
-                // Wait, hosting_orders schema checks:
-                // hosting_orders(user_id, plan_id, billing_cycle, domain_name, payment_method_id, payment_proof_url, transaction_id, status)
-                billing_cycle: billingCycle,
-                domain_name: domainName,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
+            const plan = await HostingPlan.findById(itemId)
+            if (!plan) throw new Error('Hosting plan not found')
+
+            newOrder = await HostingOrder.create({
+                userId,
+                planId: itemId,
+                billingCycle,
+                domain: domainName,
+                paymentMethodId: paymentMethodId,
+                paymentProofUrl: paymentProofUrl,
+                transactionId: transactionId,
+                price: amount,
                 status: 'pending',
-                amount: amount,
-                price: amount // Legacy column support
-            }).select('id').single()
+            })
+            orderId = newOrder._id
 
-            if (error) throw error
-            orderId = data.id
+        } else if (['services', 'projects', 'bundles', 'classes', 'memberships'].includes(type)) {
+            // Map type to itemType
+            let itemType: OrderItemType = 'service'
+            let itemTitle = ''
+            let itemSlug = ''
 
-        } else if (type === 'services') {
-            const { data, error } = await supabase.from('service_orders').insert({
-                user_id: user.id,
-                service_id: itemId,
+            if (type === 'services') {
+                itemType = 'service'
+                const service = await Service.findById(itemId)
+                if (service) { itemTitle = service.title; itemSlug = service.slug }
+            } else if (type === 'projects') {
+                itemType = 'service' // Mapping projects to 'service' instead of 'course'
+                const project = await Project.findById(itemId)
+                if (project) { itemTitle = project.title; itemSlug = project.slug }
+            } else if (type === 'bundles') {
+                itemType = 'bundle'
+                const bundle = await BundleOffer.findById(itemId)
+                if (bundle) { itemTitle = bundle.name; }
+            } else if (type === 'classes') {
+                itemType = 'class'
+                const cls = await Class.findById(itemId)
+                if (cls) { itemTitle = cls.title; itemSlug = cls.slug }
+            } else if (type === 'memberships') {
+                itemType = 'membership'
+                const membership = await Membership.findById(itemId)
+                if (membership) { itemTitle = membership.name; itemSlug = membership.slug }
+            }
+
+            newOrder = await Order.create({
+                userId,
+                itemType,
+                itemId,
+                itemTitle,
+                itemSlug,
                 amount,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
-                requirements,
-                status: 'pending'
-            }).select('id').single()
-
-            if (error) throw error
-            orderId = data.id
-
-        } else if (type === 'projects') {
-            const { data, error } = await supabase.from('project_orders').insert({
-                user_id: user.id,
-                project_id: itemId,
-                amount,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
-                status: 'pending'
-            }).select('id').single()
-
-            if (error) throw error
-            orderId = data.id
+                paymentMethod: paymentMethodId,
+                paymentId: transactionId,
+                notes: paymentProofUrl,
+                // Wait, Order schema has: paymentMethod, paymentId.
+                // It does not have paymentProofUrl field.
+                // I will store paymentProofUrl in metadata.
+                status: 'pending',
+                metadata: {
+                    paymentProofUrl,
+                    requirements,
+                    enroll,
+                    billingCycle,
+                    domainName,
+                    years
+                }
+            })
+            orderId = newOrder._id
 
         } else if (type === 'domains') {
-            const { data, error } = await supabase.from('domain_orders').insert({
-                user_id: user.id,
-                domain_name: domainName || 'unknown-domain',
-                years,
+            // For domains, we usually create a Domain record AND an Order record?
+            // Or just an Order record.
+            // The supabase code inserted into 'domain_orders'.
+            // I'll create an Order with itemType='domain'.
+            newOrder = await Order.create({
+                userId,
+                itemType: 'domain',
+                itemId: new mongoose.Types.ObjectId(), // No specific item ID for new domain reg
+                itemTitle: domainName,
                 amount,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
-                status: 'pending'
-            }).select('id').single()
-
-            if (error) throw error
-            orderId = data.id
-
-        } else if (type === 'bundles') {
-            const { data, error } = await supabase.from('bundle_orders').insert({
-                user_id: user.id,
-                bundle_id: itemId,
-                amount,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
-                status: 'pending'
-            }).select('id').single()
-
-            if (error) throw error
-            orderId = data.id
-        } else if (type === 'classes') {
-            const { data, error } = await supabase.from('class_orders').insert({
-                user_id: user.id,
-                class_id: itemId,
-                amount,
-                payment_method_id: paymentMethodId,
-                payment_proof_url: paymentProofUrl,
-                transaction_id: transactionId,
                 status: 'pending',
-                full_name: enroll?.fullName || null,
-                email: enroll?.email || null,
-                mobile: enroll?.mobile || null,
-                address: enroll?.address || null,
-                college_name: enroll?.collegeName || null,
-                other_course: enroll?.otherCourse || null,
-                remarks: enroll?.remarks || null
-            }).select('id').single()
+                paymentMethod: paymentMethodId,
+                paymentId: transactionId,
+                metadata: {
+                    paymentProofUrl,
+                    domainName,
+                    years
+                }
+            })
 
-            if (error) throw error
-            orderId = data.id
+            // Also optionally create a Domain record if needed, but usually we wait for payment.
+            // But let's create a pending Domain record.
+            await Domain.create({
+                userId,
+                domainName,
+                tld: domainName.split('.').pop() || 'com',
+                price: amount, // rough est
+                status: 'pending',
+                autoRenew: true
+            })
 
+            orderId = newOrder._id
         } else {
             return NextResponse.json({ error: 'Invalid order type' }, { status: 400 })
         }
 
         return NextResponse.json({ success: true, orderId })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Checkout error:', error)
-        return NextResponse.json({ error: error.message || 'Checkout failed' }, { status: 500 })
+        const message = error instanceof Error ? error.message : 'Checkout failed'
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }

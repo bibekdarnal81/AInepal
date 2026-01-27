@@ -45,10 +45,10 @@ export default function AboutPage() {
 
                     <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
                         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl mb-6">
-                            About  Dunzo
+                            About  AINepal
                         </h1>
                         <p className="text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-                            We're on a mission to make web development accessible to everyone through quality education and professional services.
+                            We&apos;re on a mission to make web development accessible to everyone through quality education and professional services.
                         </p>
                     </div>
                 </section>
@@ -60,13 +60,13 @@ export default function AboutPage() {
                             <h2 className="text-3xl font-bold text-white mb-6">Our Story</h2>
                             <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
                                 <p>
-                                    Dunzo was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.
+                                    AINepal was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.
                                 </p>
                                 <p>
                                     Today, we serve thousands of students worldwide, offering everything from free tutorials to premium courses, from open-source projects to custom development services. Our team of experienced developers and instructors is passionate about sharing knowledge and building amazing products.
                                 </p>
                                 <p>
-                                    We believe that quality education should be accessible to everyone, which is why we maintain a balance between free resources and premium offerings. Whether you're just starting your coding journey or looking to level up your skills,  Dunzo is here to support you every step of the way.
+                                    We believe that quality education should be accessible to everyone, which is why we maintain a balance between free resources and premium offerings. Whether you&apos;re just starting your coding journey or looking to level up your skills,  AINepal is here to support you every step of the way.
                                 </p>
                             </div>
                         </div>

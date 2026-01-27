@@ -56,7 +56,7 @@ export function ProductsSection() {
                         <span className="text-gradient">ship faster</span>
                     </h2>
                     <p className="text-xl text-muted">
-                        Deploy your apps with confidence.  Dunzo handles the infrastructure so you can focus on code.
+                        Deploy your apps with confidence.  AINepal handles the infrastructure so you can focus on code.
                     </p>
                 </div>
 

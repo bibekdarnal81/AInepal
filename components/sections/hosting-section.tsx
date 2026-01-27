@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+
 import { Check, Server, Shield, Database, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -22,27 +22,26 @@ interface HostingPlan {
 export function HostingSection() {
     const [plans, setPlans] = useState<HostingPlan[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
     useEffect(() => {
         const fetchPlans = async () => {
-            // Fetch one of each type of plan, preferably the cheapest one
-            const { data } = await supabase
-                .from('hosting_plans')
-                .select('*')
-                .eq('is_active', true)
-                .order('price', { ascending: true })
+            try {
+                const response = await fetch('/api/hosting/plans')
+                if (response.ok) {
+                    const data = await response.json()
+                    // Group by type and pick the first one (cheapest, as API sorts by price)
+                    const types = ['shared', 'vps', 'dedicated'] as const
+                    const showcasePlans = types.map(type =>
+                        (data as any[]).find(p => (p.type || 'shared') === type)
+                    ).filter(Boolean) as HostingPlan[]
 
-            if (data) {
-                // Group by type and pick the first one (cheapest)
-                const types = ['shared', 'vps', 'dedicated'] as const
-                const showcasePlans = types.map(type =>
-                    (data as any[]).find(p => (p.type || 'shared') === type)
-                ).filter(Boolean) as HostingPlan[]
-
-                setPlans(showcasePlans)
+                    setPlans(showcasePlans)
+                }
+            } catch (error) {
+                console.error('Error fetching hosting plans:', error)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
 
         fetchPlans()
@@ -88,8 +87,8 @@ export function HostingSection() {
                                 <div className="mb-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className={`p-3 rounded-lg ${plan.type === 'dedicated' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                plan.type === 'vps' ? 'bg-blue-500/10 text-blue-500' :
-                                                    'bg-green-500/10 text-green-500'
+                                            plan.type === 'vps' ? 'bg-blue-500/10 text-blue-500' :
+                                                'bg-green-500/10 text-green-500'
                                             }`}>
                                             {plan.type === 'dedicated' ? <Database className="w-6 h-6" /> :
                                                 plan.type === 'vps' ? <Server className="w-6 h-6" /> :

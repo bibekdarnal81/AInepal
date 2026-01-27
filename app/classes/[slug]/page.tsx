@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Calendar, Clock, GraduationCap, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import dbConnect from '@/lib/mongodb/client';
+import { Class } from '@/lib/mongodb/models';
 
 interface ClassItem {
     id: string;
@@ -20,17 +22,25 @@ interface ClassItem {
 }
 
 async function getClass(slug: string) {
-    const supabase = await createClient();
-    const { data } = await supabase
-        .from('classes')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single();
+    await dbConnect();
+    const classItem = await Class.findOne({ slug, isActive: true }).lean();
 
-    return data as ClassItem | null;
+    if (!classItem) return null;
+
+    return {
+        id: classItem._id.toString(),
+        title: classItem.title,
+        slug: classItem.slug,
+        summary: classItem.summary || null,
+        description: classItem.description || null,
+        level: classItem.level || null,
+        duration: classItem.duration || null,
+        start_date: classItem.startDate ? classItem.startDate.toISOString() : null,
+        price: classItem.price,
+        currency: classItem.currency,
+        thumbnail_url: classItem.thumbnailUrl || null,
+    } as ClassItem;
 }
-
 export default async function ClassDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const classItem = await getClass(slug);
@@ -96,13 +106,18 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ sl
                             </div>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card overflow-hidden">
+                        <div className="relative rounded-3xl border border-border/60 bg-card overflow-hidden">
                             {classItem.thumbnail_url ? (
-                                <img
-                                    src={classItem.thumbnail_url}
-                                    alt={classItem.title}
-                                    className="w-full h-full object-cover"
-                                />
+                                <div className="aspect-video relative">
+                                    <Image
+                                        src={classItem.thumbnail_url}
+                                        alt={classItem.title}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                                        priority
+                                    />
+                                </div>
                             ) : (
                                 <div className="h-64 flex items-center justify-center text-muted">
                                     <GraduationCap className="h-10 w-10" />

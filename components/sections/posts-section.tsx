@@ -1,16 +1,24 @@
-import { createClient } from '@/lib/supabase/server'
+import dbConnect from '@/lib/mongodb/client'
+import { Post } from '@/lib/mongodb/models'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Calendar } from 'lucide-react'
 
 export async function PostsSection() {
-    const supabase = await createClient()
+    await dbConnect()
 
-    const { data: posts } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false })
+    const posts = await Post.find({ published: true })
+        .sort({ createdAt: -1 })
         .limit(3)
+        .lean()
+        .then(docs => docs.map((doc: any) => ({
+            id: doc._id.toString(),
+            title: doc.title,
+            slug: doc.slug,
+            thumbnail_url: doc.thumbnailUrl, // Map camelCase to snake_case used in UI
+            excerpt: doc.excerpt,
+            created_at: doc.createdAt // Map camelCase
+        })))
 
     if (!posts || posts.length === 0) return null
 
@@ -38,11 +46,13 @@ export async function PostsSection() {
                             className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
                         >
                             {post.thumbnail_url && (
-                                <div className="aspect-video w-full overflow-hidden bg-secondary">
-                                    <img
+                                <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+                                    <Image
                                         src={post.thumbnail_url}
                                         alt={post.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     />
                                 </div>
                             )}

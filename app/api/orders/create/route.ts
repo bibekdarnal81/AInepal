@@ -1,14 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import dbConnect from '@/lib/mongodb/client'
+import { Order } from '@/lib/mongodb/models'
+import mongoose from 'mongoose'
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createClient()
+        const session = await getServerSession(authOptions)
 
-        // Check authentication
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        if (!session?.user) {
             return NextResponse.json(
                 { error: 'Unauthorized. Please log in to make a purchase.' },
                 { status: 401 }
@@ -28,40 +29,39 @@ export async function POST(request: Request) {
         }
 
         // Validate item type
-        if (!['service', 'course', 'project'].includes(itemType)) {
+        const validTypes = ['service', 'course', 'project', 'hosting', 'domain', 'bundle', 'class']
+        if (!validTypes.includes(itemType)) {
             return NextResponse.json(
                 { error: 'Invalid item type' },
                 { status: 400 }
             )
         }
 
-        // Create order
-        const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .insert({
-                user_id: user.id,
-                item_type: itemType,
-                item_id: itemId,
-                item_title: itemTitle,
-                item_slug: itemSlug || null,
-                amount: parseFloat(amount),
-                currency: currency || 'USD',
-                status: 'pending',
-            })
-            .select()
-            .single()
+        await dbConnect()
 
-        if (orderError) {
-            console.error('Order creation error:', orderError)
-            return NextResponse.json(
-                { error: 'Failed to create order' },
-                { status: 500 }
-            )
-        }
+        // Create order
+        const order = await Order.create({
+            userId: new mongoose.Types.ObjectId(session.user.id),
+            itemType,
+            itemId: new mongoose.Types.ObjectId(itemId),
+            itemTitle,
+            itemSlug: itemSlug || null,
+            amount: parseFloat(amount),
+            currency: currency || 'NPR',
+            status: 'pending',
+        })
 
         return NextResponse.json({
             success: true,
-            order,
+            order: {
+                id: order._id.toString(),
+                itemType: order.itemType,
+                itemTitle: order.itemTitle,
+                amount: order.amount,
+                currency: order.currency,
+                status: order.status,
+                createdAt: order.createdAt,
+            },
             message: 'Order created successfully'
         })
 

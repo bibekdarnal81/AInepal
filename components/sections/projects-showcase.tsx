@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, ExternalLink, Github, MessageSquare } from 'lucide-react'
 import { BuyButton } from '@/components/buy-button'
 import * as Icons from 'lucide-react'
@@ -39,43 +40,24 @@ export function ProjectsSection() {
     const [categories, setCategories] = useState<Category[]>([])
     const [selectedCategory, setSelectedCategory] = useState<string>('all')
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
     useEffect(() => {
         fetchData()
     }, [])
 
     const fetchData = async () => {
-        // Fetch categories
-        const { data: categoriesData } = await supabase
-            .from('project_categories')
-            .select('*')
-            .order('display_order', { ascending: true })
-
-        if (categoriesData) {
-            setCategories(categoriesData)
+        try {
+            const response = await fetch('/api/projects/showcase')
+            if (response.ok) {
+                const data = await response.json()
+                setCategories(data.categories || [])
+                setProjects(data.projects || [])
+            }
+        } catch (error) {
+            console.error('Error fetching projects:', error)
+        } finally {
+            setLoading(false)
         }
-
-        // Fetch featured projects with category info
-        const { data: projectsData } = await supabase
-            .from('projects')
-            .select(`
-                *,
-                project_categories (
-                    name,
-                    slug,
-                    color,
-                    icon_name
-                )
-            `)
-            .eq('is_published', true)
-            .eq('is_featured', true)
-            .order('display_order', { ascending: true })
-
-        if (projectsData) {
-            setProjects(projectsData as any)
-        }
-        setLoading(false)
     }
 
     const filteredProjects = selectedCategory === 'all'
@@ -162,11 +144,13 @@ export function ProjectsSection() {
                                 >
                                     {project.thumbnail_url && (
                                         <Link href={`/projects/${project.slug}`} className="block">
-                                            <div className="aspect-video w-full overflow-hidden bg-secondary cursor-pointer">
-                                                <img
+                                            <div className="relative aspect-video w-full overflow-hidden bg-secondary cursor-pointer">
+                                                <Image
                                                     src={project.thumbnail_url}
                                                     alt={project.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                 />
                                             </div>
                                         </Link>

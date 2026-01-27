@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 /**
- * Hero Section -  Dunzo-inspired design
+ * Hero Section -  AINepal-inspired design
  * Clean, minimal, with product mockup and company logos
  */
 export function HeroSection() {
@@ -36,7 +36,7 @@ export function HeroSection() {
                     </h1>
 
                     <p className="text-lg text-gray-400 mb-8 leading-relaxed max-w-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                        Dunzo simplifies your infrastructure stack from servers to
+                        AINepal simplifies your infrastructure stack from servers to
                         observability with a single, scalable, easy-to-use platform.
                     </p>
 
@@ -180,7 +180,7 @@ export function HeroSection() {
                             way to deploy applications is now boarding.
                         </p>
                         <p className="text-teal-400 font-medium">
-                            Welcome to  Dunzo.
+                            Welcome to  AINepal.
                         </p>
                     </div>
                 </div>

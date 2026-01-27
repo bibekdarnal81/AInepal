@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+
 import { motion } from 'framer-motion'
 import { ExternalLink } from 'lucide-react'
+import Image from 'next/image'
 
 interface Portfolio {
     id: string
@@ -22,24 +23,23 @@ interface Portfolio {
 export function PortfoliosSection() {
     const [portfolios, setPortfolios] = useState<Portfolio[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
     useEffect(() => {
         const fetchPortfolios = async () => {
-            const { data, error } = await supabase
-                .from('portfolios')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true })
-                .limit(6)
-
-            if (!error && data) {
-                setPortfolios(data)
+            try {
+                const response = await fetch('/api/portfolios')
+                if (response.ok) {
+                    const data = await response.json()
+                    setPortfolios(data)
+                }
+            } catch (error) {
+                console.error('Error fetching portfolios:', error)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
         fetchPortfolios()
-    }, [supabase])
+    }, [])
 
     if (loading) {
         return (
@@ -93,10 +93,12 @@ export function PortfoliosSection() {
                                 <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
                                     {portfolio.image_url ? (
                                         <>
-                                            <img
+                                            <Image
                                                 src={portfolio.image_url}
                                                 alt={portfolio.title}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                fill
+                                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             />
                                             {/* Overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">

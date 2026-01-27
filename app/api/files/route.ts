@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { listFiles, deleteFile, getFileMetadata } from '@/lib/r2/operations';
+import { listFiles, deleteFile, deleteFiles, getFileMetadata } from '@/lib/r2/operations';
 
 /**
  * GET /api/files
@@ -50,13 +50,22 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         const body = await request.json();
-        const { key } = body;
+        const { key, keys } = body;
 
-        if (!key) {
+        if (!key && (!keys || !Array.isArray(keys) || keys.length === 0)) {
             return NextResponse.json(
-                { error: 'No file key provided' },
+                { error: 'No file key or keys provided' },
                 { status: 400 }
             );
+        }
+
+        if (keys && Array.isArray(keys)) {
+            const results = await deleteFiles(keys);
+            const allSuccess = results.every(r => r.success);
+            return NextResponse.json({
+                success: allSuccess,
+                results
+            });
         }
 
         // Verify file exists before deleting

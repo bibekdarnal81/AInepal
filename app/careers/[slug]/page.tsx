@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { BriefcaseBusiness, MapPin, ArrowLeft } from 'lucide-react';
@@ -18,16 +18,26 @@ interface CareerItem {
     apply_url: string | null;
 }
 
-async function getCareer(slug: string) {
-    const supabase = await createClient();
-    const { data } = await supabase
-        .from('careers')
-        .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .single();
+import dbConnect from '@/lib/mongodb/client';
+import { Career } from '@/lib/mongodb/models';
 
-    return data as CareerItem | null;
+async function getCareer(slug: string) {
+    await dbConnect();
+    const career = await Career.findOne({ slug, isPublished: true }).lean();
+    if (!career) return null;
+
+    return {
+        id: career._id.toString(),
+        title: career.title,
+        slug: career.slug,
+        location: career.location,
+        employment_type: career.employmentType, // Map camelCase
+        department: career.department,
+        experience: career.experience,
+        description: career.description,
+        requirements: career.requirements,
+        apply_url: career.applyUrl // Map camelCase
+    };
 }
 
 export default async function CareerDetailPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -1,5 +1,3 @@
-import { createClient } from '@/lib/supabase/client'
-
 export interface GuestSession {
     id: string
     guest_name: string
@@ -33,8 +31,6 @@ export async function createGuestSession(data: CreateGuestSessionData): Promise<
         if (!response.ok) {
             const error = await response.json()
             console.error('Failed to create guest session:', error)
-            console.error('Response status:', response.status)
-            console.error('Full error details:', JSON.stringify(error, null, 2))
             return null
         }
 
@@ -97,16 +93,22 @@ export function isGuestSession(): boolean {
 }
 
 /**
- * Get session identifier (user_id or guest_session_id)
+ * Get session identifier from NextAuth session or guest storage
  */
 export async function getSessionIdentifier(): Promise<{ userId?: string; guestSessionId?: string }> {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    // Try to get authenticated user session
+    try {
+        const response = await fetch('/api/auth/session')
+        const session = await response.json()
 
-    if (user) {
-        return { userId: user.id }
+        if (session?.user?.id) {
+            return { userId: session.user.id }
+        }
+    } catch (error) {
+        console.error('Error fetching session:', error)
     }
 
+    // Fall back to guest session
     const guestSession = getGuestSessionFromStorage()
     if (guestSession) {
         return { guestSessionId: guestSession.id }

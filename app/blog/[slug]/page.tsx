@@ -1,6 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import dbConnect from '@/lib/mongodb/client'
+import { Post, PostCategory } from '@/lib/mongodb/models'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Calendar, ArrowLeft } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
@@ -14,14 +16,9 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
     const { slug } = await params
-    const supabase = await createClient()
+    await dbConnect()
 
-    const { data: post } = await supabase
-        .from('posts')
-        .select('title, excerpt, content')
-        .eq('slug', slug)
-        .eq('published', true)
-        .single()
+    const post = await Post.findOne({ slug, isPublished: true }).select('title excerpt content').lean()
 
     if (!post) {
         return { title: 'Post Not Found' }
@@ -35,31 +32,39 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function BlogPostPage({ params }: Props) {
     const { slug } = await params
-    const supabase = await createClient()
+    await dbConnect()
 
-    const { data: post } = await supabase
-        .from('posts')
-        .select(`
-            *,
-            post_categories (
-                name,
-                slug,
-                color,
-                icon_name
-            )
-        `)
-        .eq('slug', slug)
-        .eq('published', true)
-        .single()
+    const post = await Post.findOne({ slug, isPublished: true })
+        .populate({
+            path: 'categoryId',
+            model: PostCategory,
+            select: 'name slug color iconName'
+        })
+        .lean() as {
+            _id: string
+            title: string
+            excerpt?: string
+            content?: string
+            createdAt: Date
+            featuredImageUrl?: string
+            categoryId?: {
+                _id: string
+                name: string
+                slug: string
+                color?: string
+                iconName?: string
+            } | null
+        } | null
 
     if (!post) {
         notFound()
     }
 
-    const categoryInfo = post.post_categories as any
-    const CategoryIcon = categoryInfo?.icon_name && (Icons as any)[categoryInfo.icon_name]
-        ? (Icons as any)[categoryInfo.icon_name]
-        : Icons.Tag
+    const categoryInfo = post.categoryId
+    const iconName = categoryInfo?.iconName as keyof typeof Icons | undefined
+    const CategoryIcon = (iconName && iconName in Icons
+        ? Icons[iconName]
+        : Icons.Tag) as any
 
     return (
         <div className="min-h-screen bg-background">
@@ -102,8 +107,8 @@ export default async function BlogPostPage({ params }: Props) {
                         )}
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            <time dateTime={post.created_at}>
-                                {new Date(post.created_at).toLocaleDateString('en-US', {
+                            <time dateTime={post.createdAt.toString()}>
+                                {new Date(post.createdAt).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
@@ -113,12 +118,15 @@ export default async function BlogPostPage({ params }: Props) {
                     </header>
 
                     {/* Featured Image */}
-                    {post.featured_image_url && (
-                        <div className="aspect-video w-full overflow-hidden rounded-xl bg-secondary mb-8">
-                            <img
-                                src={post.featured_image_url}
+                    {post.featuredImageUrl && (
+                        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-secondary mb-8">
+                            <Image
+                                src={post.featuredImageUrl}
                                 alt={post.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 1200px) 100vw, 1200px"
+                                priority
                             />
                         </div>
                     )}

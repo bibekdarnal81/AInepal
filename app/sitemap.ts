@@ -1,68 +1,46 @@
-import { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import dbConnect from '@/lib/mongodb/client'
+import { Service } from '@/lib/mongodb/models'
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'
-    const supabase = await createClient()
+// Generate static params for sitemap
+export async function generateSitemapData() {
+    await dbConnect()
 
-    // Get all published services
-    const { data: services } = await supabase
-        .from('services')
-        .select('slug, updated_at')
-        .eq('is_published', true)
+    const services = await Service.find({ isPublished: true })
+        .select('slug updatedAt')
+        .lean()
 
-    // Get all published blog posts
-    const { data: posts } = await supabase
-        .from('posts')
-        .select('slug, created_at')
-        .eq('published', true)
+    const typedServices = services as Array<{ slug: string; updatedAt?: Date }>
+    return typedServices.map((s) => ({
+        url: `/services/${s.slug}`,
+        lastModified: s.updatedAt || new Date(),
+    }))
+}
 
-    const serviceUrls = services?.map((service) => ({
-        url: `${baseUrl}/services/${service.slug}`,
-        lastModified: new Date(service.updated_at),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-    })) || []
+export default async function sitemap() {
+    await dbConnect()
 
-    const postUrls = posts?.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.created_at),
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    })) || []
+    const services = await Service.find({ isPublished: true })
+        .select('slug updatedAt')
+        .lean()
 
-    return [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 1,
-        },
-        {
-            url: `${baseUrl}/services`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/blog`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/contact`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/about`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        ...serviceUrls,
-        ...postUrls,
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://AINepal.tech'
+
+    const staticRoutes = [
+        { url: baseUrl, lastModified: new Date() },
+        { url: `${baseUrl}/services`, lastModified: new Date() },
+        { url: `${baseUrl}/classes`, lastModified: new Date() },
+        { url: `${baseUrl}/projects`, lastModified: new Date() },
+        { url: `${baseUrl}/blog`, lastModified: new Date() },
+        { url: `${baseUrl}/careers`, lastModified: new Date() },
+        { url: `${baseUrl}/contact`, lastModified: new Date() },
+        { url: `${baseUrl}/book-demo`, lastModified: new Date() },
     ]
+
+    const typedServices = services as Array<{ slug: string; updatedAt?: Date }>
+    const serviceRoutes = typedServices.map((s) => ({
+        url: `${baseUrl}/services/${s.slug}`,
+        lastModified: s.updatedAt || new Date(),
+    }))
+
+    return [...staticRoutes, ...serviceRoutes]
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { BriefcaseBusiness, MapPin, ArrowRight } from 'lucide-react';
@@ -20,24 +20,23 @@ interface CareerItem {
 export default function CareersPage() {
     const [careers, setCareers] = useState<CareerItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const supabase = createClient();
-
     useEffect(() => {
         const fetchCareers = async () => {
-            const { data } = await supabase
-                .from('careers')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true });
-
-            if (data) {
-                setCareers(data as CareerItem[]);
+            try {
+                const response = await fetch('/api/careers');
+                if (response.ok) {
+                    const data = await response.json();
+                    setCareers(data);
+                }
+            } catch (error) {
+                console.error('Error fetching careers:', error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         fetchCareers();
-    }, [supabase]);
+    }, []);
 
     return (
         <div className="min-h-screen bg-background text-primary">
@@ -53,7 +52,7 @@ export default function CareersPage() {
                             Build products with a team that ships
                         </h1>
                         <p className="text-muted text-lg">
-                            Join Dunzo and help teams worldwide deliver reliable software faster.
+                            Join AINepal and help teams worldwide deliver reliable software faster.
                         </p>
                     </div>
 

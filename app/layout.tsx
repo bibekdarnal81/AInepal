@@ -4,6 +4,7 @@ import "./globals.css";
 import { ConditionalChatWidget } from '@/components/chat/conditional-chat-widget';
 import { ThemeScript } from '@/components/theme-script';
 import { TopBanner } from '@/components/top-banner';
+import { AuthProvider } from '@/lib/auth/provider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,12 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://dunzo.tech'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://AINepal.dev'),
   title: {
-    default: "Dunzo - Modern Software Solutions & Digital Services",
-    template: "%s | Dunzo"
+    default: "AINepal - Modern Software Solutions & Digital Services",
+    template: "%s | AINepal"
   },
-  description: "Dunzo delivers cutting-edge software solutions, web development, cloud hosting, and digital services. Transform your business with our modern tech stack and expert team.",
+  description: "AINepal delivers cutting-edge software solutions, web development, cloud hosting, and digital services. Transform your business with our modern tech stack and expert team.",
   keywords: [
     "software development",
     "web development",
@@ -29,39 +30,52 @@ export const metadata: Metadata = {
     "digital solutions",
     "tech company",
     "modern software",
-    "Dunzo",
+    "AINepal",
     "SaaS",
     "web applications",
     "API development",
     "full-stack development",
     "digital transformation"
   ],
-  authors: [{ name: "Dunzo Team" }],
-  creator: "Dunzo",
-  publisher: "Dunzo",
+  authors: [{ name: "AINepal Team" }],
+  creator: "AINepal",
+  publisher: "AINepal",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-32x32.png', type: 'image/png' },
+    ],
+    apple: '/logo.png',
+    other: [
+      {
+        rel: 'manifest',
+        url: '/site.webmanifest',
+      },
+    ],
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    siteName: 'Dunzo',
-    title: 'Dunzo - Modern Software Solutions & Digital Services',
+    siteName: 'AINepal',
+    title: 'AINepal - Modern Software Solutions & Digital Services',
     description: 'Transform your business with cutting-edge software solutions, web development, and cloud hosting. Built by experts, designed for scale.',
     images: [
       {
-        url: '/logo.jpg',
+        url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Dunzo - Modern Software Solutions',
+        alt: 'AINepal - Modern Software Solutions',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dunzo - Modern Software Solutions & Digital Services',
+    title: 'AINepal - Modern Software Solutions & Digital Services',
     description: 'Transform your business with cutting-edge software solutions, web development, and cloud hosting.',
-    images: ['/logo.jpg'],
-    creator: '@dunzotech',
-    site: '@dunzotech',
+    images: ['/logo.png'],
+    creator: '@AINepaltech',
+    site: '@AINepaltech',
   },
   robots: {
     index: true,
@@ -94,10 +108,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeScript />
-        <TopBanner />
-        {children}
-        <ConditionalChatWidget />
+        <AuthProvider>
+          {/* <TopBanner /> */}
+          {children}
+          <ConditionalChatWidget />
+        </AuthProvider>
       </body>
     </html>
   );
 }
+

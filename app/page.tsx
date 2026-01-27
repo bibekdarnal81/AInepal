@@ -1,6 +1,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { HeroWithTabs } from '@/components/sections/hero-with-tabs';
+import Hero from '@/components/sections/hero-with-tabs';
+import { PricingComparison } from '@/components/sections/pricing-comparison';
 import { MonitorSection } from '@/components/sections/monitor-section';
 import { EvolveSection } from '@/components/sections/evolve-section';
 import { CustomersSection } from '@/components/sections/customers-section';
@@ -25,20 +26,20 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://dunzo.tech/#organization",
-      "name": "Dunzo",
-      "url": "https://dunzo.tech",
+      "@id": "https://AINepal.tech/#organization",
+      "name": "AINepal",
+      "url": "https://AINepal.dev",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://dunzo.tech/logo.jpg",
+        "url": "https://AINepal.dev/logo.jpg",
         "width": 200,
         "height": 200
       },
-      "description": "Dunzo delivers cutting-edge software solutions, web development, cloud hosting, and digital services.",
+      "description": "AINepal delivers cutting-edge software solutions, web development, cloud hosting, and digital services.",
       "sameAs": [
-        "https://twitter.com/dunzotech",
-        "https://github.com/dunzotech",
-        "https://linkedin.com/company/dunzotech"
+        "https://twitter.com/AINepaltech",
+        "https://github.com/AINepaltech",
+        "https://linkedin.com/company/AINepaltech"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
@@ -48,22 +49,22 @@ const jsonLd = {
     },
     {
       "@type": "WebSite",
-      "@id": "https://dunzo.tech/#website",
-      "url": "https://dunzo.tech",
-      "name": "Dunzo",
+      "@id": "https://AINepal.tech/#website",
+      "url": "https://AINepal.tech",
+      "name": "AINepal",
       "description": "Modern Software Solutions & Digital Services",
       "publisher": {
-        "@id": "https://dunzo.tech/#organization"
+        "@id": "https://AINepal.tech/#organization"
       },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://dunzo.tech/search?q={search_term_string}",
+        "target": "https://AINepal.tech/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     },
     {
       "@type": "SoftwareApplication",
-      "name": "Dunzo Platform",
+      "name": "AINepal Platform",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "offers": {
@@ -91,9 +92,9 @@ export default function Home() {
       <div className="dot-grid">
         <Header />
         <main>
-
-          <HeroWithTabs />
+          <Hero />
           <ServicesSection />
+          <PricingComparison />
           <ClassesSection />
           <CareersSection />
           <TechStackSection />
@@ -103,7 +104,7 @@ export default function Home() {
           {/* <PostsSection /> */}
           {/* <MonitorSection /> */}
           <PlatformSection />
-          {/* <EvolveSection /> */}
+          <EvolveSection />
           <CustomersSection />
           {/* <TweetsSection /> */}
           <StatsSection />

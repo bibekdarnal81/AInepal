@@ -13,49 +13,49 @@ const tweets = [
     {
         name: "Jonah Seguin",
         handle: "@jonahseguin",
-        content: "We went from $2000 on AWS to <$200 on @ Dunzo.",
+        content: "We went from $2000 on AWS to <$200 on @ AINepal.",
         avatar: "J"
     },
     {
         name: "Daniel Moretti",
         handle: "@dmorettiv",
-        content: "@ Dunzo streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
+        content: "@ AINepal streamlines and accelerates our entire operation. It gives us instant observability into our services and makes spinning up self-hosted third-party tools almost effortless.",
         avatar: "D"
     },
     {
         name: "Pingback Inc",
         handle: "@pingbackoficial",
-        content: "As CTO at Pingback, speed of iteration is everything for us. @ Dunzo has become our go-to platform for rapid experimentation and testing new ideas.",
+        content: "As CTO at Pingback, speed of iteration is everything for us. @ AINepal has become our go-to platform for rapid experimentation and testing new ideas.",
         avatar: "P"
     },
     {
         name: "Aaron S",
         handle: "@aaronShaki",
-        content: "Typically, I avoid using PaaS but the team at @ Dunzo is boosting development velocity so significantly that it's hard to ignore",
+        content: "Typically, I avoid using PaaS but the team at @ AINepal is boosting development velocity so significantly that it's hard to ignore",
         avatar: "A"
     },
     {
         name: "John Nunemaker",
         handle: "@jnunemaker",
-        content: "I've moved $4.5k/mo from AWS and $1k/mo from Heroku in the past month and my @ Dunzo bill is like $300/mo.",
+        content: "I've moved $4.5k/mo from AWS and $1k/mo from Heroku in the past month and my @ AINepal bill is like $300/mo.",
         avatar: "J"
     },
     {
         name: "Juan Manuel Pérez",
         handle: "@juanmapfont",
-        content: "Tracking changes, scaling when needed, and handling infrastructure has never been simpler. @ Dunzo is exactly what I had been looking for over the years.",
+        content: "Tracking changes, scaling when needed, and handling infrastructure has never been simpler. @ AINepal is exactly what I had been looking for over the years.",
         avatar: "J"
     },
     {
         name: "Common",
         handle: "@commondotxyz",
-        content: "We cut our hosting costs by 75% migrating from Heroku to @ Dunzo. 1. autoscaling key services 2. transient PR environments 3. running fewer instances",
+        content: "We cut our hosting costs by 75% migrating from Heroku to @ AINepal. 1. autoscaling key services 2. transient PR environments 3. running fewer instances",
         avatar: "C"
     },
     {
         name: "Teo",
         handle: "@teodor_io",
-        content: "@ Dunzo is really really good. Being able to deploy straight from a Github repo, detecting a root Dockerfile and using that to build, no need for any complex cicd.",
+        content: "@ AINepal is really really good. Being able to deploy straight from a Github repo, detecting a root Dockerfile and using that to build, no need for any complex cicd.",
         avatar: "T"
     }
 ];
@@ -107,7 +107,7 @@ export function TweetsSection() {
                         {...fadeInUp}
                         transition={{ delay: 0.2 }}
                     >
-                        Join nearly 2M developers building with  Dunzo →
+                        Join nearly 2M developers building with  AINepal →
                     </motion.a>
                 </motion.div>
 

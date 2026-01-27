@@ -5,7 +5,7 @@
 Run these commands in your terminal to apply the migrations:
 
 ```bash
-cd /Users/aasish/Project/site/Dunzo
+cd /Users/aasish/Project/site/AINepal
 
 # Option 1: Using Supabase CLI (if installed)
 supabase db push

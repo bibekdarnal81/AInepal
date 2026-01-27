@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+
 import Link from 'next/link'
 import { ArrowRight, Check, MessageSquare } from 'lucide-react'
 import * as Icons from 'lucide-react'
@@ -22,24 +22,23 @@ interface Service {
 export function ServicesSection() {
     const [services, setServices] = useState<Service[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
 
     useEffect(() => {
         const fetchServices = async () => {
-            const { data } = await supabase
-                .from('services')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true })
-                .limit(8)
-
-            if (data) {
-                setServices(data)
+            try {
+                const response = await fetch('/api/services')
+                if (response.ok) {
+                    const data = await response.json()
+                    setServices(data)
+                }
+            } catch (error) {
+                console.error('Error fetching services:', error)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
         fetchServices()
-    }, [supabase])
+    }, [])
 
     if (loading) return null
     if (services.length === 0) return null

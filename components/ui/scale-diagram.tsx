@@ -145,7 +145,7 @@ const ScaleDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                     <tspan x={323.333} y={680.485}>Metabase</tspan>
                 </text>
                 <text fill="#f7f7f8" fontFamily="Inter, sans-serif" fontSize={14}>
-                    <tspan x={323.333} y={705.757}>mtbase-prod.up. Dunzo.app</tspan>
+                    <tspan x={323.333} y={705.757}>mtbase-prod.up. AINepal.app</tspan>
                 </text>
 
                 {/* Metabase deploy status */}
@@ -207,7 +207,7 @@ const ScaleDiagramSVG = (props: React.SVGProps<SVGSVGElement>) => (
                     <tspan x={276} y={273.818}>frontend</tspan>
                 </text>
                 <text fill="#bf92ec" fontFamily="Inter, sans-serif" fontSize={14}>
-                    <tspan x={276} y={297.758}>frontend-prod.up. Dunzo.app</tspan>
+                    <tspan x={276} y={297.758}>frontend-prod.up. AINepal.app</tspan>
                 </text>
 
                 {/* Deploy status */}

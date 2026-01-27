@@ -88,7 +88,7 @@ export default function ContactPage() {
                                 Get In Touch
                             </h1>
                             <p className="text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
-                                Have a project in mind or questions about our services? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                                Have a project in mind or questions about our services? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
                             </p>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ export default function ContactPage() {
                                     <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
                                         <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                                         <p className="text-green-800 font-medium">
-                                            Thank you! Your message has been sent successfully. We'll get back to you soon.
+                                            Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
                                         </p>
                                     </div>
                                 )}

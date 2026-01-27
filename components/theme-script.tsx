@@ -1,4 +1,4 @@
-import Script from 'next/script';
+// import Script from 'next/script';
 
 const themeScript = `
 (() => {
@@ -19,10 +19,19 @@ const themeScript = `
 })();
 `;
 
+// export function ThemeScript() {
+//   return (
+//     <Script id="theme-script" strategy="beforeInteractive">
+//       {themeScript}
+//     </Script>
+//   );
+// }
+
 export function ThemeScript() {
   return (
-    <Script id="theme-script" strategy="beforeInteractive">
-      {themeScript}
-    </Script>
+    <script
+      id="theme-script"
+      dangerouslySetInnerHTML={{ __html: themeScript }}
+    />
   );
 }

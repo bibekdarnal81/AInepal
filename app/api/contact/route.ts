@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import dbConnect from '@/lib/mongodb/client'
+import { ContactMessage } from '@/lib/mongodb/models'
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,61 +24,33 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Create Supabase client with service role key (bypasses RLS for public contact form)
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false
-                }
-            }
-        )
+        await dbConnect()
 
         // Insert contact message into database
-        const { data, error } = await supabase
-            .from('contact_messages')
-            .insert([
-                {
-                    name: name.trim(),
-                    email: email.trim().toLowerCase(),
-                    phone: phone?.trim() || null,
-                    subject: subject?.trim() || null,
-                    message: message.trim(),
-                    company: company?.trim() || null,
-                    budget: budget?.trim() || null,
-                    services: services || [],
-                    website: website?.trim() || null,
-                    contact_method: contact_method || 'email',
-                    is_read: false
-                }
-            ])
-            .select()
-            .single()
-
-        if (error) {
-            console.error('Database error:', error)
-
-            // Check for missing column error (Postgres code 42703) or Schema Cache error (PGRST204)
-            if (error.code === '42703' || error.code === 'PGRST204') {
-                return NextResponse.json(
-                    { error: 'System Error: Database schema is outdated (missing columns). Please run the migration.' },
-                    { status: 500 }
-                )
-            }
-
-            return NextResponse.json(
-                { error: 'Failed to save message. Please try again.' },
-                { status: 500 }
-            )
-        }
+        const contactMessage = await ContactMessage.create({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone?.trim() || null,
+            subject: subject?.trim() || null,
+            message: message.trim(),
+            company: company?.trim() || null,
+            budget: budget?.trim() || null,
+            services: services || [],
+            website: website?.trim() || null,
+            contactMethod: contact_method || 'email',
+            isRead: false
+        })
 
         return NextResponse.json(
             {
                 success: true,
                 message: 'Message sent successfully',
-                data
+                data: {
+                    id: contactMessage._id.toString(),
+                    name: contactMessage.name,
+                    email: contactMessage.email,
+                    createdAt: contactMessage.createdAt,
+                }
             },
             { status: 200 }
         )

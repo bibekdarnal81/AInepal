@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -10,37 +11,37 @@ const projects = [
         id: 1,
         name: 'Tulos Ecommerce Website',
         image: 'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
     {
         id: 2,
         name: 'Complete Cryptocurrency Analytics',
         image: 'https://images.unsplash.com/photo-1642104704074-907c0698cbd9?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
     {
         id: 3,
         name: 'Orebi Shopping Platform',
         image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
     {
         id: 4,
         name: 'Shopcart Ecommerce App',
         image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
     {
         id: 5,
         name: 'React Native Ecommerce',
         image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
     {
         id: 6,
         name: 'Multi-AI Chat Platform',
         image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop',
-        purchaseLink: 'https://buymeacoffee.com/ Dunzo',
+        purchaseLink: 'https://buymeacoffee.com/ AINepal',
     },
 ];
 
@@ -100,10 +101,12 @@ export function ProjectsSection() {
                                     className={`group flex-none w-80 rounded-xl overflow-hidden bg-white border-4 ${borderColors[index % borderColors.length]} hover:shadow-xl transition-all duration-300`}
                                 >
                                     <div className="relative h-48 overflow-hidden">
-                                        <img
+                                        <Image
                                             src={project.image}
                                             alt={project.name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                            sizes="(max-width: 768px) 100vw, 320px"
                                         />
                                     </div>
                                     <div className="p-6">

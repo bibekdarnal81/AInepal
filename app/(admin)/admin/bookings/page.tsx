@@ -40,6 +40,8 @@ interface Booking {
     created_at: string
 }
 
+type StatusFilter = 'all' | 'read' | 'unread'
+
 const SERVICE_OPTIONS = [
     'Website Design & Development',
     'Custom CMS Website',
@@ -60,7 +62,7 @@ export default function BookingManagementPage() {
     const [loading, setLoading] = useState(true)
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState<'all' | 'read' | 'unread'>('all')
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
     const [serviceFilter, setServiceFilter] = useState<string>('all')
     const [refreshing, setRefreshing] = useState(false)
 
@@ -216,7 +218,7 @@ export default function BookingManagementPage() {
                             <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as any)}
+                                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
                                 className="w-full pl-10 pr-10 py-2.5 bg-secondary/30 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none cursor-pointer"
                             >
                                 <option value="all">All Status</option>

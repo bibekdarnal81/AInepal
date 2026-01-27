@@ -1,162 +1,120 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import dbConnect from '@/lib/mongodb/client'
+import { ContactMessage } from '@/lib/mongodb/models'
+import mongoose from 'mongoose'
 
-// GET - Fetch all contact messages/bookings
+async function isAdmin() {
+    const session = await getServerSession(authOptions)
+    return session?.user?.isAdmin === true
+}
+
 export async function GET(request: NextRequest) {
     try {
-        const supabase = await createClient()
+        if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        await dbConnect()
 
-        // Check if user is authenticated and is admin
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Get query parameters for filtering
-        const searchParams = request.nextUrl.searchParams
-        const status = searchParams.get('status') // 'read' | 'unread' | 'all'
-        const search = searchParams.get('search')
+        const { searchParams } = new URL(request.url)
+        const status = searchParams.get('status')
         const service = searchParams.get('service')
+        const search = searchParams.get('search')
 
-        let query = supabase
-            .from('contact_messages')
-            .select('*')
-            .order('created_at', { ascending: false })
+        const query: Record<string, unknown> = {}
+        if (status === 'read') query.isRead = true
+        else if (status === 'unread') query.isRead = false
 
-        // Filter by read status
-        if (status === 'read') {
-            query = query.eq('is_read', true)
-        } else if (status === 'unread') {
-            query = query.eq('is_read', false)
-        }
+        if (service && service !== 'all') query.services = service
 
-        // Search filter
         if (search) {
-            query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%,message.ilike.%${search}%`)
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+                { company: { $regex: search, $options: 'i' } },
+                { message: { $regex: search, $options: 'i' } }
+            ]
         }
 
-        // Service filter
-        if (service && service !== 'all') {
-            query = query.contains('services', [service])
-        }
+        const messages = await ContactMessage.find(query).sort({ createdAt: -1 }).lean()
+        const typedMessages = messages as Array<{
+            _id: mongoose.Types.ObjectId
+            name: string
+            company?: string
+            email: string
+            phone?: string
+            subject?: string
+            message: string
+            budget?: string
+            services?: string[]
+            website?: string
+            contactMethod?: string
+            isRead: boolean
+            createdAt: Date
+        }>
 
-        const { data, error } = await query
-
-        if (error) {
-            console.error('Error fetching bookings:', error)
-            return NextResponse.json(
-                { error: 'Failed to fetch bookings' },
-                { status: 500 }
-            )
-        }
-
-        return NextResponse.json({ bookings: data })
-    } catch (error: any) {
+        return NextResponse.json({
+            bookings: typedMessages.map((m) => ({
+                id: m._id.toString(),
+                name: m.name,
+                company: m.company || null,
+                email: m.email,
+                phone: m.phone || null,
+                subject: m.subject || null,
+                message: m.message,
+                budget: m.budget || null,
+                services: m.services || [],
+                website: m.website || null,
+                contact_method: m.contactMethod || 'email',
+                is_read: m.isRead,
+                created_at: m.createdAt.toISOString()
+            }))
+        })
+    } catch (error) {
         console.error('Error fetching bookings:', error)
-        return NextResponse.json(
-            { error: error.message || 'Failed to fetch bookings' },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: 'Failed' }, { status: 500 })
     }
 }
 
-// PATCH - Update booking status
 export async function PATCH(request: NextRequest) {
     try {
-        const supabase = await createClient()
+        if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        await dbConnect()
+        const { id, is_read } = await request.json()
 
-        // Check if user is authenticated and is admin
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
         }
 
-        const body = await request.json()
-        const { id, is_read, status } = body
-
-        if (!id) {
-            return NextResponse.json(
-                { error: 'Booking ID is required' },
-                { status: 400 }
-            )
-        }
-
-        const updateData: any = {}
-        if (typeof is_read === 'boolean') {
-            updateData.is_read = is_read
-        }
-        if (status) {
-            updateData.status = status
-        }
-
-        const { data, error } = await supabase
-            .from('contact_messages')
-            .update(updateData)
-            .eq('id', id)
-            .select()
-            .single()
-
-        if (error) {
-            console.error('Error updating booking:', error)
-            return NextResponse.json(
-                { error: 'Failed to update booking' },
-                { status: 500 }
-            )
-        }
-
-        return NextResponse.json({ success: true, booking: data })
-    } catch (error: any) {
-        console.error('Error updating booking:', error)
-        return NextResponse.json(
-            { error: error.message || 'Failed to update booking' },
-            { status: 500 }
+        const message = await ContactMessage.findByIdAndUpdate(
+            id,
+            { isRead: is_read },
+            { new: true }
         )
+
+        if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Error updating booking:', error)
+        return NextResponse.json({ error: 'Failed' }, { status: 500 })
     }
 }
 
-// DELETE - Delete a booking
 export async function DELETE(request: NextRequest) {
     try {
-        const supabase = await createClient()
+        if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const id = new URL(request.url).searchParams.get('id')
 
-        // Check if user is authenticated and is admin
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
         }
 
-        const searchParams = request.nextUrl.searchParams
-        const id = searchParams.get('id')
+        await dbConnect()
+        const message = await ContactMessage.findByIdAndDelete(id)
 
-        if (!id) {
-            return NextResponse.json(
-                { error: 'Booking ID is required' },
-                { status: 400 }
-            )
-        }
-
-        const { error } = await supabase
-            .from('contact_messages')
-            .delete()
-            .eq('id', id)
-
-        if (error) {
-            console.error('Error deleting booking:', error)
-            return NextResponse.json(
-                { error: 'Failed to delete booking' },
-                { status: 500 }
-            )
-        }
-
+        if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
         return NextResponse.json({ success: true })
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error deleting booking:', error)
-        return NextResponse.json(
-            { error: error.message || 'Failed to delete booking' },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: 'Failed' }, { status: 500 })
     }
 }

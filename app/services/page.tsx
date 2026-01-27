@@ -1,49 +1,50 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { BuyButton } from '@/components/buy-button';
 import Link from 'next/link';
 import * as Icons from 'lucide-react';
 import { Check, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import dbConnect from '@/lib/mongodb/client';
+import { Service } from '@/lib/mongodb/models';
 
-interface Service {
-    id: string;
+interface ServiceData {
+    _id: string;
     title: string;
     slug: string;
     description: string | null;
     price: number;
     currency: string;
-    icon_name: string | null;
-    thumbnail_url: string | null;
+    iconName: string | null;
+    thumbnailUrl: string | null;
     features: string[];
-    is_featured: boolean;
-    is_published: boolean;
+    isFeatured: boolean;
+    isPublished: boolean;
 }
 
-export default function ServicesPage() {
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+async function getServices(): Promise<ServiceData[]> {
+    await dbConnect();
+    const services = await Service.find({ isPublished: true })
+        .sort({ displayOrder: 1 })
+        .lean();
 
-    useEffect(() => {
-        const fetchServices = async () => {
-            const { data, error } = await supabase
-                .from('services')
-                .select('*')
-                .eq('is_published', true)
-                .order('display_order', { ascending: true });
+    const typedServices = services as ServiceData[]
+    return typedServices.map((s) => ({
+        _id: s._id.toString(),
+        title: s.title,
+        slug: s.slug,
+        description: s.description || null,
+        price: s.price || 0,
+        currency: s.currency || 'NPR',
+        iconName: s.iconName || null,
+        thumbnailUrl: s.thumbnailUrl || null,
+        features: s.features || [],
+        isFeatured: s.isFeatured || false,
+        isPublished: s.isPublished || false,
+    }));
+}
 
-            if (!error && data) {
-                setServices(data);
-            }
-            setLoading(false);
-        };
-        fetchServices();
-    }, [supabase]);
+export default async function ServicesPage() {
+    const services = await getServices();
 
     return (
         <div className="min-h-screen bg-background text-primary selection:bg-primary/20 font-sans">
@@ -59,55 +60,40 @@ export default function ServicesPage() {
                 {/* Hero Section */}
                 <section className="relative z-10 px-6 lg:px-8 mb-20 lg:mb-32">
                     <div className="mx-auto max-w-4xl text-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
-                                <Sparkles className="h-4 w-4" />
-                                <span>Expert Web Solutions</span>
-                            </div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
+                            <Sparkles className="h-4 w-4" />
+                            <span>Expert Web Solutions</span>
+                        </div>
 
-                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
-                                Transform Your Ideas Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 animate-gradient">Digital Reality</span>
-                            </h1>
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
+                            Transform Your Ideas Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 animate-gradient">Digital Reality</span>
+                        </h1>
 
-                            <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto leading-relaxed">
-                                We specialize in high-performance web development, creating stunning user experiences with cutting-edge technologies.
-                            </p>
-                        </motion.div>
+                        <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto leading-relaxed">
+                            We specialize in high-performance web development, creating stunning user experiences with cutting-edge technologies.
+                        </p>
                     </div>
                 </section>
 
                 {/* Services Grid */}
                 <section className="relative z-10 px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl">
-                        {loading ? (
-                            <div className="flex items-center justify-center py-20">
-                                <div className="relative w-16 h-16">
-                                    <div className="absolute inset-0 rounded-full border-t-2 border-blue-500 animate-spin"></div>
-                                    <div className="absolute inset-2 rounded-full border-r-2 border-purple-500 animate-spin-reverse"></div>
-                                </div>
-                            </div>
-                        ) : services.length === 0 ? (
+                        {services.length === 0 ? (
                             <div className="text-center py-20 px-6 bg-card rounded-3xl border border-border/60">
                                 <p className="text-muted text-xl font-light">No services available right now.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                                {services.map((service, index) => {
+                                {services.map((service) => {
                                     // Dynamically resolve icon
-                                    const IconComponent = service.icon_name && (Icons as any)[service.icon_name]
-                                        ? (Icons as any)[service.icon_name]
+                                    const iconName = service.iconName as keyof typeof Icons | undefined
+                                    const IconComponent = iconName && iconName in Icons
+                                        ? Icons[iconName]
                                         : Icons.Code;
 
                                     return (
-                                        <motion.div
-                                            key={service.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.1 }}
+                                        <div
+                                            key={service._id}
                                             className="group relative flex flex-col p-8 rounded-3xl bg-card backdrop-blur-sm border border-border/60 hover:border-blue-500/30 transition-all duration-300 hover:bg-card/80 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10"
                                         >
                                             {/* Header */}
@@ -160,7 +146,7 @@ export default function ServicesPage() {
                                                 <div className="space-y-3">
                                                     <BuyButton
                                                         itemType="service"
-                                                        itemId={service.id}
+                                                        itemId={service._id}
                                                         itemTitle={service.title}
                                                         itemSlug={service.slug}
                                                         amount={service.price}
@@ -170,20 +156,16 @@ export default function ServicesPage() {
                                                         Get Started
                                                     </BuyButton>
 
-                                                    <button
-                                                        onClick={() => {
-                                                            window.dispatchEvent(new CustomEvent('openChatWithMessage', {
-                                                                detail: { itemType: 'service', itemTitle: service.title }
-                                                            }));
-                                                        }}
+                                                    <Link
+                                                        href={`/services/${service.slug}`}
                                                         className="w-full py-3.5 rounded-xl border border-border/60 hover:border-border hover:bg-secondary/60 text-secondary hover:text-primary font-medium transition-all flex items-center justify-center gap-2"
                                                     >
                                                         <MessageSquare className="h-4 w-4" />
-                                                        Ask a Question
-                                                    </button>
+                                                        Learn More
+                                                    </Link>
                                                 </div>
                                             </div>
-                                        </motion.div>
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -201,7 +183,7 @@ export default function ServicesPage() {
                                 Not sure which service is right for you?
                             </h2>
                             <p className="max-w-xl mx-auto text-muted mb-10 text-lg relative z-10">
-                                Schedule a free consultation call. We'll analyze your needs and recommend the perfect solution for your business.
+                                Schedule a free consultation call. We&apos;ll analyze your needs and recommend the perfect solution for your business.
                             </p>
 
                             <div className="relative z-10">

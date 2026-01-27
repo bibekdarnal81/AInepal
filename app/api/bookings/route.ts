@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import dbConnect from '@/lib/mongodb/client'
+import { Booking, ChatMessage } from '@/lib/mongodb/models'
 
 export async function POST(request: NextRequest) {
     try {
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const session = await getServerSession(authOptions)
 
-        if (authError || !user) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -21,97 +23,81 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        await dbConnect()
+
         // Create chat message for the booking
         const bookingMessage = `📅 Booking Request: ${serviceName} on ${new Date(bookingDate).toLocaleDateString()} at ${bookingTime}`
 
-        const { data: messageData, error: messageError } = await supabase
-            .from('chat_messages')
-            .insert({
-                user_id: user.id,
-                message: bookingMessage,
-                is_admin: false,
-                is_read: false
-            })
-            .select()
-            .single()
-
-        if (messageError) {
-            console.error('Error creating chat message:', messageError)
-            return NextResponse.json(
-                { error: 'Failed to create booking message' },
-                { status: 500 }
-            )
-        }
+        const chatMessage = await ChatMessage.create({
+            userId: session.user.id,
+            message: bookingMessage,
+            isAdmin: false,
+            isRead: false
+        })
 
         // Create booking record
-        const { data: bookingData, error: bookingError } = await supabase
-            .from('bookings')
-            .insert({
-                user_id: user.id,
-                service_type: serviceType,
-                service_name: serviceName,
-                booking_date: bookingDate,
-                booking_time: bookingTime,
-                duration: duration || 60,
-                status: 'pending',
-                notes: notes || null,
-                chat_message_id: messageData.id
-            })
-            .select()
-            .single()
-
-        if (bookingError) {
-            console.error('Error creating booking:', bookingError)
-            return NextResponse.json(
-                { error: 'Failed to create booking' },
-                { status: 500 }
-            )
-        }
+        const booking = await Booking.create({
+            userId: session.user.id,
+            serviceType,
+            serviceName,
+            bookingDate: new Date(bookingDate),
+            bookingTime,
+            duration: duration || 60,
+            status: 'pending',
+            notes: notes || null,
+            chatMessageId: chatMessage._id
+        })
 
         return NextResponse.json({
             success: true,
-            booking: bookingData,
-            message: messageData
+            booking: {
+                id: booking._id.toString(),
+                serviceType: booking.serviceType,
+                serviceName: booking.serviceName,
+                bookingDate: booking.bookingDate,
+                bookingTime: booking.bookingTime,
+                status: booking.status,
+            },
+            message: {
+                id: chatMessage._id.toString(),
+                message: chatMessage.message
+            }
         })
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error creating booking:', error)
         return NextResponse.json(
-            { error: error.message || 'Failed to create booking' },
+            { error: 'Failed to create booking' },
             { status: 500 }
         )
     }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
-        const supabase = await createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const session = await getServerSession(authOptions)
 
-        if (authError || !user) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        await dbConnect()
+
         // Fetch user's bookings
-        const { data, error } = await supabase
-            .from('bookings')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('booking_date', { ascending: true })
-            .order('booking_time', { ascending: true })
+        const bookings = await Booking.find({ userId: session.user.id })
+            .sort({ bookingDate: 1, bookingTime: 1 })
+            .lean()
 
-        if (error) {
-            console.error('Error fetching bookings:', error)
-            return NextResponse.json(
-                { error: 'Failed to fetch bookings' },
-                { status: 500 }
-            )
-        }
-
-        return NextResponse.json({ bookings: data })
-    } catch (error: any) {
+        return NextResponse.json({
+            bookings: bookings.map(b => ({
+                ...b,
+                id: b._id.toString(),
+                _id: undefined
+            }))
+        })
+    } catch (error) {
         console.error('Error fetching bookings:', error)
         return NextResponse.json(
-            { error: error.message || 'Failed to fetch bookings' },
+            { error: 'Failed to fetch bookings' },
             { status: 500 }
         )
     }
