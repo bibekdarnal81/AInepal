@@ -5,6 +5,7 @@ import { Order } from "@/lib/mongodb/models"
 import { CheckCircle, Clock, XCircle, Package, ExternalLink, Calendar } from "lucide-react"
 import Link from "next/link"
 import { OrderActions } from "./order-actions"
+import { VerifyPayment } from "./verify-payment"
 
 type OrderRow = {
     _id: string
@@ -30,6 +31,7 @@ export default async function DashboardOrdersPage() {
 
     return (
         <div className="space-y-6 animate-fade-in">
+            <VerifyPayment />
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">My Orders</h1>

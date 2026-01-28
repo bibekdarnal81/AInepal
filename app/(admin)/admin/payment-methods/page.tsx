@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, Loader2, CreditCard, X, ToggleLeft, ToggleRight, Image as ImageIcon, QrCode } from 'lucide-react'
+import { Plus, Loader2, CreditCard, X, ToggleLeft, ToggleRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ThumbnailUpload from '@/components/thumbnail-upload'
 
@@ -21,10 +21,28 @@ export default function AdminPaymentMethodsPage() {
     const [formData, setFormData] = useState(initialForm)
     const [saving, setSaving] = useState(false)
     const [deleting, setDeleting] = useState<string | null>(null)
+    const [apiModalOpen, setApiModalOpen] = useState(false)
+    const [apiConfig, setApiConfig] = useState({ merchantId: '', secret: '', environment: 'test', enabled: false })
+    const [apiSaving, setApiSaving] = useState(false)
 
     const fetchData = async () => {
         setLoading(true)
-        try { const res = await fetch('/api/admin/payment-methods'); const data = await res.json(); if (res.ok) setMethods(data.paymentMethods) }
+        try {
+            const [methodsRes, configRes] = await Promise.all([
+                fetch('/api/admin/payment-methods'),
+                fetch('/api/admin/payment-config')
+            ])
+
+            if (methodsRes.ok) {
+                const data = await methodsRes.json()
+                setMethods(data.paymentMethods)
+            }
+
+            if (configRes.ok) {
+                const data = await configRes.json()
+                if (data.payment) setApiConfig(data.payment)
+            }
+        }
         catch (e) { console.error(e) }
         finally { setLoading(false) }
     }
@@ -44,13 +62,28 @@ export default function AdminPaymentMethodsPage() {
         finally { setSaving(false) }
     }
 
+    const handleApiSubmit = async (e: React.FormEvent) => {
+        e.preventDefault(); setApiSaving(true)
+        try {
+            const res = await fetch('/api/admin/payment-config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(apiConfig) })
+            if (res.ok) { setApiModalOpen(false); fetchData(); alert('API Configuration Saved') } else { const d = await res.json(); alert(d.error) }
+        } catch (e) { console.error(e) }
+        finally { setApiSaving(false) }
+    }
+
     const handleDelete = async (id: string) => { if (!confirm('Delete?')) return; setDeleting(id); try { await fetch(`/api/admin/payment-methods?id=${id}`, { method: 'DELETE' }); fetchData() } catch (e) { console.error(e) } finally { setDeleting(null) } }
 
     const toggleActive = async (id: string, isActive: boolean) => { try { await fetch('/api/admin/payment-methods', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, isActive: !isActive }) }); fetchData() } catch (e) { console.error(e) } }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Payment Methods</h1><p className="text-muted-foreground mt-1">Manage payment options</p></div><button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90"><Plus className="h-4 w-4" /> Add Method</button></div>
+            <div className="flex items-center justify-between">
+                <div><h1 className="text-3xl font-bold">Payment Methods</h1><p className="text-muted-foreground mt-1">Manage payment options</p></div>
+                <div className="flex gap-3">
+                    <button onClick={() => setApiModalOpen(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-foreground rounded-lg font-medium hover:bg-secondary/90 border border-border">Configure API</button>
+                    <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90"><Plus className="h-4 w-4" /> Add Method</button>
+                </div>
+            </div>
 
             <div className="bg-card border border-border rounded-xl overflow-hidden">
                 {loading ? <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : methods.length === 0 ? (
@@ -109,6 +142,44 @@ export default function AdminPaymentMethodsPage() {
                                 <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-8 py-2 bg-emerald-500 text-white rounded-lg font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50">
                                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                                     {isEditing ? 'Save Changes' : 'Save Method'}
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}</AnimatePresence>
+
+            <AnimatePresence>{apiModalOpen && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setApiModalOpen(false)}>
+                    <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} onClick={e => e.stopPropagation()} className="bg-card border border-border rounded-xl shadow-xl w-full max-w-md max-h-[95vh] overflow-y-auto">
+                        <div className="flex items-center justify-between p-6 border-b border-border"><h2 className="text-xl font-semibold">eSewa API Configuration</h2><button onClick={() => setApiModalOpen(false)} className="p-2 hover:bg-secondary rounded-lg"><X className="h-5 w-5" /></button></div>
+                        <form onSubmit={handleApiSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Environment</label>
+                                <select value={apiConfig.environment} onChange={e => setApiConfig(p => ({ ...p, environment: e.target.value }))} className="w-full px-4 py-2 bg-secondary/50 border border-border rounded-lg outline-none focus:border-primary/50">
+                                    <option value="test">Test Mode (Sandbox)</option>
+                                    <option value="live">Live Mode</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Merchant ID (Scd)</label>
+                                <input type="text" value={apiConfig.merchantId} onChange={e => setApiConfig(p => ({ ...p, merchantId: e.target.value.trim() }))} placeholder="e.g. EPAYTEST" className="w-full px-4 py-2 bg-secondary/50 border border-border rounded-lg outline-none focus:border-primary/50" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Secret Key / Signature</label>
+                                <input type="password" value={apiConfig.secret} onChange={e => setApiConfig(p => ({ ...p, secret: e.target.value.trim() }))} placeholder="Enter secret key if applicable" className="w-full px-4 py-2 bg-secondary/50 border border-border rounded-lg outline-none focus:border-primary/50" />
+                                <p className="text-xs text-muted-foreground mt-1">Leave empty if using standard eSewa (only needed for hashing)</p>
+                            </div>
+                            <label className="flex items-center gap-2 cursor-pointer p-4 border border-border rounded-lg bg-secondary/20">
+                                <input type="checkbox" checked={apiConfig.enabled} onChange={e => setApiConfig(p => ({ ...p, enabled: e.target.checked }))} className="h-4 w-4 bg-primary rounded border-border" />
+                                <span className="text-sm font-medium">Enable eSewa API Integration</span>
+                            </label>
+
+                            <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+                                <button type="button" onClick={() => setApiModalOpen(false)} className="px-4 py-2 text-foreground font-medium hover:bg-secondary rounded-lg">Cancel</button>
+                                <button type="submit" disabled={apiSaving} className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50">
+                                    {apiSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                                    Save Config
                                 </button>
                             </div>
                         </form>

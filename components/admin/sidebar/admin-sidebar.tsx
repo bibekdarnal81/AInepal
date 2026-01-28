@@ -26,7 +26,8 @@ import {
     Store,
     Bot,
     PanelLeft,
-    School
+    School,
+    Key
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSession, signOut } from 'next-auth/react'
@@ -327,6 +328,20 @@ export function AdminSidebar() {
                             icon={<Server className="h-5 w-5" />}
                             label="Hosting Plans"
                             href="/admin/hosting"
+                        />
+                    </div>
+
+                    {/* Developers */}
+                    <div>
+                        {!isCollapsed && (
+                            <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                Developers
+                            </h3>
+                        )}
+                        <SidebarItem
+                            icon={<Key className="h-5 w-5" />}
+                            label="API Keys"
+                            href="/admin/api-keys"
                         />
                     </div>
                 </div>

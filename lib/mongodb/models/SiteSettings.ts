@@ -13,6 +13,14 @@ export interface ISiteSettings extends Document {
     _id: mongoose.Types.ObjectId
     key: string
     sidebarItems: ISidebarItem[]
+    payment?: {
+        esewa: {
+            merchantId: string
+            secret: string
+            environment: 'test' | 'live'
+            enabled: boolean
+        }
+    }
     updatedAt: Date
     createdAt: Date
 }
@@ -69,6 +77,18 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
         timestamps: true,
     }
 )
+
+// Add Payment Schema manually to the schema object since we are modifying an existing schema definition block
+SiteSettingsSchema.add({
+    payment: {
+        esewa: {
+            merchantId: { type: String, default: '' },
+            secret: { type: String, default: '' },
+            environment: { type: String, enum: ['test', 'live'], default: 'test' },
+            enabled: { type: Boolean, default: false }
+        }
+    }
+})
 
 // Prevent Mongoose model compilation errors in development
 if (process.env.NODE_ENV === 'development') {

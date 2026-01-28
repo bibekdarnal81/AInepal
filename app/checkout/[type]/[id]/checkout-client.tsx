@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Check, Upload, CreditCard, Loader2, ArrowRight, ShieldCheck } from 'lucide-react'
@@ -52,7 +52,7 @@ export default function CheckoutClient({
     const [receiptUrl, setReceiptUrl] = useState<string>('')
     const [transactionId, setTransactionId] = useState('')
 
-    const [domainName, setDomainName] = useState(initialDomainName)
+    const [domainName] = useState(initialDomainName)
     const [years, setYears] = useState(1)
     const [requirements, setRequirements] = useState('')
 
@@ -63,6 +63,22 @@ export default function CheckoutClient({
     const [enrollCollegeName, setEnrollCollegeName] = useState('')
     const [enrollOtherCourse, setEnrollOtherCourse] = useState('')
     const [enrollRemarks, setEnrollRemarks] = useState('')
+
+    // eSewa API State
+    const [esewaConfig, setEsewaConfig] = useState<{ enabled: boolean, environment: string, merchantId: string } | null>(null)
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await fetch('/api/admin/payment-config')
+                if (res.ok) {
+                    const data = await res.json()
+                    setEsewaConfig(data.payment)
+                }
+            } catch (e) { console.error(e) }
+        }
+        fetchConfig()
+    }, [])
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return
@@ -169,6 +185,109 @@ export default function CheckoutClient({
         enrollMobile.trim() &&
         enrollAddress.trim()
     )
+
+    const handleEsewaPayment = async () => {
+        if (!item) return
+        setSubmitting(true)
+        try {
+            const amount = calculateTotal()
+            const taxAmount = 0
+            const totalAmount = amount + taxAmount
+            // Create a unique transaction ID
+            const uuid = `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+
+            // 1. Create Order in Database first
+            const orderPayload = {
+                type,
+                itemId: item.id,
+                itemName: item.name,
+                amount: amount,
+                paymentMethodId: selectedMethod,
+                paymentProofUrl: '',
+                transactionId: uuid,
+                billingCycle: (type === 'hosting' || type === 'memberships') ? billingCycle : undefined,
+                domainName: type === 'domains' ? (domainName || item.name) : domainName,
+                years: type === 'domains' ? years : undefined,
+                requirements: type === 'services' ? requirements : undefined,
+                enroll: type === 'classes' ? {
+                    fullName: enrollFullName.trim(),
+                    email: enrollEmail.trim(),
+                    mobile: enrollMobile.trim(),
+                    address: enrollAddress.trim(),
+                    collegeName: enrollCollegeName.trim(),
+                    otherCourse: enrollOtherCourse.trim(),
+                    remarks: enrollRemarks.trim()
+                } : undefined
+            }
+
+            const orderRes = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderPayload)
+            })
+
+            if (!orderRes.ok) throw new Error('Failed to create order')
+
+            // Get Signature
+            const signRes = await fetch('/api/payment/esewa/sign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: totalAmount,
+                    transaction_uuid: uuid,
+                    product_code: esewaConfig?.environment === 'live' ? esewaConfig.merchantId : 'EPAYTEST'
+                })
+            })
+
+            if (!signRes.ok) throw new Error('Failed to generate signature')
+            const signData = await signRes.json()
+
+            // Construct eSewa Form
+            const formAction = esewaConfig?.environment === 'live'
+                ? "https://epay.esewa.com.np/api/epay/main/v2/form"
+                : "https://rc-epay.esewa.com.np/api/epay/main/v2/form"
+
+            if (!confirm(`Debug: Submitting to eSewa\nEnv: ${esewaConfig?.environment}\nMerchant ID: ${esewaConfig?.environment === 'live' ? esewaConfig.merchantId : 'EPAYTEST'}\nURL: ${formAction}\nClick OK to proceed.`)) {
+                setSubmitting(false)
+                return
+            }
+
+            const form = document.createElement("form");
+            form.setAttribute("method", "POST");
+            form.setAttribute("action", formAction);
+
+            const params = {
+                amount: amount,
+                tax_amount: taxAmount,
+                total_amount: totalAmount,
+                transaction_uuid: uuid,
+                product_code: (signData.product_code || 'EPAYTEST').trim(),
+                product_service_charge: 0,
+                product_delivery_charge: 0,
+                success_url: `${window.location.origin}/dashboard/orders?payment_success=true`,
+                failure_url: `${window.location.origin}/checkout/${type}/${item.id}?payment_failed=true`,
+                signed_field_names: "total_amount,transaction_uuid,product_code",
+                signature: signData.signature,
+            }
+
+            for (const key in params) {
+                const hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                // @ts-expect-error - params is loosely typed
+                hiddenField.setAttribute("value", params[key]);
+                form.appendChild(hiddenField);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+
+        } catch (error) {
+            console.error(error)
+            alert('eSewa Payment Initiation Failed')
+            setSubmitting(false)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-background text-primary font-sans">
@@ -403,86 +522,113 @@ export default function CheckoutClient({
 
                             {selectedMethodDetails && (
                                 <div className="bg-card rounded-xl p-8 border border-border mt-6 animate-in fade-in slide-in-from-top-4">
-                                    <div className="grid md:grid-cols-2 gap-8 items-center">
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-lg mb-4 text-primary">Scan & Pay</h3>
-                                            <div className="bg-white p-4 rounded-xl inline-block shadow-lg shadow-black/30">
-                                                {selectedMethodDetails.qr_image_url ? (
-                                                    <div className="relative w-48 h-48">
-                                                        <Image
-                                                            src={selectedMethodDetails.qr_image_url}
-                                                            alt="QR Code"
-                                                            fill
-                                                            className="object-contain"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-48 h-48 flex items-center justify-center text-muted border-2 border-dashed border-border">
-                                                        No QR
-                                                    </div>
-                                                )}
+                                    {/* Check if eSewa API is available for this method */}
+                                    {selectedMethodDetails.type === 'esewa' && esewaConfig?.enabled ? (
+                                        <div className="text-center space-y-6 py-8">
+                                            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <CreditCard className="w-10 h-10 text-green-600" />
                                             </div>
-                                            <div className="text-sm space-y-2 text-muted">
-                                                <p className="flex justify-between border-b border-border pb-2">
-                                                    <span className="text-muted">Account Name</span>
-                                                    <span className="font-medium text-primary">{selectedMethodDetails.account_name}</span>
-                                                </p>
-                                                <p className="flex justify-between border-b border-border pb-2">
-                                                    <span className="text-muted">Number</span>
-                                                    <span className="font-medium font-mono text-primary bg-secondary px-2 rounded">{selectedMethodDetails.account_number}</span>
-                                                </p>
-                                                {selectedMethodDetails.bank_name && (
-                                                    <p className="flex justify-between border-b border-border pb-2">
-                                                        <span className="text-muted">Bank</span>
-                                                        <span className="font-medium text-primary">{selectedMethodDetails.bank_name}</span>
-                                                    </p>
-                                                )}
+                                            <h3 className="text-2xl font-bold">Pay with eSewa</h3>
+                                            <p className="text-muted max-w-md mx-auto">
+                                                You will be redirected to eSewa to complete your payment securely.
+                                            </p>
+                                            <div className="flex justify-center pt-4">
+                                                <button
+                                                    onClick={handleEsewaPayment}
+                                                    disabled={submitting}
+                                                    className="px-8 py-4 bg-[#60bb46] hover:bg-[#54a43d] text-white rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 transition-all flex items-center gap-3"
+                                                >
+                                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                                                    Pay NPR {totalAmount.toLocaleString()}
+                                                </button>
+                                            </div>
+                                            <div className="text-xs text-muted mt-4">
+                                                By clicking above, you agree to our terms and conditions.
                                             </div>
                                         </div>
-
-                                        <div className="space-y-6">
-                                            <div className="space-y-2">
-                                                <h3 className="font-bold text-primary">Upload Payment Proof</h3>
-                                                <p className="text-sm text-muted">Upload a screenshot of your successful payment.</p>
-
-                                                <div className="border-2 border-dashed border-border rounded-xl h-40 flex flex-col items-center justify-center text-center hover:bg-secondary/50 hover:border-primary/30 transition-all cursor-pointer relative group">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={handleFileUpload}
-                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                    />
-                                                    {receiptUrl ? (
-                                                        <div className="flex flex-col items-center gap-2 text-green-500">
-                                                            <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                                                                <Check className="w-6 h-6" />
-                                                            </div>
-                                                            <span className="font-medium">Receipt Uploaded</span>
-                                                            <span className="text-xs text-muted">Click to replace</span>
+                                    ) : (
+                                        // Existing Manual Payment UI
+                                        <div className="grid md:grid-cols-2 gap-8 items-center">
+                                            <div className="space-y-4">
+                                                <h3 className="font-bold text-lg mb-4 text-primary">Scan & Pay</h3>
+                                                <div className="bg-white p-4 rounded-xl inline-block shadow-lg shadow-black/30">
+                                                    {selectedMethodDetails.qr_image_url ? (
+                                                        <div className="relative w-48 h-48">
+                                                            <Image
+                                                                src={selectedMethodDetails.qr_image_url}
+                                                                alt="QR Code"
+                                                                fill
+                                                                className="object-contain"
+                                                            />
                                                         </div>
                                                     ) : (
-                                                        <div className="flex flex-col items-center gap-3 text-muted group-hover:text-primary">
-                                                            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                                                                <Upload className="w-6 h-6" />
-                                                            </div>
-                                                            <span>{uploading ? 'Uploading...' : 'Drop image or Click to Upload'}</span>
+                                                        <div className="w-48 h-48 flex items-center justify-center text-muted border-2 border-dashed border-border">
+                                                            No QR
                                                         </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm space-y-2 text-muted">
+                                                    <p className="flex justify-between border-b border-border pb-2">
+                                                        <span className="text-muted">Account Name</span>
+                                                        <span className="font-medium text-primary">{selectedMethodDetails.account_name}</span>
+                                                    </p>
+                                                    <p className="flex justify-between border-b border-border pb-2">
+                                                        <span className="text-muted">Number</span>
+                                                        <span className="font-medium font-mono text-primary bg-secondary px-2 rounded">{selectedMethodDetails.account_number}</span>
+                                                    </p>
+                                                    {selectedMethodDetails.bank_name && (
+                                                        <p className="flex justify-between border-b border-border pb-2">
+                                                            <span className="text-muted">Bank</span>
+                                                            <span className="font-medium text-primary">{selectedMethodDetails.bank_name}</span>
+                                                        </p>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-medium text-muted">Transaction ID (Optional)</label>
-                                                <input
-                                                    type="text"
-                                                    value={transactionId}
-                                                    onChange={(e) => setTransactionId(e.target.value)}
-                                                    placeholder="Enter transaction ID / Ref No"
-                                                    className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:border-blue-500 outline-none transition-colors text-primary placeholder:text-muted"
-                                                />
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <h3 className="font-bold text-primary">Upload Payment Proof</h3>
+                                                    <p className="text-sm text-muted">Upload a screenshot of your successful payment.</p>
+
+                                                    <div className="border-2 border-dashed border-border rounded-xl h-40 flex flex-col items-center justify-center text-center hover:bg-secondary/50 hover:border-primary/30 transition-all cursor-pointer relative group">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleFileUpload}
+                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        />
+                                                        {receiptUrl ? (
+                                                            <div className="flex flex-col items-center gap-2 text-green-500">
+                                                                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                                                                    <Check className="w-6 h-6" />
+                                                                </div>
+                                                                <span className="font-medium">Receipt Uploaded</span>
+                                                                <span className="text-xs text-muted">Click to replace</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-col items-center gap-3 text-muted group-hover:text-primary">
+                                                                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                                                                    <Upload className="w-6 h-6" />
+                                                                </div>
+                                                                <span>{uploading ? 'Uploading...' : 'Drop image or Click to Upload'}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-medium text-muted">Transaction ID (Optional)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={transactionId}
+                                                        onChange={(e) => setTransactionId(e.target.value)}
+                                                        placeholder="Enter transaction ID / Ref No"
+                                                        className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:border-blue-500 outline-none transition-colors text-primary placeholder:text-muted"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             )}
                         </section>
@@ -535,8 +681,15 @@ export default function CheckoutClient({
 
                             <button
                                 onClick={handleCheckout}
-                                disabled={submitting || !selectedMethod || !receiptUrl || !isEnrollmentValid}
-                                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled={
+                                    submitting ||
+                                    !selectedMethod ||
+                                    // if eSewa API is active for this method, we don't need receiptUrl
+                                    ((!(selectedMethodDetails?.type === 'esewa' && esewaConfig?.enabled)) && !receiptUrl) ||
+                                    !isEnrollmentValid
+                                }
+                                className={`w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${(selectedMethodDetails?.type === 'esewa' && esewaConfig?.enabled) ? 'hidden' : ''
+                                    }`}
                             >
                                 {submitting ? (
                                     <>

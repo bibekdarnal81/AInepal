@@ -7,6 +7,8 @@ export interface IUserApiKey extends Document {
     key: string
     lastUsedAt?: Date
     expiresAt?: Date
+    allowedDomains?: string[]
+    isActive: boolean
     createdAt: Date
     updatedAt: Date
 }
@@ -33,6 +35,14 @@ const UserApiKeySchema = new Schema<IUserApiKey>(
         },
         expiresAt: {
             type: Date,
+        },
+        allowedDomains: {
+            type: [String],
+            default: []
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
         },
     },
     {

@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import dbConnect from '@/lib/mongodb/client'
-import { AIModel, AIModelApiKey, User, UserApiKey } from '@/lib/mongodb/models'
+import { AIModel, AIModelApiKey, User } from '@/lib/mongodb/models'
 import { decryptApiKey } from '@/lib/ai-encryption'
 import { callAiModel } from '@/lib/ai-providers'
 import { deductCredits } from '@/lib/credits'
 import type { AiProvider } from '@/lib/types/ai-models'
-import { headers } from 'next/headers'
+
 
 // Credit costs for different features
 const CREDIT_COSTS = {
@@ -40,23 +40,28 @@ export async function POST(request: Request) {
 
         // 2. If no session, try Bearer Token (for VS Code)
         if (!userId) {
-            const headersList = await headers()
-            const authorization = headersList.get('authorization')
+            // Use the centralized verification (checks expiration, active status, domains)
+            // verifyApiKey extracts token from 'x-api-key' or 'Authorization: Bearer'
+            // We need to typecase request to NextRequest for verifyApiKey, 
+            // but the route is defined as taking `request: Request`. 
+            // In Next.js App Router, Request is compatible.
+            // However, verifyApiKey is typed for NextRequest mostly for headers.
+            // Let's import NextRequest to be safe or cast it.
 
-            if (authorization?.startsWith('Bearer ')) {
-                const token = authorization.substring(7)
+            // To use verifyApiKey, we need to import it.
+            // And use it to get the keyDoc.
 
-                const apiKeyDoc = await UserApiKey.findOne({ key: token })
+            const { verifyApiKey } = await import('@/lib/auth/verifyApiKey')
+            // Need to convert Web Request to NextRequest if verifyApiKey strictly requires it,
+            // or just ensure we pass something with headers.
+            // NextRequest extends Request.
+            const { NextRequest } = await import('next/server')
+            const nextReq = new NextRequest(request.url, { headers: request.headers, method: request.method })
 
-                if (apiKeyDoc) {
-                    userId = apiKeyDoc.userId.toString()
+            const verifiedUser = await verifyApiKey(nextReq)
 
-                    // Update last used
-                    await UserApiKey.updateOne(
-                        { _id: apiKeyDoc._id },
-                        { $set: { lastUsedAt: new Date() } }
-                    )
-                }
+            if (verifiedUser) {
+                userId = verifiedUser._id.toString()
             }
         }
 
@@ -108,13 +113,27 @@ export async function POST(request: Request) {
 
         if (!modelId || modelId === 'default') {
             // Get first active model if 'default' or undefined
-            modelConfig = await AIModel.findOne({ isActive: true, disabled: { $ne: true } }).sort({ displayOrder: 1 }).lean()
+            modelConfig = await AIModel.findOne({ isActive: true, disabled: { $ne: true }, availableInVSCode: true }).sort({ displayOrder: 1 }).lean()
         } else {
-            modelConfig = await AIModel.findById(modelId).lean()
+            // Check if modelId is a valid ObjectId (internal ID)
+            const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(modelId)
+
+            if (isValidObjectId) {
+                modelConfig = await AIModel.findById(modelId).lean()
+            }
+
+            // If not found by ID or not an object ID, try checking the 'modelId' string field
+            if (!modelConfig) {
+                modelConfig = await AIModel.findOne({ modelId: modelId }).lean()
+            }
         }
 
         if (!modelConfig || !modelConfig.isActive) {
             return NextResponse.json({ error: 'Model not found or inactive' }, { status: 404 })
+        }
+
+        if (modelConfig.availableInVSCode === false) {
+            return NextResponse.json({ error: 'This model is not available in VS Code' }, { status: 403 })
         }
 
         if (modelConfig.disabled) {

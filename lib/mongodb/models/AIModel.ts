@@ -22,6 +22,7 @@ export interface IAIModel extends Document {
     currency: string
     isActive: boolean
     disabled: boolean
+    availableInVSCode: boolean
     adminMessage?: string
     displayOrder: number
     lastTestedAt?: Date
@@ -106,6 +107,10 @@ const AIModelSchema = new Schema<IAIModel>(
         disabled: {
             type: Boolean,
             default: false,
+        },
+        availableInVSCode: {
+            type: Boolean,
+            default: true,
         },
         adminMessage: {
             type: String,

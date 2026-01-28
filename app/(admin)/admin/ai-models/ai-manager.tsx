@@ -20,6 +20,7 @@ interface AIModel {
     supportsVideoGeneration?: boolean
     isActive: boolean
     disabled?: boolean
+    availableInVSCode?: boolean
     adminMessage?: string
 }
 
@@ -51,6 +52,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
         supportsImageGeneration: false,
         supportsVideoGeneration: false,
         disabled: false,
+        availableInVSCode: true,
         adminMessage: ''
     })
 
@@ -98,6 +100,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                 supportsImageGeneration: false,
                 supportsVideoGeneration: false,
                 disabled: false,
+                availableInVSCode: true,
                 adminMessage: ''
             })
             router.refresh()
@@ -123,6 +126,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
             supportsImageGeneration: model.supportsImageGeneration ?? false,
             supportsVideoGeneration: model.supportsVideoGeneration ?? false,
             disabled: model.disabled ?? false,
+            availableInVSCode: model.availableInVSCode ?? true,
             adminMessage: model.adminMessage || ''
         })
         window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -143,6 +147,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
             supportsImageGeneration: false,
             supportsVideoGeneration: false,
             disabled: false,
+            availableInVSCode: true,
             adminMessage: ''
         })
     }
@@ -331,6 +336,18 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                                 </label>
                             </div>
 
+                            <div className="pt-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={newModel.availableInVSCode}
+                                        onChange={(e) => setNewModel({ ...newModel, availableInVSCode: e.target.checked })}
+                                        className="rounded border-border bg-secondary"
+                                    />
+                                    Available in VS Code
+                                </label>
+                            </div>
+
                             {/* Disable Model Section */}
                             <div className="border-t border-border pt-4 mt-2">
                                 <label className="flex items-center gap-2 text-sm">
@@ -404,6 +421,9 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                                         <p className="text-xs text-muted-foreground">{model.provider} • {model.modelId}</p>
                                         {model.disabled && model.adminMessage && (
                                             <p className="text-xs text-amber-500 mt-1 truncate" title={model.adminMessage}>💬 {model.adminMessage}</p>
+                                        )}
+                                        {model.availableInVSCode && (
+                                            <span className="text-[10px] bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded border border-blue-500/20 mt-1 inline-block">VS Code</span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">

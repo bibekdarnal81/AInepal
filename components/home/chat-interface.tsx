@@ -5,6 +5,7 @@ import { Send, Bot, User, Paperclip, Sparkles, Search, Mic, Globe, Menu, PanelLe
 import { useSession } from "next-auth/react"
 import ReactMarkdown from 'react-markdown'
 import { AIModel } from "./types"
+import { CodeBlock } from "./code-block"
 import { ActiveModelsPopover } from "./active-models-popover"
 import { ModelSelectorModal } from "./model-selector-modal"
 import { InsufficientCreditsModal } from "./insufficient-credits-modal"
@@ -511,8 +512,12 @@ export function ChatInterface({
                                                                     {singleMsg.model?.displayName || "AI"}
                                                                 </span>
                                                             </div>
-                                                            <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-gray-100 dark:prose-pre:bg-zinc-900 prose-pre:rounded-xl">
-                                                                <ReactMarkdown>
+                                                            <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-none">
+                                                                <ReactMarkdown
+                                                                    components={{
+                                                                        code: CodeBlock
+                                                                    }}
+                                                                >
                                                                     {singleMsg.content}
                                                                 </ReactMarkdown>
                                                             </div>
