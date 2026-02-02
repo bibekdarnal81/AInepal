@@ -176,7 +176,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
         const user = await User.findById(session.user.id)
             .select('membershipStatus advancedCredits membershipId')
             .populate('membershipId')
-            .lean() as { membershipStatus?: string; advancedCredits?: number; membershipId?: { slug: string; price: number } | null } | null
+            .lean() as unknown as { membershipStatus?: string; advancedCredits?: number; membershipId?: { slug: string; price: number } | null } | null
 
         if (user) {
             // Restriction 1: No Doubles (unless current plan is Free)

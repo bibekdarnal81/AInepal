@@ -18,7 +18,7 @@ export default async function MembershipUpgradePage() {
         if (user?.membershipId) currentMembershipId = user.membershipId.toString()
     }
     const memberships = await Membership.find({ isActive: true }).sort({ sortOrder: 1, createdAt: -1 }).lean()
-    const typedMemberships = memberships as Array<{
+    const typedMemberships = (memberships as unknown) as Array<{
         _id: string
         name: string
         slug: string
@@ -182,7 +182,7 @@ export default async function MembershipUpgradePage() {
                                                 </div>
                                             </div>
                                             <div className="grid gap-8 md:grid-cols-2">
-                                                {m.additionalSections.map((section, idx) => (
+                                                {(m.additionalSections || []).map((section, idx) => (
                                                     <div key={`${m._id}-${idx}-section`} className="group rounded-3xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0b0f17] p-1 overflow-hidden hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm">
                                                         <div className="bg-gray-50 dark:bg-[#131926] rounded-[22px] p-6 h-full flex flex-col">
                                                             {section.imageUrl && (

@@ -1,6 +1,7 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, Suspense } from 'react'
 import { Loader2, MessageCircle, Send, User, Trash2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 
@@ -8,7 +9,7 @@ interface Message { id: string; message: string; isAdmin: boolean; isRead: boole
 interface LastMessage { message: string }
 interface Conversation { id: string; type: 'user' | 'guest'; name: string; email?: string; avatarUrl?: string; unreadCount: number; lastMessage?: LastMessage; messages: Message[]; createdAt: string }
 
-export default function AdminChatPage() {
+function ChatContent() {
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
@@ -155,5 +156,13 @@ export default function AdminChatPage() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function AdminChatPage() {
+    return (
+        <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <ChatContent />
+        </Suspense>
     )
 }

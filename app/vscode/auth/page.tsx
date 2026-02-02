@@ -2,12 +2,12 @@
 
 import { useSession, signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, ShieldCheck, Check } from 'lucide-react'
 
-export default function VSCodeAuthPage() {
+function VSCodeAuthContent() {
     const { data: session, status } = useSession()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -136,5 +136,13 @@ export default function VSCodeAuthPage() {
                 </CardFooter>
             </Card>
         </div>
+    )
+}
+
+export default function VSCodeAuthPage() {
+    return (
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <VSCodeAuthContent />
+        </Suspense>
     )
 }

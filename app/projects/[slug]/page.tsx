@@ -15,7 +15,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
     const project = await Project.findOne({ slug, isPublished: true })
         .populate('categoryId')
-        .lean() as {
+        .lean() as unknown as {
             _id: string
             title: string
             slug: string

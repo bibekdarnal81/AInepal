@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
         const targetUserId = searchParams.get('userId')
 
         // 1. Get all guest sessions
-        const guestSessions = await GuestChatSession.find().sort({ lastActivityAt: -1 }).lean() as GuestSessionDoc[]
+        const guestSessions = await GuestChatSession.find().sort({ lastActivityAt: -1 }).lean() as unknown as GuestSessionDoc[]
 
         // 2. Get all distinct user IDs from messages (excluding admins)
         const userIds = await ChatMessage.distinct('userId', { userId: { $exists: true } }) as mongoose.Types.ObjectId[]
-        
+
         console.log('Admin chat - found userIds with messages:', userIds.map(id => id?.toString()));
-        
+
         const targetId = targetUserId && mongoose.Types.ObjectId.isValid(targetUserId)
             ? new mongoose.Types.ObjectId(targetUserId)
             : null
@@ -79,12 +79,12 @@ export async function GET(request: NextRequest) {
             : userIds
 
         // Fetch users - exclude admin users from the list (they shouldn't be in user support chats)
-        const users = await User.find({ 
+        const users = await User.find({
             _id: { $in: finalUserIds },
             isAdmin: { $ne: true }
         })
             .select('displayName email avatarUrl')
-            .lean() as UserDoc[]
+            .lean() as unknown as UserDoc[]
 
         console.log('Admin chat - targetUserId:', targetUserId, 'finalUserIds:', finalUserIds.map(id => id?.toString()), 'found users:', users.map(u => u._id?.toString()));
 
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
             guestSessions.map(async (session) => {
                 const messages = await ChatMessage.find({ guestSessionId: session._id })
                     .sort({ createdAt: 1 })
-                    .lean() as ChatMessageDoc[]
+                    .lean() as unknown as ChatMessageDoc[]
                 if (messages.length === 0) return null
                 const unreadCount = messages.filter((m) => !m.isRead && !m.isAdmin).length
                 return {
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
             users.map(async (user) => {
                 const messages = await ChatMessage.find({ userId: user._id })
                     .sort({ createdAt: 1 })
-                    .lean() as ChatMessageDoc[]
+                    .lean() as unknown as ChatMessageDoc[]
                 // Only include users who have messages (except for targeted user)
                 if (messages.length === 0 && user._id.toString() !== targetUserId) return null
                 const unreadCount = messages.filter((m) => !m.isRead && !m.isAdmin).length

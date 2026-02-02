@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         const modelId = model || 'sora-2'
         let provider = 'openai'
 
-        const modelRecord = await AIModel.findOne({ modelId }).lean() as {
+        const modelRecord = await AIModel.findOne({ modelId }).lean() as unknown as {
             provider: string
             disabled?: boolean
             adminMessage?: string

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         // We need to find the model in DB to know its provider, OR infer from ID
         // Let's infer or fetch. Fetching is safer.
         let provider = 'openai' // Default
-        const modelRecord = await AIModel.findOne({ modelId: modelId }).lean() as {
+        const modelRecord = await AIModel.findOne({ modelId: modelId }).lean() as unknown as {
             provider: string
             disabled?: boolean
             adminMessage?: string

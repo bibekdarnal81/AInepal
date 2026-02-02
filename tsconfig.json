@@ -39,6 +39,11 @@
   ],
   "exclude": [
     "node_modules",
-    "disabled"
+    "disabled",
+    "features",
+    "debug-mongo.ts",
+    "check_models.ts",
+    "verify-data.ts",
+    "check-chat.ts"
   ]
 }

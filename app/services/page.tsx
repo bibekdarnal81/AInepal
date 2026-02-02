@@ -27,7 +27,7 @@ async function getServices(): Promise<ServiceData[]> {
         .sort({ displayOrder: 1 })
         .lean();
 
-    const typedServices = services as ServiceData[]
+    const typedServices = (services as unknown) as ServiceData[]
     return typedServices.map((s) => ({
         _id: s._id.toString(),
         title: s.title,
@@ -87,9 +87,9 @@ export default async function ServicesPage() {
                                 {services.map((service) => {
                                     // Dynamically resolve icon
                                     const iconName = service.iconName as keyof typeof Icons | undefined
-                                    const IconComponent = iconName && iconName in Icons
+                                    const IconComponent = (iconName && iconName in Icons
                                         ? Icons[iconName]
-                                        : Icons.Code;
+                                        : Icons.Code) as any;
 
                                     return (
                                         <div

@@ -68,7 +68,7 @@ export function PurchaseCredits() {
                     <CardFooter>
                         <Button
                             className="w-full"
-                            variant={pack.highlight ? 'default' : 'outline'}
+                            variant={pack.highlight ? 'primary' : 'secondary'}
                             disabled={loading !== null}
                             onClick={() => handlePurchase(pack.id, pack.amount)}
                         >

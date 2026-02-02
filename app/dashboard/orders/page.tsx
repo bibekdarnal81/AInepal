@@ -1,3 +1,4 @@
+import React from "react"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import dbConnect from "@/lib/mongodb/client"
@@ -31,7 +32,9 @@ export default async function DashboardOrdersPage() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <VerifyPayment />
+            <React.Suspense fallback={null}>
+                <VerifyPayment />
+            </React.Suspense>
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">My Orders</h1>

@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: Props) {
             model: PostCategory,
             select: 'name slug color iconName'
         })
-        .lean() as {
+        .lean() as unknown as {
             _id: string
             title: string
             excerpt?: string
