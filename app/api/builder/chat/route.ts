@@ -1,5 +1,5 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { streamText } from 'ai';
+import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -82,9 +82,8 @@ export async function POST(req: Request) {
         system: CODING_AGENT_SYSTEM_PROMPT,
         messages,
         tools: {
-            listFiles: {
+            listFiles: tool({
                 description: 'List all files and folders in the project',
-                inputSchema: z.object({}),
                 execute: async () => {
                     const files = await BuilderFile.find({ projectId });
                     return files.map(f => ({
@@ -94,13 +93,11 @@ export async function POST(req: Request) {
                         parentId: f.parentId?.toString()
                     }));
                 },
-            },
-            readFiles: {
+                inputSchema: z.object({}),
+            }),
+            readFiles: tool({
                 description: 'Read the content of specific files',
-                inputSchema: z.object({
-                    fileIds: z.array(z.string()).describe('The IDs of the files to read'),
-                }),
-                execute: async ({ fileIds }: any) => {
+                execute: async ({ fileIds }) => {
                     const files = await BuilderFile.find({
                         projectId,
                         _id: { $in: fileIds },
@@ -112,17 +109,13 @@ export async function POST(req: Request) {
                         content: f.content
                     }));
                 },
-            },
-            createFiles: {
-                description: 'Create multiple files at once',
                 inputSchema: z.object({
-                    files: z.array(z.object({
-                        name: z.string(),
-                        content: z.string(),
-                    })),
-                    parentId: z.string().optional().describe('The ID of the parent folder (optional)'),
+                    fileIds: z.array(z.string()).describe('The IDs of the files to read'),
                 }),
-                execute: async ({ files, parentId }: any) => {
+            }),
+            createFiles: tool({
+                description: 'Create multiple files at once',
+                execute: async ({ files, parentId }) => {
                     const results = [];
                     for (const file of files) {
                         try {
@@ -142,14 +135,17 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return results;
                 },
-            },
-            createFolder: {
-                description: 'Create a new folder',
                 inputSchema: z.object({
-                    name: z.string(),
-                    parentId: z.string().optional(),
+                    files: z.array(z.object({
+                        name: z.string(),
+                        content: z.string(),
+                    })),
+                    parentId: z.string().optional().describe('The ID of the parent folder (optional)'),
                 }),
-                execute: async ({ name, parentId }: any) => {
+            }),
+            createFolder: tool({
+                description: 'Create a new folder',
+                execute: async ({ name, parentId }) => {
                     const newFolder = await BuilderFile.create({
                         projectId,
                         parentId: parentId || undefined,
@@ -160,14 +156,14 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { id: newFolder._id.toString(), name };
                 },
-            },
-            updateFile: {
-                description: 'Update the content of a file',
                 inputSchema: z.object({
-                    fileId: z.string(),
-                    content: z.string(),
+                    name: z.string(),
+                    parentId: z.string().optional(),
                 }),
-                execute: async ({ fileId, content }: any) => {
+            }),
+            updateFile: tool({
+                description: 'Update the content of a file',
+                execute: async ({ fileId, content }) => {
                     await BuilderFile.findOneAndUpdate(
                         { _id: fileId, projectId },
                         { content, updatedAt: Date.now() }
@@ -175,13 +171,14 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            },
-            deleteFiles: {
-                description: 'Delete files or folders recursively',
                 inputSchema: z.object({
-                    fileIds: z.array(z.string()),
+                    fileId: z.string(),
+                    content: z.string(),
                 }),
-                execute: async ({ fileIds }: any) => {
+            }),
+            deleteFiles: tool({
+                description: 'Delete files or folders recursively',
+                execute: async ({ fileIds }) => {
                     // Recursive delete helper
                     const deleteRecursive = async (fid: string) => {
                         const file = await BuilderFile.findById(fid);
@@ -201,14 +198,13 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            },
-            renameFile: {
-                description: 'Rename a file or folder',
                 inputSchema: z.object({
-                    fileId: z.string(),
-                    newName: z.string(),
+                    fileIds: z.array(z.string()),
                 }),
-                execute: async ({ fileId, newName }: any) => {
+            }),
+            renameFile: tool({
+                description: 'Rename a file or folder',
+                execute: async ({ fileId, newName }) => {
                     await BuilderFile.findOneAndUpdate(
                         { _id: fileId, projectId },
                         { name: newName, updatedAt: Date.now() }
@@ -216,7 +212,11 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            },
+                inputSchema: z.object({
+                    fileId: z.string(),
+                    newName: z.string(),
+                }),
+            }),
         },
         onFinish: async ({ text }) => {
             // Save assistant response
