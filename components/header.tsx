@@ -45,17 +45,17 @@ export function Header() {
     return (
         <header
             className={`fixed left-0 right-0 z-50 transition-all duration-300 flex justify-center ${isScrolled
-                ? 'top-[calc(var(--banner-height,0px)+1rem)]'
+                ? 'top-[calc(var(--banner-height,0px)+0.5rem)] md:top-[calc(var(--banner-height,0px)+1rem)]'
                 : 'top-[var(--banner-height,0px)]'
                 }`}
         >
             <div
                 className={`transition-all duration-300 w-full ${isScrolled
-                    ? 'bg-background/80 backdrop-blur-md border border-border shadow-lg rounded-full max-w-7xl mx-4'
+                    ? 'bg-background/80 backdrop-blur-md border border-border shadow-lg rounded-full max-w-7xl mx-2 md:mx-4'
                     : 'bg-transparent border-b border-transparent'
                     }`}
             >
-                <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 px-6 lg:px-8" aria-label="Global">
+                <nav className="mx-auto flex max-w-7xl items-center justify-between p-3 px-4 md:p-4 md:px-6 lg:px-8" aria-label="Global">
 
                     {/* Logo */}
                     <div className="flex lg:flex-1">

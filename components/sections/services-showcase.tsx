@@ -69,7 +69,7 @@ export function ServicesSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-4xl md:text-6xl font-extrabold text-foreground mb-6"
+                        className="text-3xl md:text-6xl font-extrabold text-foreground mb-6"
                     >
                         Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">Services</span>
                     </motion.h2>
@@ -79,7 +79,7 @@ export function ServicesSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
+                        className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
                     >
                         We combine cutting-edge technology with strategic thinking to deliver
                         exceptional digital experiences that drive real business results.

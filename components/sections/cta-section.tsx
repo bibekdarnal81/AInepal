@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Rocket, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { BookDemoModal } from '@/components/site/book-demo-modal';
 
@@ -16,7 +17,7 @@ export function CTASection() {
     const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
     return (
-        <section className="relative py-32 px-6 overflow-hidden bg-background">
+        <section className="relative py-20 md:py-32 px-4 md:px-6 overflow-hidden bg-background">
             <BookDemoModal
                 isOpen={isDemoModalOpen}
                 onClose={() => setIsDemoModalOpen(false)}
@@ -34,7 +35,7 @@ export function CTASection() {
                     className="text-center mb-16"
                     {...fadeInUp}
                 >
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
                         Ready to Transform Your Business?
                     </h2>
                     <p className="text-xl text-muted-foreground mb-8 text-balance">
@@ -60,7 +61,7 @@ export function CTASection() {
                     transition={{ delay: 0.3 }}
                 >
                     {/* Consultation Card */}
-                    <a
+                    <Link
                         href="/services"
                         className="group bg-card/50 border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 backdrop-blur-sm"
                     >
@@ -76,10 +77,10 @@ export function CTASection() {
                         <p className="text-muted-foreground text-sm">
                             Get a free analysis of your current digital presence and growth opportunities.
                         </p>
-                    </a>
+                    </Link>
 
                     {/* Solutions Card */}
-                    <a
+                    <Link
                         href="/portfolios"
                         className="group bg-card/50 border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 backdrop-blur-sm"
                     >
@@ -93,9 +94,9 @@ export function CTASection() {
                             See Our Success Stories
                         </h3>
                         <p className="text-muted-foreground text-sm">
-                            Explore how we've helped other businesses achieve their digital goals.
+                            Explore how we&apos;ve helped other businesses achieve their digital goals.
                         </p>
-                    </a>
+                    </Link>
                 </motion.div>
             </div>
         </section>

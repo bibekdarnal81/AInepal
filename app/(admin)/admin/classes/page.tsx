@@ -13,7 +13,7 @@ import {
     School
 } from 'lucide-react'
 import Link from 'next/link'
-import { IClass } from '@/lib/mongodb/models/Class'
+import type { IClass } from '@/lib/types/mongodb'
 
 export default function AdminClassesPage() {
     const [classes, setClasses] = useState<IClass[]>([])
@@ -179,8 +179,8 @@ export default function AdminClassesPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.isActive
-                                                    ? 'bg-green-500/10 text-green-500'
-                                                    : 'bg-gray-500/10 text-gray-500'
+                                                ? 'bg-green-500/10 text-green-500'
+                                                : 'bg-gray-500/10 text-gray-500'
                                                 }`}>
                                                 {item.isActive ? 'Active' : 'Draft'}
                                             </span>

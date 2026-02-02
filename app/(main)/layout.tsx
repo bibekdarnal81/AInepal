@@ -1,7 +1,8 @@
 import { SidebarProvider } from "@/components/home/sidebar-provider"
 import { HomeLayoutContent } from "../../components/chat/chat-layout-content"
 import dbConnect from "@/lib/mongodb/client"
-import { SiteSettings, type ISidebarItem, type ISiteSettings } from "@/lib/mongodb/models"
+import { SiteSettings } from "@/lib/mongodb/models"
+import type { ISidebarItem, ISiteSettings } from '@/lib/types/mongodb'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 

@@ -47,8 +47,8 @@ export function PricingComparison() {
             <div className="container mx-auto max-w-7xl px-4">
                 {/* Header */}
                 <div className="mb-16 text-center">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
-                        Get 9+ Premium AI Models<br />for Half the Price of One
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
+                        Get 9+ Premium AI Models<br className="hidden sm:block" /> for Half the Price of One
                     </h2>
                     <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
                         <span className="text-lg">🔥</span>
@@ -63,7 +63,7 @@ export function PricingComparison() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl dark:border-white/10 dark:bg-slate-900/80 dark:backdrop-blur"
+                        className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl dark:border-white/10 dark:bg-slate-900/80 dark:backdrop-blur"
                     >
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Individual AI Subscriptions</h3>
                         <div className="mt-2">
@@ -110,7 +110,7 @@ export function PricingComparison() {
                         {/* Top glow */}
                         <div className="pointer-events-none absolute -top-20 right-0 h-40 w-80 bg-gradient-to-b from-emerald-400/20 to-transparent blur-3xl dark:from-emerald-500/30" />
 
-                        <div className="relative p-8">
+                        <div className="relative p-6 sm:p-8">
                             {/* Header */}
                             <div className="mb-6 flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400">

@@ -1,13 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
-
-export interface ISidebarItem {
-    key: string
-    label: string
-    href: string
-    icon: string
-    visible: boolean
-    order: number
-}
+import { ISidebarItem } from '@/lib/types/mongodb'
 
 export interface ISiteSettings extends Document {
     _id: mongoose.Types.ObjectId

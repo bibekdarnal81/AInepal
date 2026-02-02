@@ -244,11 +244,11 @@ export default function Hero() {
             ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative flex min-h-[90vh] w-full items-center justify-center overflow-hidden bg-background px-6 py-24 dark:bg-slate-950 md:px-12 lg:py-32"
+            className="relative flex min-h-[80vh] md:min-h-[90vh] w-full items-center justify-center overflow-hidden bg-background px-4 py-20 dark:bg-slate-950 md:px-12 lg:py-32"
         >
             <HeroBackground />
 
-            <div className="container relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-8">
+            <div className="container relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
                 {/* Left Content */}
                 <div className="flex flex-col items-center text-center lg:items-start lg:text-left z-20">
                     <motion.div
@@ -268,7 +268,7 @@ export default function Hero() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mb-6 text-4xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
+                        className="mb-6 text-3xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
                     >
                         Build <Highlight>smarter products</Highlight> with{' '}
                         <span className="bg-gradient-to-r from-cyan-500 to-indigo-500 bg-clip-text text-transparent dark:from-cyan-400 dark:to-indigo-400">
@@ -353,24 +353,24 @@ export default function Hero() {
                         className="relative z-10"
                     >
                         {/* Tab Buttons - Floating Above */}
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-30 flex gap-2 p-1 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 shadow-xl">
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-30 flex gap-1 sm:gap-2 p-1 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 shadow-xl max-w-[95vw] sm:max-w-none">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                                    className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
+                                    className={`relative px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex items-center gap-1.5 sm:gap-2 ${activeTab === tab.id
                                         ? 'bg-white text-black shadow-lg scale-105'
                                         : 'text-white/70 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
-                                    <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-current' : ''}`} />
-                                    {tab.label}
+                                    <tab.icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${activeTab === tab.id ? 'text-current' : ''}`} />
+                                    <span className={activeTab === tab.id ? 'block' : 'hidden sm:block'}>{tab.label}</span>
                                 </button>
                             ))}
                         </div>
 
                         {/* Glass container */}
-                        <div className="group relative h-[450px] w-full overflow-hidden rounded-3xl border border-white/20 bg-slate-950/40 p-1 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/60 transition-all duration-500">
+                        <div className="group relative h-[320px] sm:h-[450px] w-full overflow-hidden rounded-3xl border border-white/20 bg-slate-950/40 p-1 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/60 transition-all duration-500">
 
                             {/* Inner Content Area */}
                             <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-slate-900/50 shadow-inner">

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save, Eye, EyeOff, MessageSquare, Image as ImageIcon, Video, Headphones, Code } from "lucide-react"
 
-import { ISidebarItem } from "@/lib/mongodb/models"
+import type { ISidebarItem } from "@/lib/types/mongodb"
 
 // Icon map for rendering
 const iconMap: Record<string, React.ReactNode> = {

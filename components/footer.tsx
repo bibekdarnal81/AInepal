@@ -5,8 +5,8 @@ import { Twitter, Github, Linkedin, Youtube } from 'lucide-react';
 export function Footer() {
     return (
         <footer className="relative border-t border-border/60 bg-card/80">
-            <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-                <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                         <h3 className="text-sm font-semibold text-primary mb-4">Product</h3>
                         <ul className="space-y-3">

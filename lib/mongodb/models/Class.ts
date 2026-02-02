@@ -1,25 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
+import { IClass as IClassBase } from '@/lib/types/mongodb'
 
-export interface IClass extends Document {
+export interface IClass extends IClassBase, Document {
     _id: mongoose.Types.ObjectId
-    title: string
-    slug: string
-    description?: string
-    instructor?: string
-    thumbnailUrl?: string
-    price: number
-    currency: string
-    duration?: string
-    schedule?: string
-    maxStudents?: number
-    level?: string
-    startDate?: Date
-    summary?: string
-    isActive: boolean
-    isFeatured: boolean
-    displayOrder: number
-    createdAt: Date
-    updatedAt: Date
 }
 
 const ClassSchema = new Schema<IClass>(

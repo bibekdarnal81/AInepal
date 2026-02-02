@@ -4,7 +4,7 @@ import React from "react"
 import { AppSidebar } from "@/components/home/app-sidebar"
 import { useSidebar } from "@/components/home/sidebar-provider"
 
-import { ISidebarItem } from "@/lib/mongodb/models"
+import type { ISidebarItem } from "@/lib/types/mongodb"
 
 interface User {
     name?: string | null
