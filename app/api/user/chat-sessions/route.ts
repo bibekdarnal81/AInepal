@@ -3,9 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import dbConnect from '@/lib/mongodb/client'
 import { UserChatSession } from '@/lib/mongodb/models'
-import { FilterQuery } from 'mongoose'
-import { IUserChatSession } from '@/lib/mongodb/models/UserChatSession'
-
 // GET - Fetch user's chat sessions
 export async function GET(req: NextRequest) {
     try {
@@ -21,7 +18,11 @@ export async function GET(req: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1')
         const projectId = searchParams.get('projectId')
 
-        const query: FilterQuery<IUserChatSession> = {
+        const query: {
+            userId: string
+            isActive: boolean
+            projectId?: string | { $exists: boolean }
+        } = {
             userId: session.user.id,
             isActive: true
         }
