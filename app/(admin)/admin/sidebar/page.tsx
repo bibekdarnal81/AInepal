@@ -8,6 +8,7 @@ const DEFAULT_SIDEBAR_ITEMS = [
     { key: 'image', label: 'Image', href: '/image', icon: 'Image', visible: true, order: 1 },
     { key: 'video', label: 'Video', href: '/video', icon: 'Video', visible: true, order: 2 },
     { key: 'audio', label: 'Audio', href: '/audio', icon: 'Headphones', visible: true, order: 3 },
+    { key: 'code', label: 'Code', href: '/code', icon: 'Code', visible: true, order: 4 },
 ]
 
 export default async function SidebarSettingsPage() {
@@ -24,6 +25,11 @@ export default async function SidebarSettingsPage() {
     }
 
     const items = JSON.parse(JSON.stringify(settings.sidebarItems)) as ISidebarItem[]
+
+    // Ensure 'code' item exists (for existing deployments)
+    if (!items.find(i => i.key === 'code')) {
+        items.push({ key: 'code', label: 'Code', href: '/code', icon: 'Code', visible: true, order: 4 })
+    }
 
     return (
         <div className="space-y-6">

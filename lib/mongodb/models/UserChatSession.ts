@@ -14,6 +14,7 @@ export interface IUserChatSession extends Document {
     title: string
     messages: IChatHistoryMessage[]
     modelId?: string
+    projectId?: mongoose.Types.ObjectId
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -55,6 +56,11 @@ const UserChatSessionSchema = new Schema<IUserChatSession>(
         },
         messages: [ChatHistoryMessageSchema],
         modelId: String,
+        projectId: {
+            type: Schema.Types.ObjectId,
+            ref: 'ChatProject',
+            index: true,
+        },
         isActive: {
             type: Boolean,
             default: true,

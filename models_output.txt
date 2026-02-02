@@ -1,0 +1,26 @@
+*   Trying ::1...
+* TCP_NODELAY set
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Connected to localhost (::1) port 3000 (#0)
+> GET /api/vscode/models HTTP/1.1
+> Host: localhost:3000
+> User-Agent: curl/7.53.1
+> Accept: */*
+> 
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0< HTTP/1.1 200 OK
+< Access-Control-Allow-Credentials: true
+< Access-Control-Allow-Origin: *
+< Access-Control-Allow-Methods: GET,DELETE,PATCH,POST,PUT
+< Access-Control-Allow-Headers: X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, X-Api-Key
+< vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+< content-type: application/json
+< Date: Thu, 29 Jan 2026 05:53:49 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< Transfer-Encoding: chunked
+< 
+{ [1291 bytes data]
+100  1279    0  1279    0     0   4210      0 --:--:-- --:--:-- --:--:--  4235
+* Connection #0 to host localhost left intact
+{"models":[{"_id":"69779a4b6bf3e54490346dc9","provider":"digitalocean","displayName":"Llama 3.1 Instruct (8B)","description":"Meta Llama 3.1 8B Instruct model via DigitalOcean","modelId":"llama3-8b-instruct","supportsStreaming":true,"supportsVision":true,"supportsImageGeneration":false},{"_id":"6979f8375b27980ce62e2ab5","provider":"digitalocean","displayName":"Qwen3-Coder","description":"alibaba-qwen3-32b","modelId":"alibaba-qwen3-32b","supportsStreaming":false,"supportsVision":false,"supportsImageGeneration":false},{"_id":"697a3dc5858b1350360c89f5","provider":"openai","displayName":"gpt-4.1","description":"","modelId":"gpt-4.1","supportsStreaming":false,"supportsVision":false,"supportsImageGeneration":false},{"_id":"69739ab6bd0eae487055f030","provider":"google","displayName":"gemini 2.5 pro","description":"","modelId":"gemini-2.5-pro","supportsStreaming":true,"supportsVision":false,"supportsImageGeneration":false},{"_id":"6979f4511420c1b1c2f9ab7f","modelId":"alibaba-qwen3-32b","description":"Qwen 2.5 32B Instruct is the latest series of Qwen large language models. It offers significant improvements in coding and mathematics.","displayName":"Qwen 3 32b","provider":"digitalocean","supportsImageGeneration":true,"supportsStreaming":true,"supportsVision":false}]}

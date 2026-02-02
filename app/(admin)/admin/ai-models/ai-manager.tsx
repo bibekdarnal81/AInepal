@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save, Plus, Key, Bot, Trash2, Pencil, X } from "lucide-react"
+import Image from "next/image"
 import ThumbnailUpload from "@/components/thumbnail-upload"
 
 interface AIModel {
@@ -18,6 +19,7 @@ interface AIModel {
     supportsVision?: boolean
     supportsImageGeneration?: boolean
     supportsVideoGeneration?: boolean
+    supportsCodeGeneration?: boolean
     isActive: boolean
     disabled?: boolean
     availableInVSCode?: boolean
@@ -34,7 +36,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
     const router = useRouter()
     const [activeTab, setActiveTab] = useState<'models' | 'keys'>('models')
     const [models, setModels] = useState(initialModels)
-    const [keys, setKeys] = useState(initialKeys)
+    const [keys] = useState(initialKeys)
     const [loading, setLoading] = useState(false)
     const [filterType, setFilterType] = useState('all')
 
@@ -51,6 +53,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
         supportsVision: false,
         supportsImageGeneration: false,
         supportsVideoGeneration: false,
+        supportsCodeGeneration: false,
         disabled: false,
         availableInVSCode: true,
         adminMessage: ''
@@ -99,12 +102,13 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                 supportsVision: false,
                 supportsImageGeneration: false,
                 supportsVideoGeneration: false,
+                supportsCodeGeneration: false,
                 disabled: false,
                 availableInVSCode: true,
                 adminMessage: ''
             })
             router.refresh()
-        } catch (error) {
+        } catch {
             alert(editingModel ? 'Error updating model' : 'Error adding model')
         } finally {
             setLoading(false)
@@ -125,6 +129,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
             supportsVision: model.supportsVision ?? false,
             supportsImageGeneration: model.supportsImageGeneration ?? false,
             supportsVideoGeneration: model.supportsVideoGeneration ?? false,
+            supportsCodeGeneration: model.supportsCodeGeneration ?? false,
             disabled: model.disabled ?? false,
             availableInVSCode: model.availableInVSCode ?? true,
             adminMessage: model.adminMessage || ''
@@ -146,6 +151,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
             supportsVision: false,
             supportsImageGeneration: false,
             supportsVideoGeneration: false,
+            supportsCodeGeneration: false,
             disabled: false,
             availableInVSCode: true,
             adminMessage: ''
@@ -165,7 +171,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
 
             // Re-fetch keys or just reload page to get masked version
             location.reload()
-        } catch (error) {
+        } catch {
             alert('Error saving key')
         } finally {
             setLoading(false)
@@ -183,7 +189,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
 
             setModels(models.filter(m => m._id !== id))
             router.refresh()
-        } catch (error) {
+        } catch {
             alert('Error deleting model')
         } finally {
             setLoading(false)
@@ -334,6 +340,15 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                                     />
                                     Video Generation
                                 </label>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={newModel.supportsCodeGeneration}
+                                        onChange={(e) => setNewModel({ ...newModel, supportsCodeGeneration: e.target.checked })}
+                                        className="rounded border-border bg-secondary"
+                                    />
+                                    Code Generation
+                                </label>
                             </div>
 
                             <div className="pt-2">
@@ -399,19 +414,21 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                                 <option value="all">All Models</option>
                                 <option value="image">Image Generation</option>
                                 <option value="video">Video Generation</option>
+                                <option value="code">Code Generation</option>
                             </select>
                         </div>
                         <div className="space-y-3">
                             {models.filter(m => {
                                 if (filterType === 'image') return m.supportsImageGeneration;
                                 if (filterType === 'video') return m.supportsVideoGeneration;
+                                if (filterType === 'code') return m.supportsCodeGeneration;
                                 return true;
                             }).map(model => (
                                 <div key={model._id} className={`flex items-center justify-between p-3 rounded-lg border group ${model.disabled ? 'bg-red-500/10 border-red-500/30' : 'bg-secondary/30 border-border/50'}`}>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             {model.image && (
-                                                <img src={model.image} alt={model.displayName} className={`w-5 h-5 rounded-sm object-cover ${model.disabled ? 'opacity-50' : ''}`} />
+                                                <Image src={model.image} alt={model.displayName} width={20} height={20} className={`w-5 h-5 rounded-sm object-cover ${model.disabled ? 'opacity-50' : ''}`} unoptimized />
                                             )}
                                             <p className={`font-medium text-sm ${model.disabled ? 'line-through text-muted-foreground' : ''}`}>{model.displayName}</p>
                                             {model.disabled && (
@@ -448,6 +465,7 @@ export function AiManager({ initialModels, initialKeys }: { initialModels: AIMod
                             {models.filter(m => {
                                 if (filterType === 'image') return m.supportsImageGeneration;
                                 if (filterType === 'video') return m.supportsVideoGeneration;
+                                if (filterType === 'code') return m.supportsCodeGeneration;
                                 return true;
                             }).length === 0 && (
                                     <p className="text-sm text-muted-foreground text-center py-4">No matching models found.</p>

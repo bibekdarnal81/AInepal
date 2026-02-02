@@ -7,9 +7,10 @@ import { SiteSettings, User } from '@/lib/mongodb/models'
 // Default sidebar items
 const DEFAULT_SIDEBAR_ITEMS = [
     { key: 'chat', label: 'Chat', href: '/chat', icon: 'MessageSquare', visible: true, order: 0 },
-    { key: 'image', label: 'Image', href: '/chat/image', icon: 'Image', visible: true, order: 1 },
-    { key: 'video', label: 'Video', href: '/chat/video', icon: 'Video', visible: true, order: 2 },
-    { key: 'audio', label: 'Audio', href: '/chat/audio', icon: 'Headphones', visible: true, order: 3 },
+    { key: 'image', label: 'Image', href: '/image', icon: 'Image', visible: true, order: 1 },
+    { key: 'video', label: 'Video', href: '/video', icon: 'Video', visible: true, order: 2 },
+    { key: 'audio', label: 'Audio', href: '/audio', icon: 'Headphones', visible: true, order: 3 },
+    { key: 'code', label: 'Code', href: '/code', icon: 'Code', visible: true, order: 4 },
 ]
 
 // GET - Get sidebar settings (public for sidebar component)

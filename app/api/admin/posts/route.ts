@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
             PostCategory.find().sort({ name: 1 }).lean()
         ])
 
-        const typedPosts = posts as Array<{
+        const typedPosts = posts as unknown as Array<{
             _id: string
             title: string
             slug: string
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             posts: transformedPosts,
-            categories: (categories as Array<{ _id: string; name: string; slug: string }>).map((c) => ({
+            categories: (categories as unknown as Array<{ _id: string; name: string; slug: string }>).map((c) => ({
                 id: c._id.toString(),
                 name: c.name,
                 slug: c.slug

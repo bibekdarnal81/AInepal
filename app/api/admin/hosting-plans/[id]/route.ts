@@ -6,8 +6,9 @@ import { HostingPlan, User } from '@/lib/mongodb/models'
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const session = await getServerSession(authOptions)
         if (!session?.user?.email) {
@@ -22,7 +23,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const deletedPlan = await HostingPlan.findByIdAndDelete(params.id)
+        const deletedPlan = await HostingPlan.findByIdAndDelete(id)
 
         if (!deletedPlan) {
             return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
@@ -37,8 +38,9 @@ export async function DELETE(
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const session = await getServerSession(authOptions)
         if (!session?.user?.email) {
@@ -55,7 +57,7 @@ export async function PATCH(
 
         const body = await request.json()
         const updatedPlan = await HostingPlan.findByIdAndUpdate(
-            params.id,
+            id,
             { $set: body },
             { new: true }
         )

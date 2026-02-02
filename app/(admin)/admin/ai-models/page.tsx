@@ -22,8 +22,9 @@ export default async function AdminAiModelsPage() {
 
     // Transform for client
     const cleanModels = JSON.parse(JSON.stringify(models))
-    const cleanKeys = (JSON.parse(JSON.stringify(keys)) as Array<{ _id?: string; provider: string }>).map((k) => ({
-        ...k,
+    const cleanKeys = (JSON.parse(JSON.stringify(keys)) as Array<{ _id: string; provider: string }>).map((k) => ({
+        _id: k._id,
+        provider: k.provider,
         maskedKey: '••••••••'
     }))
 

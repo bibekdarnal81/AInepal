@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { verifyApiKey } from '@/lib/auth/verifyApiKey'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import dbConnect from '@/lib/mongodb/client'
@@ -26,7 +27,7 @@ export async function GET() {
     })
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
         await dbConnect()
 
@@ -40,25 +41,8 @@ export async function POST(request: Request) {
 
         // 2. If no session, try Bearer Token (for VS Code)
         if (!userId) {
-            // Use the centralized verification (checks expiration, active status, domains)
-            // verifyApiKey extracts token from 'x-api-key' or 'Authorization: Bearer'
-            // We need to typecase request to NextRequest for verifyApiKey, 
-            // but the route is defined as taking `request: Request`. 
-            // In Next.js App Router, Request is compatible.
-            // However, verifyApiKey is typed for NextRequest mostly for headers.
-            // Let's import NextRequest to be safe or cast it.
-
-            // To use verifyApiKey, we need to import it.
-            // And use it to get the keyDoc.
-
-            const { verifyApiKey } = await import('@/lib/auth/verifyApiKey')
-            // Need to convert Web Request to NextRequest if verifyApiKey strictly requires it,
-            // or just ensure we pass something with headers.
-            // NextRequest extends Request.
-            const { NextRequest } = await import('next/server')
-            const nextReq = new NextRequest(request.url, { headers: request.headers, method: request.method })
-
-            const verifiedUser = await verifyApiKey(nextReq)
+            // Use the centralized verification
+            const verifiedUser = await verifyApiKey(request)
 
             if (verifiedUser) {
                 userId = verifiedUser._id.toString()
@@ -132,6 +116,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Model not found or inactive' }, { status: 404 })
         }
 
+
         if (modelConfig.availableInVSCode === false) {
             return NextResponse.json({ error: 'This model is not available in VS Code' }, { status: 403 })
         }
@@ -157,10 +142,18 @@ export async function POST(request: Request) {
         }
 
         // 4. Construct System Prompt / Messages with Context
+        // Helper to determine safe code fence length
+        const getFence = (content: string) => {
+            const maxBackticks = (content.match(/`+/g) || []).reduce((max, match) => Math.max(max, match.length), 0)
+            return '`'.repeat(Math.max(3, maxBackticks + 1))
+        }
+
+        const fence = selection ? getFence(selection) : '```'
+
         const systemPrompt = `You are an intelligent coding assistant integrated into VS Code.
 User is working on file: ${fileName || 'Untitled'}
 Language: ${language || 'text'}
-${selection ? `\nSelected Code Context:\n\`\`\`${language}\n${selection}\n\`\`\`\n` : ''}
+${selection ? `\nSelected Code Context:\n${fence}${language}\n${selection}\n${fence}\n` : ''}
 Please help the user with their request regarding this context.`
 
         const apiMessages: { role: 'system' | 'user' | 'assistant', content: string }[] = [

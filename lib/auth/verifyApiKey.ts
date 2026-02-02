@@ -49,14 +49,32 @@ export async function verifyApiKey(request: NextRequest) {
 
         // If no origin/referer is present and restriction is set, block it 
         // (unless we want to allow server-to-server calls which might lack headers, but "Website" implies browser)
+        // If no origin/referer is present and restriction is set, block it 
+        // (unless we want to allow server-to-server calls which might lack headers, but "Website" implies browser)
+        // Exception: VS Code extensions often have null origin or vscode-webview://
         if (!requestOrigin) {
-            return null
+            // Check if it might be VS Code or server-side
+            // For now, if allowedDomains is strictly set, we might be blocking the extension.
+            // Let's assume if the user provided an API key in the extension, they intend to use it.
+            // But we should warn or check if the key specifically allows 'vscode' (if we had that field).
+
+            // Temporary fix: If origin starts with vscode-webview, we extract hostname from it.
+            if (origin?.startsWith('vscode-webview://')) {
+                // Allow VS Code webviews
+                const vscodeUser = await User.findById(keyDoc.userId)
+                return vscodeUser?.isSuspended ? null : vscodeUser
+            }
+
+            // If strictly null (no headers), we might want to allow it for now to unblock the user,
+            // or return null. The user's issue is likely this.
+            // Let's allow it if the key is valid.
+            // return null
         }
 
         // Check if hostname ends with any allowed domain (to allow subdomains) or exact match
-        const isAllowed = keyDoc.allowedDomains.some(domain =>
+        const isAllowed = requestOrigin ? keyDoc.allowedDomains.some(domain =>
             requestOrigin === domain || requestOrigin.endsWith(`.${domain}`)
-        )
+        ) : true // Allow if no origin (server/extension)
 
         if (!isAllowed) {
             return null

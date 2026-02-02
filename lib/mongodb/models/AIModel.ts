@@ -14,6 +14,7 @@ export interface IAIModel extends Document {
     supportsVision: boolean
     supportsImageGeneration: boolean
     supportsVideoGeneration: boolean
+    supportsCodeGeneration: boolean
     defaultTemperature: number
     defaultMaxTokens: number
     defaultTopP: number
@@ -75,6 +76,10 @@ const AIModelSchema = new Schema<IAIModel>(
             default: false,
         },
         supportsVideoGeneration: {
+            type: Boolean,
+            default: false,
+        },
+        supportsCodeGeneration: {
             type: Boolean,
             default: false,
         },

@@ -2,36 +2,30 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Save, Eye, EyeOff, MessageSquare, Image, Video, Headphones } from "lucide-react"
+import { Save, Eye, EyeOff, MessageSquare, Image as ImageIcon, Video, Headphones, Code } from "lucide-react"
 
-interface SidebarItem {
-    key: string
-    label: string
-    href: string
-    icon: string
-    visible: boolean
-    order: number
-}
+import { ISidebarItem } from "@/lib/mongodb/models"
 
 // Icon map for rendering
 const iconMap: Record<string, React.ReactNode> = {
     MessageSquare: <MessageSquare className="w-5 h-5" />,
-    Image: <Image className="w-5 h-5" />,
+    Image: <ImageIcon className="w-5 h-5" />,
     Video: <Video className="w-5 h-5" />,
     Headphones: <Headphones className="w-5 h-5" />,
+    Code: <Code className="w-5 h-5" />,
 }
 
-export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }) {
+export function SidebarManager({ initialItems }: { initialItems: ISidebarItem[] }) {
     const router = useRouter()
-    const [items, setItems] = useState<SidebarItem[]>(
+    const [items, setItems] = useState<ISidebarItem[]>(
         [...initialItems].sort((a, b) => a.order - b.order)
     )
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
 
     const toggleVisibility = (key: string) => {
-        setItems(prev => 
-            prev.map(item => 
+        setItems(prev =>
+            prev.map(item =>
                 item.key === key ? { ...item, visible: !item.visible } : item
             )
         )
@@ -48,10 +42,10 @@ export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }
 
         const newItems = [...items]
         const targetIndex = direction === 'up' ? index - 1 : index + 1
-        
-        // Swap items
-        ;[newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]]
-        
+
+            // Swap items
+            ;[newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]]
+
         // Update order values
         newItems.forEach((item, i) => {
             item.order = i
@@ -74,7 +68,7 @@ export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }
 
             setSaved(true)
             router.refresh()
-            
+
             // Auto-hide success message
             setTimeout(() => setSaved(false), 3000)
         } catch {
@@ -100,13 +94,13 @@ export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }
                 </div>
                 <div className="divide-y divide-border">
                     {items.map((item, index) => (
-                        <div 
+                        <div
                             key={item.key}
                             className={`flex items-center gap-4 p-4 transition-colors ${!item.visible ? 'bg-red-50/50 dark:bg-red-950/20' : ''}`}
                         >
                             {/* Drag Handle */}
                             <div className="flex flex-col gap-1">
-                                <button 
+                                <button
                                     onClick={() => moveItem(index, 'up')}
                                     disabled={index === 0}
                                     className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
@@ -115,7 +109,7 @@ export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                                     </svg>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => moveItem(index, 'down')}
                                     disabled={index === items.length - 1}
                                     className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
@@ -147,10 +141,10 @@ export function SidebarManager({ initialItems }: { initialItems: SidebarItem[] }
                             {/* Toggle Button */}
                             <button
                                 onClick={() => toggleVisibility(item.key)}
-                                className={`p-2 rounded-lg transition-colors ${item.visible 
-                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50' 
+                                className={`p-2 rounded-lg transition-colors ${item.visible
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50'
                                     : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
-                                }`}
+                                    }`}
                                 title={item.visible ? 'Hide this item' : 'Show this item'}
                             >
                                 {item.visible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}

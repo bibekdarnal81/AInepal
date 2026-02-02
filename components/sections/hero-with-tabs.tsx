@@ -313,19 +313,13 @@ export default function Hero() {
                         className="flex flex-wrap items-center justify-center gap-4 lg:justify-start"
                     >
                         <Link
-                            href="/auth/register"
+                            href="/chat"
                             className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-xl bg-cyan-500 px-8 font-semibold text-white transition-all hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/25 dark:bg-cyan-500 dark:hover:bg-cyan-400"
                         >
                             <span className="mr-2">Get Started</span>
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Link>
-                        <Link
-                            href="/chat"
-                            className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-background px-8 font-semibold text-foreground transition-all hover:bg-accent hover:text-accent-foreground dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-                        >
-                            <Play className="h-4 w-4 fill-current opacity-70" />
-                            <span>View Demos</span>
-                        </Link>
+
                     </motion.div>
 
                     <motion.div

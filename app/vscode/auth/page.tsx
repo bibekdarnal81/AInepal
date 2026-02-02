@@ -16,10 +16,14 @@ export default function VSCodeAuthPage() {
     const [success, setSuccess] = useState(false)
 
     // Params from VS Code
+    const session_id = searchParams.get('session')
     const redirectUrl = searchParams.get('vscode_open_uri') || searchParams.get('redirect_url') || searchParams.get('redirectUri') || searchParams.get('redirect_uri')
 
     // Support standard OAuth state param or our custom ones
     const state = searchParams.get('state')
+
+    // If we have a session ID, construct the vscode:// deep link
+    const vscodeDeepLink = session_id ? `vscode://ainepal.ainepal-chat/auth-callback` : null
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -28,8 +32,10 @@ export default function VSCodeAuthPage() {
     }, [status])
 
     const handleAuthorize = async () => {
-        if (!redirectUrl) {
-            setError('Missing redirect URL from VS Code')
+        const finalRedirectUrl = vscodeDeepLink || redirectUrl
+
+        if (!finalRedirectUrl) {
+            setError('Missing redirect URL or session from VS Code')
             return
         }
 
@@ -49,11 +55,14 @@ export default function VSCodeAuthPage() {
             const { token } = await response.json()
 
             // Construct redirect URI
-            // If it's a deep link (vscode://...), just append params
-            // If it's a callback URL, ensure it is properly formed
+            // For vscode:// deep links, use query params
+            const separator = finalRedirectUrl.includes('?') ? '&' : '?'
+            const params = new URLSearchParams()
+            params.append('token', token)
+            if (session_id) params.append('session', session_id)
+            if (state) params.append('state', state)
 
-            const separator = redirectUrl.includes('?') ? '&' : '?'
-            const finalUrl = `${redirectUrl}${separator}token=${token}${state ? `&state=${state}` : ''}`
+            const finalUrl = `${finalRedirectUrl}${separator}${params.toString()}`
 
             setSuccess(true)
 
@@ -115,7 +124,7 @@ export default function VSCodeAuthPage() {
                         <Button
                             className="w-full"
                             onClick={handleAuthorize}
-                            disabled={isAuthorizing || !redirectUrl}
+                            disabled={isAuthorizing || (!redirectUrl && !vscodeDeepLink)}
                         >
                             {isAuthorizing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isAuthorizing ? 'Authorizing...' : 'Authorize'}

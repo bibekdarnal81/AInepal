@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import dbConnect from '@/lib/mongodb/client'
 import { UserChatSession } from '@/lib/mongodb/models'
+import { FilterQuery } from 'mongoose'
+import { IUserChatSession } from '@/lib/mongodb/models/UserChatSession'
 
 // GET - Fetch user's chat sessions
 export async function GET(req: NextRequest) {
@@ -17,21 +19,27 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url)
         const limit = parseInt(searchParams.get('limit') || '20')
         const page = parseInt(searchParams.get('page') || '1')
+        const projectId = searchParams.get('projectId')
 
-        const sessions = await UserChatSession.find({ 
+        const query: FilterQuery<IUserChatSession> = {
             userId: session.user.id,
-            isActive: true 
-        })
+            isActive: true
+        }
+
+        if (projectId) {
+            query.projectId = projectId
+        } else if (searchParams.has('unassigned')) {
+            query.projectId = { $exists: false }
+        }
+
+        const sessions = await UserChatSession.find(query)
             .select('_id title updatedAt createdAt')
             .sort({ updatedAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean()
 
-        const total = await UserChatSession.countDocuments({ 
-            userId: session.user.id,
-            isActive: true 
-        })
+        const total = await UserChatSession.countDocuments(query)
 
         return NextResponse.json({
             sessions: sessions.map(s => ({
@@ -61,12 +69,13 @@ export async function POST(req: NextRequest) {
         await dbConnect()
 
         const body = await req.json()
-        const { title, modelId } = body
+        const { title, modelId, projectId } = body
 
         const chatSession = await UserChatSession.create({
             userId: session.user.id,
             title: title || 'New Chat',
             modelId,
+            projectId,
             messages: [],
             isActive: true,
         })
@@ -123,23 +132,27 @@ export async function PUT(req: NextRequest) {
         await dbConnect()
 
         const body = await req.json()
-        const { id, title, message } = body
+        const { id, title, message, projectId } = body
 
         if (!id) {
             return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
         }
 
         const updateData: Record<string, unknown> = {}
-        
+
         if (title) {
             updateData.title = title
+        }
+
+        if (projectId !== undefined) {
+            updateData.projectId = projectId || null
         }
 
         if (message) {
             // Add message to session
             await UserChatSession.updateOne(
                 { _id: id, userId: session.user.id },
-                { 
+                {
                     $push: { messages: message },
                     $set: { updatedAt: new Date() }
                 }

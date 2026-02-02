@@ -7,8 +7,9 @@ import mongoose from 'mongoose'
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const session = await getServerSession(authOptions)
 
@@ -24,7 +25,6 @@ export async function DELETE(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { id } = params
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
         }

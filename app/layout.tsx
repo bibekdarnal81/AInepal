@@ -5,6 +5,7 @@ import { ConditionalChatWidget } from '@/components/chat/conditional-chat-widget
 import { ThemeScript } from '@/components/theme-script';
 import { TopBanner } from '@/components/top-banner';
 import { AuthProvider } from '@/lib/auth/provider';
+import { Toaster } from 'sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -112,6 +113,7 @@ export default function RootLayout({
           {/* <TopBanner /> */}
           {children}
           <ConditionalChatWidget />
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

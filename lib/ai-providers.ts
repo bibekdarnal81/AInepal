@@ -697,11 +697,6 @@ export async function callDigitalOcean(
     // For now, we'll default to a placeholder that users likely need to override/configure via model api_endpoint
     const baseUrl = endpoint || 'https://api.digitalocean.com/v1/genai/chat/completions'
 
-    console.log('[DigitalOcean] Request:', {
-        url: baseUrl,
-        model: modelId,
-        endpointParam: endpoint
-    });
 
     const response = await fetch(baseUrl, {
         method: 'POST',

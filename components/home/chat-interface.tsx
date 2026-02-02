@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Send, Bot, User, Paperclip, Sparkles, Search, Mic, Globe, Menu, PanelLeftClose, Bell, Loader2, Plus, ArrowUp, ChevronRight, ChevronDown, Pencil, Languages, FileSearch, FileText, Network, BookOpen, Bookmark, Wand2, Package, FileEdit, Table, Podcast, ClipboardList, LayoutGrid } from "lucide-react"
+import { Bot, Sparkles, Search, Mic, Globe, PanelLeftClose, Bell, Loader2, Plus, ArrowUp, Pencil, Languages, FileSearch, FileText, Network, BookOpen, Bookmark, Wand2, Package, FileEdit, Table, Podcast, ClipboardList, LayoutGrid } from "lucide-react"
 import { useSession } from "next-auth/react"
 import ReactMarkdown from 'react-markdown'
+import { toast } from "sonner"
 import { AIModel } from "./types"
 import { CodeBlock } from "./code-block"
 import { ActiveModelsPopover } from "./active-models-popover"
@@ -12,8 +13,60 @@ import { InsufficientCreditsModal } from "./insufficient-credits-modal"
 import { SuspendedAccountModal } from "./suspended-account-modal"
 import { MultiModelResponse } from "./multi-model-response"
 import { useSidebar } from "./sidebar-provider"
+import { CodeSidebarProvider } from "./code-sidebar-provider"
+import { CodeSidebar } from "./code-sidebar"
 import Link from "next/link"
 import { getSocket } from "@/lib/socket-client"
+import { cn } from "@/lib/utils"
+
+interface SpeechRecognitionEvent extends Event {
+    resultIndex: number;
+    results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+    length: number;
+    item(index: number): SpeechRecognitionResult;
+    [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+    isFinal: boolean;
+    [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+    transcript: string;
+    confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+    message: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => unknown) | null;
+    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => unknown) | null;
+    start(): void;
+    stop(): void;
+}
+
+declare global {
+    interface Window {
+        webkitSpeechRecognition: {
+            new(): SpeechRecognition;
+        };
+        SpeechRecognition: {
+            new(): SpeechRecognition;
+        };
+    }
+}
 
 // Tools data for main page display
 const tools = [
@@ -75,6 +128,72 @@ export function ChatInterface({
 
     const [loading, setLoading] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    // Voice Typing
+    const [isListening, setIsListening] = useState(false)
+    const recognitionRef = useRef<SpeechRecognition | null>(null)
+
+    const handleVoiceInput = () => {
+        if (isListening) {
+            recognitionRef.current?.stop()
+            setIsListening(false)
+            return
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        if (!SpeechRecognition) {
+            toast.error("Your browser does not support voice typing.")
+            return
+        }
+
+        const recognition = new SpeechRecognition()
+        recognition.continuous = true
+        recognition.interimResults = true
+        recognition.lang = 'en-US'
+
+        recognition.onstart = () => {
+            console.log("Voice recognition started")
+            setIsListening(true)
+        }
+
+        recognition.onend = () => {
+            console.log("Voice recognition ended")
+            setIsListening(false)
+        }
+
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+            console.warn("Voice recognition error:", event.error)
+            if (event.error === 'not-allowed') {
+                toast.error("Microphone access denied. Please enable microphone permissions.")
+            } else if (event.error === 'network') {
+                toast.error("Network error. Please check your internet connection and try again.")
+            } else {
+                toast.error("Voice recognition error: " + event.error)
+            }
+            setIsListening(false)
+        }
+
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+            let finalTranscript = ''
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' '
+                }
+            }
+            if (finalTranscript) {
+                console.log("Transcript received:", finalTranscript)
+                setInput(prev => prev + finalTranscript)
+            }
+        }
+
+        recognitionRef.current = recognition
+        try {
+            recognition.start()
+        } catch (error) {
+            console.error("Failed to start recognition:", error)
+        }
+    }
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -150,7 +269,7 @@ export function ChatInterface({
             socket.off('credits-updated', onCreditsUpdated)
             socket.off('new-message', onNewMessage)
         }
-    }, [session?.user?.id])
+    }, [session?.user?.id, chatSessionId])
 
     // Local state for real-time updates
     const [localAdvancedCredits, setLocalAdvancedCredits] = useState(advancedCredits)
@@ -224,7 +343,8 @@ export function ChatInterface({
                         timestamp: new Date(),
                         model: model
                     }
-                } catch (error: any) {
+                } catch (err: unknown) {
+                    const error = err instanceof Error ? err : new Error(String(err))
                     console.error(`Chat error with ${model.displayName}:`, error)
 
                     if (error.message?.includes("Insufficient advanced credits")) {
@@ -257,7 +377,7 @@ export function ChatInterface({
             // Add all responses to state
             setMessages(prev => [...prev, ...responses])
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('General chat error:', error)
         } finally {
             setLoading(false)
@@ -265,117 +385,333 @@ export function ChatInterface({
     }
 
     // Primary model for display purposes
-    const primaryModel = selectedModels[0]
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-950 relative selection:bg-green-100 dark:selection:bg-green-900/30">
-            {/* Header */}
-            <header className="h-16 px-4 flex items-center justify-between z-20 border-b border-transparent">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={toggleSidebar}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-gray-500"
-                    >
-                        <PanelLeftClose className="w-5 h-5" />
-                    </button>
-
-
-                    {/* Model Selector Popover Trigger */}
-                    <div className="relative">
+        <CodeSidebarProvider>
+            <div className="flex flex-col h-full bg-white dark:bg-zinc-950 relative selection:bg-green-100 dark:selection:bg-green-900/30">
+                {/* Header */}
+                <header className="h-16 px-4 flex items-center justify-between z-20 border-b border-transparent">
+                    <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                            onClick={toggleSidebar}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-gray-500"
                         >
-                            {selectedModels.length > 0 ? (
-                                <div className="flex items-center gap-2">
-                                    {selectedModels.length === 1 && selectedModels[0].image ? (
-                                        <img src={selectedModels[0].image} alt="" className="w-4 h-4 object-contain rounded-sm" />
-                                    ) : (
-                                        <Bot className="w-4 h-4 text-purple-500" />
-                                    )}
-                                    <span className="font-semibold text-gray-700 dark:text-gray-200">
-                                        {selectedModels.map(m => m.displayName).join(" | ")}
-                                    </span>
-                                </div>
-                            ) : (
-                                <span>Select Model</span>
-                            )}
+                            <PanelLeftClose className="w-5 h-5" />
                         </button>
 
-                        {/* Active Models Popover */}
-                        <ActiveModelsPopover
-                            isOpen={isPopoverOpen}
-                            onClose={() => setIsPopoverOpen(false)}
-                            activeModels={selectedModels}
-                            onOpenModal={() => setIsModalOpen(true)}
-                        />
-                    </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                    {localMembershipName && (
-                        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm font-bold rounded-full border border-green-200 dark:border-green-900/50">
-                            <span>{localMembershipName}</span>
+                        {/* Model Selector Popover Trigger */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                            >
+                                {selectedModels.length > 0 ? (
+                                    <div className="flex items-center gap-2">
+                                        {selectedModels.length === 1 && selectedModels[0].image ? (
+                                            <div className="w-4 h-4 rounded-sm overflow-hidden relative">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={selectedModels[0].image} alt="" className="w-full h-full object-contain" />
+                                            </div>
+                                        ) : (
+                                            <Bot className="w-4 h-4 text-purple-500" />
+                                        )}
+                                        <span className="font-semibold text-gray-700 dark:text-gray-200">
+                                            {selectedModels.map(m => m.displayName).join(" | ")}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span>Select Model</span>
+                                )}
+                            </button>
+
+                            {/* Active Models Popover */}
+                            <ActiveModelsPopover
+                                isOpen={isPopoverOpen}
+                                onClose={() => setIsPopoverOpen(false)}
+                                activeModels={selectedModels}
+                                onOpenModal={() => setIsModalOpen(true)}
+                            />
                         </div>
-                    )}
-                    <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-sm font-bold rounded-full border border-purple-200 dark:border-purple-900/50 relative group cursor-help">
-                        <Sparkles className="w-3.5 h-3.5 fill-current" />
-                        <span>AdvancedCredit: {localAdvancedCredits}{localMembershipAdvancedCredits > 0 && ` / ${localMembershipAdvancedCredits}`}</span>
-                        {/* Credit costs tooltip */}
-                        <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2">Credit Costs:</p>
-                            <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                <div className="flex justify-between"><span>💬 Chat</span><span className="font-medium">2 credits</span></div>
-                                <div className="flex justify-between"><span>🖼️ Image</span><span className="font-medium">5 credits</span></div>
-                                <div className="flex justify-between"><span>🎬 Video</span><span className="font-medium">20 credits</span></div>
-                                <div className="flex justify-between"><span>🎵 Audio</span><span className="font-medium">10 credits</span></div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {localMembershipName && (
+                            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-sm font-bold rounded-full border border-green-200 dark:border-green-900/50">
+                                <span>{localMembershipName}</span>
+                            </div>
+                        )}
+                        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-sm font-bold rounded-full border border-purple-200 dark:border-purple-900/50 relative group cursor-help">
+                            <Sparkles className="w-3.5 h-3.5 fill-current" />
+                            <span>AdvancedCredit: {localAdvancedCredits}{localMembershipAdvancedCredits > 0 && ` / ${localMembershipAdvancedCredits}`}</span>
+                            {/* Credit costs tooltip */}
+                            <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2">Credit Costs:</p>
+                                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                    <div className="flex justify-between"><span>💬 Chat</span><span className="font-medium">2 credits</span></div>
+                                    <div className="flex justify-between"><span>🖼️ Image</span><span className="font-medium">5 credits</span></div>
+                                    <div className="flex justify-between"><span>🎬 Video</span><span className="font-medium">20 credits</span></div>
+                                    <div className="flex justify-between"><span>🎵 Audio</span><span className="font-medium">10 credits</span></div>
+                                </div>
                             </div>
                         </div>
+                        <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors relative">
+                            <Bell className="w-5 h-5" />
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-zinc-950"></span>
+                        </button>
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                            {firstName[0]}
+                        </div>
                     </div>
-                    <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-zinc-950"></span>
-                    </button>
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                        {firstName[0]}
+                </header>
+
+                {/* Model Selector Modal */}
+                <ModelSelectorModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    availableModels={availableModels}
+                    selectedModels={selectedModels}
+                    onSelectModels={setSelectedModels}
+                />
+
+                {/* Insufficient Credits Modal */}
+                <InsufficientCreditsModal
+                    isOpen={showCreditModal}
+                    onClose={() => setShowCreditModal(false)}
+                    currentCredits={localAdvancedCredits}
+                    requiredCredits={requiredCredits}
+                />
+
+                {/* Suspended Account Modal */}
+                <SuspendedAccountModal isOpen={isSuspended} />
+
+                {/* Main Content Area */}
+                <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pb-32">
+                    <div className="max-w-3xl mx-auto px-4 min-h-full flex flex-col pt-6">
+
+                        {messages.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center mb-12">
+                                {/* Greeting */}
+                                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-center text-gray-900 dark:text-white">
+                                    {getGreeting()}, <span className="text-green-500">{firstName}!</span>
+                                </h1>
+
+                                {/* Main Input Box (Initial State) */}
+                                <div className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-zinc-800/50 rounded-[32px] shadow-2xl shadow-gray-200/50 dark:shadow-none p-2 mb-8 relative z-10 transition-all hover:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] ring-1 ring-gray-900/5 dark:ring-white/5">
+                                    <form onSubmit={handleSend} className="flex flex-col">
+                                        <textarea
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault()
+                                                    handleSend()
+                                                }
+                                            }}
+                                            placeholder={selectedModels.length > 1 ? "Message multiple models..." : "How to stay productive at home?"}
+                                            className="w-full bg-transparent border-none outline-none text-lg text-gray-800 dark:text-gray-100 placeholder:text-gray-400 min-h-[60px] resize-none px-4 py-3"
+                                        />
+
+                                        <div className="flex items-center justify-between px-2 pb-1">
+                                            <div className="flex items-center gap-1">
+                                                <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 transition-colors tooltip-trigger" title="Add attachment">
+                                                    <Plus className="w-5 h-5" />
+                                                </button>
+                                                <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 transition-colors" title="Web Search">
+                                                    <Globe className="w-5 h-5" />
+                                                </button>
+
+                                                <div className="hidden md:flex items-center gap-2 ml-2">
+                                                    <button type="button" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors">
+                                                        <Bot className="w-3.5 h-3.5" />
+                                                        <span>Combine</span>
+                                                    </button>
+                                                    <button type="button" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors">
+                                                        <Sparkles className="w-3.5 h-3.5" />
+                                                        <span>Compare</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleVoiceInput}
+                                                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-90'}`}
+                                                >
+                                                    {isListening ? <Mic className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    disabled={!input.trim() || loading}
+                                                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${input.trim() ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-gray-200 dark:bg-zinc-800 text-gray-400'}`}
+                                                >
+                                                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                {/* Tools Grid Section */}
+                                <div className="w-full max-w-4xl mx-auto">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <LayoutGrid className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Tools</h2>
+                                    </div>
+                                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                                        {tools.map((tool) => {
+                                            const Icon = tool.icon
+                                            return (
+                                                <Link
+                                                    key={tool.name}
+                                                    href={tool.href}
+                                                    className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-100 dark:border-zinc-800 transition-all hover:scale-105 hover:shadow-md group"
+                                                >
+                                                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-800 group-hover:bg-gray-50 dark:group-hover:bg-zinc-700 transition-colors shadow-sm">
+                                                        <Icon className={`w-5 h-5 ${tool.color}`} />
+                                                    </div>
+                                                    <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 text-center leading-tight line-clamp-2">
+                                                        {tool.name}
+                                                    </span>
+                                                </Link>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Footer Text */}
+                                <div className="mt-auto md:mb-12 text-center">
+                                    <p className="text-gray-400 text-sm">Your all-in-one AI Platform</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-8">
+                                {(() => {
+                                    const renderGroups = []
+                                    let i = 0
+                                    while (i < messages.length) {
+                                        const msg = messages[i]
+
+                                        if (msg.role === 'user') {
+                                            // Render User Message
+                                            renderGroups.push(
+                                                <div key={msg.id} className="flex gap-4 justify-end group">
+                                                    <div className="bg-[#f4f4f4] dark:bg-[#212121] rounded-[24px] rounded-tr-sm px-6 py-3.5 max-w-[85%] shadow-sm border border-transparent dark:border-zinc-800 transition-all hover:shadow-md">
+                                                        <div className="text-[15px] text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                                                    </div>
+                                                    {/* <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-1 text-xs font-bold text-blue-600 dark:text-blue-400">
+                                                    {firstName[0]}
+                                                </div> */}
+                                                </div>
+                                            )
+                                            i++
+                                        } else {
+                                            // Collect all consecutive assistant messages
+                                            const assistantMessages = []
+                                            while (i < messages.length && messages[i].role === 'assistant') {
+                                                assistantMessages.push(messages[i])
+                                                i++
+                                            }
+
+                                            if (assistantMessages.length > 0) {
+                                                if (assistantMessages.length > 1) {
+                                                    // Render Multi-Model Response Tab View
+                                                    renderGroups.push(
+                                                        <div key={assistantMessages[0].id} className="flex gap-4 justify-start">
+                                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-1">
+                                                                <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                                            </div>
+                                                            <MultiModelResponse messages={assistantMessages} />
+                                                        </div>
+                                                    )
+                                                } else {
+                                                    // Render Single Assistant Response
+                                                    const singleMsg = assistantMessages[0]
+                                                    renderGroups.push(
+                                                        <div key={singleMsg.id} className="flex gap-4 justify-start">
+                                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-1">
+                                                                <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                                            </div>
+                                                            <div className="flex-1 max-w-full">
+                                                                <div className="mb-2 flex items-center gap-2">
+                                                                    <span className="font-semibold text-sm text-gray-900 dark:text-white">
+                                                                        {singleMsg.model?.displayName || "AI"}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-none">
+                                                                    <ReactMarkdown
+                                                                        components={{
+                                                                            code: CodeBlock,
+                                                                            h1: ({ className, ...props }) => <h1 className={cn("text-2xl font-bold mt-6 mb-4 text-gray-900 dark:text-gray-100", className)} {...props} />,
+                                                                            h2: ({ className, ...props }) => <h2 className={cn("text-xl font-bold mt-5 mb-3 text-gray-900 dark:text-gray-100", className)} {...props} />,
+                                                                            h3: ({ className, ...props }) => <h3 className={cn("text-lg font-semibold mt-4 mb-2 text-gray-900 dark:text-gray-100", className)} {...props} />,
+                                                                            p: ({ className, ...props }) => <p className={cn("mb-4 last:mb-0 leading-7 text-gray-800 dark:text-gray-300", className)} {...props} />,
+                                                                            ul: ({ className, ...props }) => <ul className={cn("list-disc list-outside ml-6 mb-4 space-y-1 text-gray-800 dark:text-gray-300", className)} {...props} />,
+                                                                            ol: ({ className, ...props }) => <ol className={cn("list-decimal list-outside ml-6 mb-4 space-y-1 text-gray-800 dark:text-gray-300", className)} {...props} />,
+                                                                            li: ({ className, ...props }) => <li className={cn("pl-1", className)} {...props} />,
+                                                                            a: ({ className, ...props }) => <a className={cn("text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline underline-offset-4 decoration-blue-300 dark:decoration-blue-700 decoration-1 hover:decoration-2 transition-all", className)} target="_blank" rel="noopener noreferrer" {...props} />,
+                                                                            blockquote: ({ className, ...props }) => <blockquote className={cn("border-l-4 border-gray-300 dark:border-zinc-700 pl-4 py-1 my-4 italic text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-zinc-800/50 rounded-r", className)} {...props} />,
+                                                                            table: ({ className, ...props }) => <div className="overflow-x-auto my-6 rounded-lg border border-gray-200 dark:border-zinc-800"><table className={cn("w-full text-left text-sm", className)} {...props} /></div>,
+                                                                            thead: ({ className, ...props }) => <thead className={cn("bg-gray-100 dark:bg-zinc-800", className)} {...props} />,
+                                                                            th: ({ className, ...props }) => <th className={cn("px-4 py-3 font-semibold text-gray-900 dark:text-gray-100", className)} {...props} />,
+                                                                            td: ({ className, ...props }) => <td className={cn("px-4 py-3 border-t border-gray-100 dark:border-zinc-800 text-gray-700 dark:text-gray-300", className)} {...props} />,
+                                                                            hr: ({ className, ...props }) => <hr className={cn("my-8 border-gray-200 dark:border-zinc-800", className)} {...props} />,
+                                                                        }}
+                                                                    >
+                                                                        {singleMsg.content}
+                                                                    </ReactMarkdown>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    return renderGroups
+                                })()}
+
+                                {loading && (
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                                            <Bot className="w-5 h-5 text-green-600 dark:text-green-400 animate-pulse" />
+                                        </div>
+                                        <div className="flex items-center gap-1.5 h-10 px-4">
+                                            <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-0" />
+                                            <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-150" />
+                                            <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-300" />
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+                        )}
+
+                        {/* Footer Text for chat view */}
+                        {messages.length > 0 && (
+                            <div className="mt-8 mb-4 text-center">
+                                <p className="text-gray-400 text-xs">Your all-in-one AI Platform</p>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </header>
 
-            {/* Model Selector Modal */}
-            <ModelSelectorModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                availableModels={availableModels}
-                selectedModels={selectedModels}
-                onSelectModels={setSelectedModels}
-            />
+                {/* Sticky Input Area (Only visible when messages exist) */}
+                {messages.length > 0 && (
+                    <div className="absolute bottom-6 left-0 right-0 z-30 px-4">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-zinc-800/50 rounded-[32px] shadow-2xl shadow-gray-200/40 dark:shadow-none flex items-end p-2.5 relative ring-1 ring-gray-900/5 dark:ring-white/5">
+                                {/* Floating Actions Overlay could go here if needed, keeping simple for now */}
 
-            {/* Insufficient Credits Modal */}
-            <InsufficientCreditsModal
-                isOpen={showCreditModal}
-                onClose={() => setShowCreditModal(false)}
-                currentCredits={localAdvancedCredits}
-                requiredCredits={requiredCredits}
-            />
+                                <form onSubmit={handleSend} className="flex-1 flex items-end w-full">
+                                    <button type="button" className="p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors mb-0.5 ml-1">
+                                        <Plus className="w-5 h-5" />
+                                    </button>
+                                    <button type="button" className="p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors mb-0.5">
+                                        <Globe className="w-5 h-5" />
+                                    </button>
 
-            {/* Suspended Account Modal */}
-            <SuspendedAccountModal isOpen={isSuspended} />
-
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pb-32">
-                <div className="max-w-3xl mx-auto px-4 min-h-full flex flex-col pt-6">
-
-                    {messages.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center mb-12">
-                            {/* Greeting */}
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-center text-gray-900 dark:text-white">
-                                {getGreeting()}, <span className="text-green-500">{firstName}!</span>
-                            </h1>
-
-                            {/* Main Input Box (Initial State) */}
-                            <div className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-[2rem] shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] dark:shadow-none p-2 mb-8 relative z-10 transition-shadow hover:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.15)]">
-                                <form onSubmit={handleSend} className="flex flex-col">
                                     <textarea
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
@@ -385,225 +721,37 @@ export function ChatInterface({
                                                 handleSend()
                                             }
                                         }}
-                                        placeholder={selectedModels.length > 1 ? "Message multiple models..." : "How to stay productive at home?"}
-                                        className="w-full bg-transparent border-none outline-none text-lg text-gray-800 dark:text-gray-100 placeholder:text-gray-400 min-h-[60px] resize-none px-4 py-3"
+                                        placeholder={selectedModels.length > 1 ? "Message multiple models..." : "Message..."}
+                                        className="flex-1 bg-transparent border-none outline-none text-base text-gray-800 dark:text-gray-100 placeholder:text-gray-400 min-h-[44px] max-h-[120px] resize-none py-3 px-3 mx-1"
+                                        rows={1}
                                     />
 
-                                    <div className="flex items-center justify-between px-2 pb-1">
-                                        <div className="flex items-center gap-1">
-                                            <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 transition-colors tooltip-trigger" title="Add attachment">
-                                                <Plus className="w-5 h-5" />
-                                            </button>
-                                            <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 transition-colors" title="Web Search">
-                                                <Globe className="w-5 h-5" />
-                                            </button>
-
-                                            <div className="hidden md:flex items-center gap-2 ml-2">
-                                                <button type="button" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors">
-                                                    <Bot className="w-3.5 h-3.5" />
-                                                    <span>Combine</span>
-                                                </button>
-                                                <button type="button" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors">
-                                                    <Sparkles className="w-3.5 h-3.5" />
-                                                    <span>Compare</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity">
-                                                <Mic className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={!input.trim() || loading}
-                                                className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${input.trim() ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-gray-200 dark:bg-zinc-800 text-gray-400'}`}
-                                            >
-                                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
-                                            </button>
-                                        </div>
+                                    <div className="flex items-center gap-1 mb-0.5 mr-1">
+                                        <button
+                                            type="button"
+                                            onClick={handleVoiceInput}
+                                            className={`p-2.5 rounded-full text-gray-500 transition-colors ${isListening ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'hover:bg-gray-100 dark:hover:bg-zinc-800'}`}
+                                        >
+                                            <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={!input.trim() || loading}
+                                            className={`p-2 rounded-full transition-all ${input.trim() ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-zinc-800 text-gray-400'}`}
+                                        >
+                                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
+                                        </button>
                                     </div>
                                 </form>
+
+                                {/* Combine/Compare Buttons Floating above input if needed, or inline */}
                             </div>
-
-                            {/* Tools Grid Section */}
-                            <div className="w-full max-w-4xl mx-auto">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <LayoutGrid className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Tools</h2>
-                                </div>
-                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                                    {tools.map((tool) => {
-                                        const Icon = tool.icon
-                                        return (
-                                            <Link
-                                                key={tool.name}
-                                                href={tool.href}
-                                                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-100 dark:border-zinc-800 transition-all hover:scale-105 hover:shadow-md group"
-                                            >
-                                                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-800 group-hover:bg-gray-50 dark:group-hover:bg-zinc-700 transition-colors shadow-sm">
-                                                    <Icon className={`w-5 h-5 ${tool.color}`} />
-                                                </div>
-                                                <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 text-center leading-tight line-clamp-2">
-                                                    {tool.name}
-                                                </span>
-                                            </Link>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Footer Text */}
-                            <div className="mt-auto md:mb-12 text-center">
-                                <p className="text-gray-400 text-sm">Your all-in-one AI Platform</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-8">
-                            {(() => {
-                                const renderGroups = []
-                                let i = 0
-                                while (i < messages.length) {
-                                    const msg = messages[i]
-
-                                    if (msg.role === 'user') {
-                                        // Render User Message
-                                        renderGroups.push(
-                                            <div key={msg.id} className="flex gap-4 justify-end">
-                                                <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl px-5 py-3.5 max-w-[85%]">
-                                                    <div className="text-[15px] text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{msg.content}</div>
-                                                </div>
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-1 text-xs font-bold text-blue-600 dark:text-blue-400">
-                                                    {firstName[0]}
-                                                </div>
-                                            </div>
-                                        )
-                                        i++
-                                    } else {
-                                        // Collect all consecutive assistant messages
-                                        const assistantMessages = []
-                                        while (i < messages.length && messages[i].role === 'assistant') {
-                                            assistantMessages.push(messages[i])
-                                            i++
-                                        }
-
-                                        if (assistantMessages.length > 0) {
-                                            if (assistantMessages.length > 1) {
-                                                // Render Multi-Model Response Tab View
-                                                renderGroups.push(
-                                                    <div key={assistantMessages[0].id} className="flex gap-4 justify-start">
-                                                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-1">
-                                                            <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                                        </div>
-                                                        <MultiModelResponse messages={assistantMessages} />
-                                                    </div>
-                                                )
-                                            } else {
-                                                // Render Single Assistant Response
-                                                const singleMsg = assistantMessages[0]
-                                                renderGroups.push(
-                                                    <div key={singleMsg.id} className="flex gap-4 justify-start">
-                                                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-1">
-                                                            <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                                        </div>
-                                                        <div className="flex-1 max-w-full">
-                                                            <div className="mb-2 flex items-center gap-2">
-                                                                <span className="font-semibold text-sm text-gray-900 dark:text-white">
-                                                                    {singleMsg.model?.displayName || "AI"}
-                                                                </span>
-                                                            </div>
-                                                            <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-none">
-                                                                <ReactMarkdown
-                                                                    components={{
-                                                                        code: CodeBlock
-                                                                    }}
-                                                                >
-                                                                    {singleMsg.content}
-                                                                </ReactMarkdown>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                return renderGroups
-                            })()}
-
-                            {loading && (
-                                <div className="flex gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="w-5 h-5 text-green-600 dark:text-green-400 animate-pulse" />
-                                    </div>
-                                    <div className="flex items-center gap-1.5 h-10 px-4">
-                                        <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-0" />
-                                        <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-150" />
-                                        <div className="w-2 h-2 bg-gray-300 dark:bg-zinc-700 rounded-full animate-bounce delay-300" />
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-                    )}
-
-                    {/* Footer Text for chat view */}
-                    {messages.length > 0 && (
-                        <div className="mt-8 mb-4 text-center">
-                            <p className="text-gray-400 text-xs">Your all-in-one AI Platform</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Sticky Input Area (Only visible when messages exist) */}
-            {messages.length > 0 && (
-                <div className="absolute bottom-6 left-0 right-0 z-30 px-4">
-                    <div className="max-w-3xl mx-auto">
-                        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-[2rem] shadow-xl flex items-end p-2 relative">
-                            {/* Floating Actions Overlay could go here if needed, keeping simple for now */}
-
-                            <form onSubmit={handleSend} className="flex-1 flex items-end w-full">
-                                <button type="button" className="p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors mb-0.5 ml-1">
-                                    <Plus className="w-5 h-5" />
-                                </button>
-                                <button type="button" className="p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors mb-0.5">
-                                    <Globe className="w-5 h-5" />
-                                </button>
-
-                                <textarea
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault()
-                                            handleSend()
-                                        }
-                                    }}
-                                    placeholder={selectedModels.length > 1 ? "Message multiple models..." : "Message..."}
-                                    className="flex-1 bg-transparent border-none outline-none text-base text-gray-800 dark:text-gray-100 placeholder:text-gray-400 min-h-[44px] max-h-[120px] resize-none py-3 px-3 mx-1"
-                                    rows={1}
-                                />
-
-                                <div className="flex items-center gap-1 mb-0.5 mr-1">
-                                    <button type="button" className="p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors">
-                                        <Mic className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={!input.trim() || loading}
-                                        className={`p-2 rounded-full transition-all ${input.trim() ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-zinc-800 text-gray-400'}`}
-                                    >
-                                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                            </form>
-
-                            {/* Combine/Compare Buttons Floating above input if needed, or inline */}
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+                {/* Code Sidebar */}
+                <CodeSidebar />
+            </div>
+        </CodeSidebarProvider>
     )
 }
