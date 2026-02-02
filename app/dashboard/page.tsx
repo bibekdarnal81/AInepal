@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import dbConnect from "@/lib/mongodb/client"
-import { Order, Membership, Project, Domain, HostingOrder, User } from "@/lib/mongodb/models"
-import { CreditCard, Globe, Server, Package, ArrowRight, Clock, CheckCircle, XCircle, Crown, Star } from "lucide-react"
+import { Order, Domain, HostingOrder, User } from "@/lib/mongodb/models"
+import { CreditCard, Globe, Server, Package, ArrowRight, Clock, CheckCircle, XCircle, Crown } from "lucide-react"
 import Link from "next/link"
 
 type DashboardOrder = {
@@ -87,7 +87,11 @@ export default async function DashboardPage() {
                             </div>
                             <h2 className="text-3xl font-bold mb-1">{stats.membership.membershipId?.title || 'Premium Member'}</h2>
                             <p className="text-white/80">
-                                Valid until {new Date(stats.membership.membershipExpiresAt).toLocaleDateString()}
+                                {stats.membership.membershipExpiresAt ? (
+                                    <>Valid until {new Date(stats.membership.membershipExpiresAt).toLocaleDateString()}</>
+                                ) : (
+                                    <>No expiration date</>
+                                )}
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
