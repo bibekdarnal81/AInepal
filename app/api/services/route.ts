@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb/client';
 import { Service } from '@/lib/mongodb/models';
+import mongoose from 'mongoose';
 
 export async function GET() {
     try {
@@ -14,8 +15,8 @@ export async function GET() {
             .lean();
 
         // Transform to match frontend interface
-        const typedServices = services as Array<{
-            _id: string
+        const typedServices = services as unknown as Array<{
+            _id: mongoose.Types.ObjectId
             title: string
             slug: string
             description?: string
@@ -24,6 +25,7 @@ export async function GET() {
             iconName?: string
             category?: string
             features?: string[]
+            thumbnailUrl?: string
         }>
         const transformedServices = typedServices.map((s) => ({
             id: s._id.toString(),
@@ -32,7 +34,8 @@ export async function GET() {
             description: s.description,
             price: s.price,
             currency: s.currency,
-            icon_name: s.iconName, // Map camelCase to snake_case
+            icon_name: s.iconName,
+            image_url: s.thumbnailUrl,
             category: s.category,
             features: s.features || []
         }));

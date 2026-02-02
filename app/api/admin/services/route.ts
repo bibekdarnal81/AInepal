@@ -44,13 +44,15 @@ export async function GET(request: NextRequest) {
             isFeatured?: boolean
             isPublished?: boolean
             displayOrder?: number
+            thumbnailUrl?: string
         }>
 
         return NextResponse.json({
             services: typedServices.map((s) => ({
                 id: s._id.toString(), title: s.title, slug: s.slug, description: s.description,
                 price: s.price, currency: s.currency, iconName: s.iconName, features: s.features || [],
-                category: s.category, isFeatured: s.isFeatured, isPublished: s.isPublished, displayOrder: s.displayOrder
+                category: s.category, isFeatured: s.isFeatured, isPublished: s.isPublished, displayOrder: s.displayOrder,
+                thumbnailUrl: s.thumbnailUrl
             })),
             pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
         })
