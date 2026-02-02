@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         const freeMembership = await Membership.findOne({ slug: 'free', isActive: true }).select('durationDays advancedCredits').lean()
         const membershipExpiresAt = freeMembership?.durationDays
             ? new Date(Date.now() + freeMembership.durationDays * 86400000)
-            : null
+            : undefined
 
         // Create user
         const user = await User.create({

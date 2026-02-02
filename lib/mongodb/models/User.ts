@@ -10,12 +10,12 @@ export interface IUser extends Document {
     bio?: string
     isAdmin: boolean
     isSuspended: boolean
-    membershipId?: mongoose.Types.ObjectId
+    membershipId?: mongoose.Types.ObjectId | null
     membershipStatus?: 'none' | 'active' | 'trialing' | 'canceled' | 'expired'
-    membershipExpiresAt?: Date
+    membershipExpiresAt?: Date | null
     credits: number
     advancedCredits: number
-    emailVerified?: Date
+    emailVerified?: Date | null
     createdAt: Date
     updatedAt: Date
 }

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
             isSuspended?: boolean
             emailVerified?: boolean
             createdAt: Date
-            membershipId?: mongoose.Types.ObjectId
+            membershipId?: mongoose.Types.ObjectId | null
             membershipStatus?: string
             membershipExpiresAt?: Date | null
             advancedCredits?: number
