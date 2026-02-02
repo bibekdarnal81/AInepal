@@ -1,10 +1,10 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { streamText, tool } from 'ai';
+import { streamText } from 'ai';
 import { z } from 'zod';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/mongodb/client";
-import { BuilderFile, BuilderProject, BuilderMessage, User, BuilderConversation } from "@/lib/mongodb/models";
+import { BuilderFile, BuilderProject, BuilderMessage, User } from "@/lib/mongodb/models";
 
 export const maxDuration = 300;
 
@@ -82,9 +82,9 @@ export async function POST(req: Request) {
         system: CODING_AGENT_SYSTEM_PROMPT,
         messages,
         tools: {
-            listFiles: tool({
+            listFiles: {
                 description: 'List all files and folders in the project',
-                parameters: z.object({}),
+                inputSchema: z.object({}),
                 execute: async () => {
                     const files = await BuilderFile.find({ projectId });
                     return files.map(f => ({
@@ -94,13 +94,13 @@ export async function POST(req: Request) {
                         parentId: f.parentId?.toString()
                     }));
                 },
-            }),
-            readFiles: tool({
+            },
+            readFiles: {
                 description: 'Read the content of specific files',
-                parameters: z.object({
+                inputSchema: z.object({
                     fileIds: z.array(z.string()).describe('The IDs of the files to read'),
                 }),
-                execute: async ({ fileIds }) => {
+                execute: async ({ fileIds }: any) => {
                     const files = await BuilderFile.find({
                         projectId,
                         _id: { $in: fileIds },
@@ -112,17 +112,17 @@ export async function POST(req: Request) {
                         content: f.content
                     }));
                 },
-            }),
-            createFiles: tool({
+            },
+            createFiles: {
                 description: 'Create multiple files at once',
-                parameters: z.object({
+                inputSchema: z.object({
                     files: z.array(z.object({
                         name: z.string(),
                         content: z.string(),
                     })),
                     parentId: z.string().optional().describe('The ID of the parent folder (optional)'),
                 }),
-                execute: async ({ files, parentId }) => {
+                execute: async ({ files, parentId }: any) => {
                     const results = [];
                     for (const file of files) {
                         try {
@@ -135,21 +135,21 @@ export async function POST(req: Request) {
                                 updatedAt: Date.now()
                             });
                             results.push({ name: file.name, id: newFile._id.toString(), status: 'created' });
-                        } catch (e) {
+                        } catch (_e) {
                             results.push({ name: file.name, error: 'Failed to create' });
                         }
                     }
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return results;
                 },
-            }),
-            createFolder: tool({
+            },
+            createFolder: {
                 description: 'Create a new folder',
-                parameters: z.object({
+                inputSchema: z.object({
                     name: z.string(),
                     parentId: z.string().optional(),
                 }),
-                execute: async ({ name, parentId }) => {
+                execute: async ({ name, parentId }: any) => {
                     const newFolder = await BuilderFile.create({
                         projectId,
                         parentId: parentId || undefined,
@@ -160,14 +160,14 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { id: newFolder._id.toString(), name };
                 },
-            }),
-            updateFile: tool({
+            },
+            updateFile: {
                 description: 'Update the content of a file',
-                parameters: z.object({
+                inputSchema: z.object({
                     fileId: z.string(),
                     content: z.string(),
                 }),
-                execute: async ({ fileId, content }) => {
+                execute: async ({ fileId, content }: any) => {
                     await BuilderFile.findOneAndUpdate(
                         { _id: fileId, projectId },
                         { content, updatedAt: Date.now() }
@@ -175,13 +175,13 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            }),
-            deleteFiles: tool({
+            },
+            deleteFiles: {
                 description: 'Delete files or folders recursively',
-                parameters: z.object({
+                inputSchema: z.object({
                     fileIds: z.array(z.string()),
                 }),
-                execute: async ({ fileIds }) => {
+                execute: async ({ fileIds }: any) => {
                     // Recursive delete helper
                     const deleteRecursive = async (fid: string) => {
                         const file = await BuilderFile.findById(fid);
@@ -201,14 +201,14 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            }),
-            renameFile: tool({
+            },
+            renameFile: {
                 description: 'Rename a file or folder',
-                parameters: z.object({
+                inputSchema: z.object({
                     fileId: z.string(),
                     newName: z.string(),
                 }),
-                execute: async ({ fileId, newName }) => {
+                execute: async ({ fileId, newName }: any) => {
                     await BuilderFile.findOneAndUpdate(
                         { _id: fileId, projectId },
                         { name: newName, updatedAt: Date.now() }
@@ -216,7 +216,7 @@ export async function POST(req: Request) {
                     await BuilderProject.findByIdAndUpdate(projectId, { updatedAt: Date.now() });
                     return { success: true };
                 },
-            }),
+            },
         },
         onFinish: async ({ text }) => {
             // Save assistant response
@@ -230,5 +230,5 @@ export async function POST(req: Request) {
         }
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
 }
