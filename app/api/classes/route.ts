@@ -14,7 +14,7 @@ export async function GET() {
             .lean();
 
         // Transform to match frontend interface
-        const typedClasses = classes as Array<{
+        const typedClasses = classes as unknown as Array<{
             _id: string
             title: string
             slug: string

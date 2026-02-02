@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
             Portfolio.countDocuments(query)
         ])
 
-        const typedPortfolios = portfolios as Array<{
+        const typedPortfolios = portfolios as unknown as Array<{
             _id: mongoose.Types.ObjectId
             title: string
             slug: string

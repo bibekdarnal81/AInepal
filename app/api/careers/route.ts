@@ -14,7 +14,7 @@ export async function GET() {
             .lean();
 
         // Transform to match frontend interface
-        const typedCareers = careers as Array<{
+        const typedCareers = careers as unknown as Array<{
             _id: string
             title: string
             slug: string

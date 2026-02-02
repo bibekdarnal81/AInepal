@@ -34,7 +34,7 @@ export async function GET() {
             .limit(5)
             .lean()
 
-        const typedRecentUsers = recentUsers as Array<{
+        const typedRecentUsers = recentUsers as unknown as Array<{
             _id: string
             displayName?: string
             email?: string

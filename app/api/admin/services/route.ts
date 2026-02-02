@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
             Service.countDocuments(query)
         ])
 
-        const typedServices = services as Array<{
+        const typedServices = services as unknown as Array<{
             _id: mongoose.Types.ObjectId
             title: string
             slug: string

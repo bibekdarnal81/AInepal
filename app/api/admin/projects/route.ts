@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
             ProjectCategory.find().sort({ name: 1 }).lean()
         ])
 
-        const typedProjects = projects as Array<{
+        const typedProjects = projects as unknown as Array<{
             _id: mongoose.Types.ObjectId
             title: string
             slug: string
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             projects: transformed,
-            categories: (categories as Array<{ _id: mongoose.Types.ObjectId; name: string; slug: string; color?: string }>).map((c) => ({
+            categories: (categories as unknown as Array<{ _id: mongoose.Types.ObjectId; name: string; slug: string; color?: string }>).map((c) => ({
                 id: c._id.toString(),
                 name: c.name,
                 slug: c.slug,

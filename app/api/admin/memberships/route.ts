@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
             Membership.countDocuments(query),
         ])
 
-        const typedMemberships = memberships as Array<{
+        const typedMemberships = memberships as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             slug: string

@@ -23,7 +23,7 @@ export async function GET() {
             .sort({ name: 1 })
             .lean()
 
-        const typedCategories = categories as Array<{
+        const typedCategories = categories as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             slug: string

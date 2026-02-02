@@ -19,14 +19,14 @@ export async function GET() {
         // We need to manually populate or map category info since we're not using .populate() with a simple ref sometimes, 
         // or to match the specific structure expected by the frontend (which expects project_categories property)
 
-        const typedCategories = categories as Array<{
+        const typedCategories = categories as unknown as Array<{
             _id: string
             name: string
             slug: string
             color?: string
             iconName?: string
         }>
-        const typedProjects = projects as Array<{
+        const typedProjects = projects as unknown as Array<{
             _id: string
             title: string
             slug: string

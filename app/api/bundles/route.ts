@@ -20,7 +20,7 @@ export async function GET(request: Request) {
             .lean();
 
         // Transform to match frontend expectations
-        const typedOffers = offers as Array<{
+        const typedOffers = offers as unknown as Array<{
             _id: string
             name: string
             description?: string

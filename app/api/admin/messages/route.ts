@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
             ContactMessage.countDocuments({ isRead: false })
         ])
 
-        const typedMessages = messages as Array<{
+        const typedMessages = messages as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             email: string

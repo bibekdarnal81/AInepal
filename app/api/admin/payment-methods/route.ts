@@ -15,7 +15,7 @@ export async function GET() {
         if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         await dbConnect()
         const methods = await PaymentMethod.find().sort({ createdAt: -1 }).lean()
-        const typedMethods = methods as Array<{
+        const typedMethods = methods as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             type: string

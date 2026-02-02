@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         }
 
         const messages = await ContactMessage.find(query).sort({ createdAt: -1 }).lean()
-        const typedMessages = messages as Array<{
+        const typedMessages = messages as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             company?: string

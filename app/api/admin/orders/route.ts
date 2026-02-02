@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
             Order.countDocuments(query)
         ])
 
-        const typedOrders = orders as Array<{
+        const typedOrders = orders as unknown as Array<{
             _id: mongoose.Types.ObjectId
             userId?: { _id?: mongoose.Types.ObjectId; email?: string; displayName?: string } | null
             itemType: string

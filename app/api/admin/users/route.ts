@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
             User.countDocuments(query)
         ])
 
-        const typedUsers = users as Array<{
+        const typedUsers = users as unknown as Array<{
             _id: mongoose.Types.ObjectId
             email: string
             displayName?: string

@@ -33,7 +33,7 @@ export async function GET(request: Request) {
             .lean();
 
         // Transform for frontend compatibility if needed
-        const typedMessages = messages as Array<{
+        const typedMessages = messages as unknown as Array<{
             _id: mongoose.Types.ObjectId
             message: string
             isAdmin: boolean

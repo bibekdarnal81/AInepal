@@ -18,7 +18,7 @@ export async function GET() {
 
         await dbConnect()
         const categories = await ProjectCategory.find().sort({ displayOrder: 1, name: 1 }).lean()
-        const typedCategories = categories as Array<{
+        const typedCategories = categories as unknown as Array<{
             _id: mongoose.Types.ObjectId
             name: string
             slug: string
