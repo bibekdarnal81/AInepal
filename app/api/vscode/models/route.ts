@@ -20,7 +20,14 @@ export async function GET() {
             .sort({ displayOrder: 1 })
             .lean()
 
-        return NextResponse.json(models)
+        // Map to the format expected by VS Code extension
+        const formattedModels = models.map(model => ({
+            id: model._id?.toString() || model.modelId,
+            name: model.displayName,
+            provider: model.provider
+        }))
+
+        return NextResponse.json({ models: formattedModels })
 
     } catch (error) {
         console.error('Error fetching VS Code models:', error)

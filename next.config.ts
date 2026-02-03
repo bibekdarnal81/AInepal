@@ -64,6 +64,15 @@ const nextConfig: NextConfig = {
         ]
       }
     ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/auth/vscode-login',
+        destination: '/vscode/auth',
+        permanent: false,
+      },
+    ]
   }
 };
 

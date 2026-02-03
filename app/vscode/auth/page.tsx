@@ -34,11 +34,6 @@ function VSCodeAuthContent() {
     const handleAuthorize = async () => {
         const finalRedirectUrl = vscodeDeepLink || redirectUrl
 
-        if (!finalRedirectUrl) {
-            setError('Missing redirect URL or session from VS Code')
-            return
-        }
-
         setIsAuthorizing(true)
         setError(null)
 
@@ -53,6 +48,15 @@ function VSCodeAuthContent() {
             }
 
             const { token } = await response.json()
+
+            // If no redirect URL, show the token for manual copy
+            if (!finalRedirectUrl) {
+                // Copy token to clipboard
+                await navigator.clipboard.writeText(token)
+                setSuccess(true)
+                setIsAuthorizing(false)
+                return
+            }
 
             // Construct redirect URI
             // For vscode:// deep links, use query params
@@ -118,13 +122,13 @@ function VSCodeAuthContent() {
                 <CardFooter className="flex flex-col gap-2">
                     {success ? (
                         <Button className="w-full" disabled variant="secondary">
-                            <Check className="mr-2 h-4 w-4" /> Redirecting...
+                            <Check className="mr-2 h-4 w-4" /> {(vscodeDeepLink || redirectUrl) ? 'Redirecting...' : 'Token copied to clipboard!'}
                         </Button>
                     ) : (
                         <Button
                             className="w-full"
                             onClick={handleAuthorize}
-                            disabled={isAuthorizing || (!redirectUrl && !vscodeDeepLink)}
+                            disabled={isAuthorizing}
                         >
                             {isAuthorizing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isAuthorizing ? 'Authorizing...' : 'Authorize'}
