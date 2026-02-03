@@ -1,42 +1,14 @@
-// FILE: app/api/video/progress/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
+import {
+    cleanupWatchProgress,
+    getWatchProgress,
+    updateWatchProgress
+} from '@/lib/video/store'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-// In-memory store for watch progress (TODO: persist to DB)
-// Key: `${sessionId}:${videoId}` -> { secondsWatched, durationSeconds, watched, updatedAt }
-interface WatchProgress {
-    secondsWatched: number
-    durationSeconds: number
-    watched: boolean
-    updatedAt: number
-}
-
-const watchProgressStore = new Map<string, WatchProgress>()
-
-// Clean up old entries (older than 24 hours)
-function cleanupWatchProgress() {
-    const now = Date.now()
-    const maxAge = 24 * 60 * 60 * 1000
-    for (const [key, value] of watchProgressStore.entries()) {
-        if (now - value.updatedAt > maxAge) {
-            watchProgressStore.delete(key)
-        }
-    }
-}
-
-// Export for use by download route
-export function getWatchProgress(sessionId: string, videoId: string): WatchProgress | undefined {
-    return watchProgressStore.get(`${sessionId}:${videoId}`)
-}
-
-export function isVideoWatched(sessionId: string, videoId: string): boolean {
-    const progress = watchProgressStore.get(`${sessionId}:${videoId}`)
-    return progress?.watched === true
-}
 
 // Watch threshold: 95% of video or ended event
 const WATCH_THRESHOLD = 0.95
@@ -63,22 +35,22 @@ export async function POST(request: NextRequest) {
 
         cleanupWatchProgress()
 
-        const key = `${sessionId}:${id}`
-        const existing = watchProgressStore.get(key)
+        const existing = getWatchProgress(sessionId, id)
 
         // Calculate if watched threshold is met
         const watchRatio = durationSeconds > 0 ? secondsWatched / durationSeconds : 0
         const watched = ended === true || watchRatio >= WATCH_THRESHOLD || (existing?.watched === true)
 
         // Update progress (only if new progress is higher)
-        const newProgress: WatchProgress = {
+        // We define the type to match what the store expects
+        const newProgress = {
             secondsWatched: Math.max(secondsWatched, existing?.secondsWatched || 0),
             durationSeconds,
             watched,
             updatedAt: Date.now()
         }
 
-        watchProgressStore.set(key, newProgress)
+        updateWatchProgress(sessionId, id, newProgress)
 
         return NextResponse.json({
             id,

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import dbConnect from '@/lib/mongodb/client'
 import {
     HostingPlan,
@@ -111,7 +111,7 @@ async function getItem(type: string, id: string, searchParams: { domain?: string
                 // Depending on routing.
             }
         }
-    } else if (type === 'bundles') {
+    } else if (type === 'bundles' || type === 'bundle') {
         const data = await BundleOffer.findById(id).lean()
         if (data) {
             item = {

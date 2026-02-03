@@ -1,6 +1,6 @@
 import React from "react"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/options"
 import dbConnect from "@/lib/mongodb/client"
 import { Order } from "@/lib/mongodb/models"
 import { CheckCircle, Clock, XCircle, Package, ExternalLink, Calendar } from "lucide-react"

@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import { redirect } from 'next/navigation'
 import dbConnect from '@/lib/mongodb/client'
 import { User } from '@/lib/mongodb/models'

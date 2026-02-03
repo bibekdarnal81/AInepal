@@ -2,7 +2,7 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/options";
 import dbConnect from "@/lib/mongodb/client";
 import { BuilderFile, BuilderProject, BuilderMessage, User } from "@/lib/mongodb/models";
 

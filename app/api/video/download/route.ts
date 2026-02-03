@@ -1,9 +1,8 @@
 // FILE: app/api/video/download/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getVideoMetadata } from '../status/route'
-import { isVideoWatched } from '../progress/route'
+import { authOptions } from '@/lib/auth/options'
+import { getVideoMetadata, isVideoWatched } from '@/lib/video/store'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,7 +19,7 @@ const ALLOWED_HOSTS = [
 function isAllowedHost(url: string): boolean {
     try {
         const parsed = new URL(url)
-        return ALLOWED_HOSTS.some(host => 
+        return ALLOWED_HOSTS.some(host =>
             parsed.hostname === host || parsed.hostname.endsWith('.' + host)
         )
     } catch {

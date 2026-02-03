@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import dbConnect from '@/lib/mongodb/client'
 import { Class } from '@/lib/mongodb/models/Class'
 import { User } from '@/lib/mongodb/models/User'

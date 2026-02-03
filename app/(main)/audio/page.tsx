@@ -1,6 +1,6 @@
 
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/options"
 import { redirect } from "next/navigation"
 import { AudioInterface } from "@/components/home/audio-interface"
 import dbConnect from '@/lib/mongodb/client'

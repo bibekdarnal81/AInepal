@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { verifyApiKey } from '@/lib/auth/verifyApiKey'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import dbConnect from '@/lib/mongodb/client'
 import { AIModel, AIModelApiKey, User } from '@/lib/mongodb/models'
 import { decryptApiKey } from '@/lib/ai-encryption'

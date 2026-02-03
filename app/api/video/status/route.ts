@@ -1,33 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import dbConnect from '@/lib/mongodb/client'
 import { AIModelApiKey, AIModel } from '@/lib/mongodb/models'
 import { decryptApiKey } from '@/lib/ai-encryption'
 import crypto from 'crypto'
+import { cleanupVideoStore, saveVideoMetadata } from '@/lib/video/store'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-// In-memory store for video metadata (TODO: persist to DB)
-// Maps videoId -> { outputUrl, playToken, createdAt }
-const videoStore = new Map<string, { outputUrl: string; playToken: string; createdAt: number }>()
-
-// Clean up old entries (older than 24 hours)
-function cleanupVideoStore() {
-    const now = Date.now()
-    const maxAge = 24 * 60 * 60 * 1000
-    for (const [key, value] of videoStore.entries()) {
-        if (now - value.createdAt > maxAge) {
-            videoStore.delete(key)
-        }
-    }
-}
-
-// Export for use by play/download routes
-export function getVideoMetadata(videoId: string) {
-    return videoStore.get(videoId)
-}
 
 interface OpenAIVideoStatusResponse {
     id: string
@@ -104,10 +85,10 @@ export async function GET(request: NextRequest) {
         if (!response.ok) {
             const errorText = await response.text()
             console.error(`[Video-Status] OpenAI API error (${response.status})`)
-            
+
             // Check for moderation block in error response
             const lowerError = errorText.toLowerCase()
-            const isModerationBlock = 
+            const isModerationBlock =
                 lowerError.includes('moderation') ||
                 lowerError.includes('blocked') ||
                 lowerError.includes('policy') ||
@@ -143,7 +124,7 @@ export async function GET(request: NextRequest) {
         // Check if there's an error in the response body (even on 200)
         if (data.error) {
             const lowerError = (data.error.message || '').toLowerCase()
-            const isModerationBlock = 
+            const isModerationBlock =
                 lowerError.includes('moderation') ||
                 lowerError.includes('blocked') ||
                 lowerError.includes('policy') ||
@@ -207,7 +188,7 @@ export async function GET(request: NextRequest) {
             if (outputUrl) {
                 cleanupVideoStore()
                 playToken = crypto.randomBytes(32).toString('hex')
-                videoStore.set(data.id, {
+                saveVideoMetadata(data.id, {
                     outputUrl,
                     playToken,
                     createdAt: Date.now()

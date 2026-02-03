@@ -4,7 +4,7 @@ import dbConnect from '@/lib/mongodb/client'
 import { Membership, User } from '@/lib/mongodb/models'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth/options'
 import MembershipPlans from './membership-plans'
 
 export const revalidate = 60

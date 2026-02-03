@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalChatWidget } from '@/components/chat/conditional-chat-widget';
@@ -97,6 +97,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -110,7 +114,7 @@ export default function RootLayout({
       >
         <ThemeScript />
         <AuthProvider>
-          {/* <TopBanner /> */}
+          <TopBanner />
           {children}
           <ConditionalChatWidget />
           <Toaster />

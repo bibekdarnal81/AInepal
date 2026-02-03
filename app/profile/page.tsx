@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation"
 
-export default function ProfilePage({
+export default async function ProfilePage({
     searchParams,
 }: {
-    searchParams: { tab?: string }
+    searchParams: Promise<{ tab?: string }>
 }) {
-    const tab = searchParams.tab
+    const { tab } = await searchParams
 
     if (tab === 'orders') {
         redirect("/dashboard/orders")

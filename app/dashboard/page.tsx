@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/options"
 import dbConnect from "@/lib/mongodb/client"
 import { Order, Domain, HostingOrder, User } from "@/lib/mongodb/models"
 import { CreditCard, Globe, Server, Package, ArrowRight, Clock, CheckCircle, XCircle, Crown } from "lucide-react"

@@ -4,7 +4,7 @@ import dbConnect from "@/lib/mongodb/client"
 import { SiteSettings } from "@/lib/mongodb/models"
 import type { ISidebarItem, ISiteSettings } from '@/lib/types/mongodb'
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/options"
 
 export const dynamic = 'force-dynamic'
 

@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth/options"
 import { User, LogOut, Monitor } from "lucide-react"
 import Link from "next/link"
 import { GenerateTokenButton } from "@/components/settings/generate-token-button"
