@@ -13,6 +13,11 @@ export interface ISiteSettings extends Document {
             enabled: boolean
         }
     }
+    email?: {
+        resendApiKey: string
+        fromName: string
+        fromEmail: string
+    }
     updatedAt: Date
     createdAt: Date
 }
@@ -79,6 +84,11 @@ SiteSettingsSchema.add({
             environment: { type: String, enum: ['test', 'live'], default: 'test' },
             enabled: { type: Boolean, default: false }
         }
+    },
+    email: {
+        resendApiKey: { type: String, default: '' },
+        fromName: { type: String, default: 'AINepal' },
+        fromEmail: { type: String, default: 'onboarding@resend.dev' }
     }
 })
 

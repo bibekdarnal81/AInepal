@@ -1,8 +1,10 @@
 'use client'
 
 import React from 'react'
-import { SidebarProvider, AdminSidebar, useSidebar } from '@/components/admin/sidebar/admin-sidebar'
 import { Menu } from 'lucide-react'
+import { SidebarProvider, AdminSidebar, useSidebar } from '@/components/admin/sidebar/admin-sidebar'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const { isCollapsed, toggleSidebar, toggleMobileSidebar } = useSidebar()
@@ -32,6 +34,29 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+    const { data: session, status } = useSession()
+    const router = useRouter()
+
+    React.useEffect(() => {
+        if (status === 'loading') return
+
+        if (!session || !session.user?.isAdmin) {
+            router.push('/')
+        }
+    }, [session, status, router])
+
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        )
+    }
+
+    if (!session || !session.user?.isAdmin) {
+        return null
+    }
+
     return (
         <SidebarProvider>
             <AdminLayoutContent>

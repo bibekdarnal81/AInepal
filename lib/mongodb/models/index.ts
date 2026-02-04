@@ -1,4 +1,5 @@
 export * from './User'
+export * from './About'
 export * from './Project'
 export * from './Service'
 export * from './Post'

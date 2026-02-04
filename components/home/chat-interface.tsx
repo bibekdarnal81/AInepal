@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Bot, Sparkles, Search, Mic, Globe, PanelLeftClose, Bell, Loader2, Plus, ArrowUp, Pencil, Languages, FileSearch, FileText, Network, BookOpen, Bookmark, Wand2, Package, FileEdit, Table, Podcast, ClipboardList, LayoutGrid } from "lucide-react"
+import { Bot, Sparkles, Search, Mic, Globe, PanelLeftClose, Bell, Loader2, Plus, ArrowUp, ArrowRight, Pencil, Languages, FileSearch, FileText, Network, BookOpen, Bookmark, Wand2, Package, FileEdit, Table, Podcast, ClipboardList, LayoutGrid } from "lucide-react"
 import { useSession } from "next-auth/react"
 import ReactMarkdown from 'react-markdown'
 import { toast } from "sonner"
@@ -555,9 +555,17 @@ export function ChatInterface({
 
                                 {/* Tools Grid Section */}
                                 <div className="w-full max-w-4xl mx-auto">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <LayoutGrid className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                                        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Tools</h2>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <LayoutGrid className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Tools</h2>
+                                        </div>
+                                        <Link
+                                            href="/chat/tools"
+                                            className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
+                                        >
+                                            View All <ArrowRight className="w-4 h-4" />
+                                        </Link>
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                                         {tools.map((tool) => {

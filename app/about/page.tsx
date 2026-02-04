@@ -2,36 +2,62 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Target, Users, Zap, Award } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import dbConnect from '@/lib/mongodb/client';
+import { About } from '@/lib/mongodb/models';
 
-const values = [
+async function getAboutData() {
+    try {
+        await dbConnect();
+        const data = await About.findOne().lean();
+        return JSON.parse(JSON.stringify(data));
+    } catch (error) {
+        console.error('Failed to fetch about data:', error);
+        return null;
+    }
+}
+
+// Default/Fallback Data
+const defaultValues = [
     {
-        id: 1,
         title: 'Our Mission',
         description: 'To empower developers and businesses with cutting-edge web technologies and comprehensive learning resources.',
-        icon: Target,
+        icon: 'Target',
     },
     {
-        id: 2,
         title: 'Community First',
         description: 'Building a vibrant community of learners and professionals who support each other\'s growth.',
-        icon: Users,
+        icon: 'Users',
     },
     {
-        id: 3,
         title: 'Innovation',
         description: 'Staying ahead of the curve with the latest technologies and best practices in web development.',
-        icon: Zap,
+        icon: 'Zap',
     },
     {
-        id: 4,
         title: 'Excellence',
         description: 'Delivering high-quality courses, projects, and services that exceed expectations.',
-        icon: Award,
+        icon: 'Award',
     },
 ];
 
-export default function AboutPage() {
+export const revalidate = 0; // Ensure fresh data on every request
+
+export default async function AboutPage() {
+    const data = await getAboutData();
+
+    const heroTitle = data?.hero?.title || 'About AINepal';
+    const heroDescription = data?.hero?.description || 'We\'re on a mission to make web development accessible to everyone through quality education and professional services.';
+
+    const storyTitle = data?.story?.title || 'Our Story';
+    const storyContent = data?.story?.content?.length > 0 ? data.story.content : [
+        'AINepal was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.',
+        'Today, we serve thousands of students worldwide, offering everything from free tutorials to premium courses, from open-source projects to custom development services. Our team of experienced developers and instructors is passionate about sharing knowledge and building amazing products.',
+        'We believe that quality education should be accessible to everyone, which is why we maintain a balance between free resources and premium offerings. Whether you\'re just starting your coding journey or looking to level up your skills, AINepal is here to support you every step of the way.'
+    ];
+
+    const values = data?.values?.length > 0 ? data.values : defaultValues;
+
     return (
         <div className="min-h-screen bg-slate-950">
             <Header />
@@ -45,10 +71,10 @@ export default function AboutPage() {
 
                     <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
                         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl mb-6">
-                            About  AINepal
+                            {heroTitle}
                         </h1>
                         <p className="text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-                            We&apos;re on a mission to make web development accessible to everyone through quality education and professional services.
+                            {heroDescription}
                         </p>
                     </div>
                 </section>
@@ -57,17 +83,11 @@ export default function AboutPage() {
                 <section className="bg-slate-950 py-16">
                     <div className="mx-auto max-w-4xl px-6 lg:px-8">
                         <div className="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 p-8 lg:p-12 border border-white/10">
-                            <h2 className="text-3xl font-bold text-white mb-6">Our Story</h2>
+                            <h2 className="text-3xl font-bold text-white mb-6">{storyTitle}</h2>
                             <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
-                                <p>
-                                    AINepal was founded with a simple vision: to bridge the gap between aspiring developers and the ever-evolving world of web technologies. We started as a small YouTube channel sharing React tutorials, and quickly grew into a comprehensive learning platform.
-                                </p>
-                                <p>
-                                    Today, we serve thousands of students worldwide, offering everything from free tutorials to premium courses, from open-source projects to custom development services. Our team of experienced developers and instructors is passionate about sharing knowledge and building amazing products.
-                                </p>
-                                <p>
-                                    We believe that quality education should be accessible to everyone, which is why we maintain a balance between free resources and premium offerings. Whether you&apos;re just starting your coding journey or looking to level up your skills,  AINepal is here to support you every step of the way.
-                                </p>
+                                {storyContent.map((paragraph: string, index: number) => (
+                                    <p key={index}>{paragraph}</p>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -79,11 +99,12 @@ export default function AboutPage() {
                         <h2 className="text-3xl font-bold text-white text-center mb-12">Our Values</h2>
 
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-                            {values.map((value) => {
-                                const Icon = value.icon;
+                            {values.map((value: any, index: number) => {
+                                // @ts-ignore - Dynamic icon loading based on string name
+                                const Icon = LucideIcons[value.icon as keyof typeof LucideIcons] || LucideIcons.Star;
                                 return (
                                     <div
-                                        key={value.id}
+                                        key={index}
                                         className="text-center p-6 rounded-xl bg-slate-800/50 border border-white/5 hover:border-purple-500/30 transition-all"
                                     >
                                         <div className="inline-flex items-center justify-center rounded-full bg-purple-500/10 p-4 mb-4">

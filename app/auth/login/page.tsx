@@ -57,7 +57,15 @@ function LoginForm() {
             })
 
             if (result?.error) {
-                setError(result.error)
+                if (result.error === 'Email not verified. Please check your inbox.') {
+                    // Redirect to verify page with email prefilled
+                    setError('Email not verified. Redirecting to verification...')
+                    setTimeout(() => {
+                        router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
+                    }, 1500)
+                } else {
+                    setError(result.error)
+                }
                 setLoading(false)
             } else if (result?.ok) {
                 // Fetch session to check if admin

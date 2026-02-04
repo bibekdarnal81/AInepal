@@ -1,47 +1,35 @@
-
-import dbConnect from '@/lib/mongodb/client'
-import { User } from '@/lib/mongodb/models'
-import readline from 'readline'
+import dbConnect from '../lib/mongodb/client';
+import { User } from '../lib/mongodb/models';
+import readline from 'readline';
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-const question = (query: string) => new Promise<string>((resolve) => rl.question(query, resolve));
-
-async function createOrUpdateAdmin() {
+const makeAdmin = async () => {
     try {
-        await dbConnect()
-        console.log('Connected to DB')
+        await dbConnect();
 
-        const email = await question('Enter email to make admin: ');
+        rl.question('Enter email of user to make admin: ', async (email) => {
+            const user = await User.findOne({ email: email.toLowerCase() });
 
-        if (!email) {
-            console.error('Email is required')
-            process.exit(1)
-        }
+            if (!user) {
+                console.error(`User found with email: ${email}`);
+                process.exit(1);
+            }
 
-        const user = await User.findOne({ email: email.toLowerCase() })
-
-        if (user) {
             user.isAdmin = true;
             await user.save();
-            console.log(`User ${email} is now an ADMIN.`)
-        } else {
-            console.log(`User ${email} not found. checking if you want to create one...`)
-            // For now, just tell them to register first or I could implement creation here.
-            // But usually it's better to promote an existing user to avoid password hashing complexity in a simple script unless needed.
-            // Let's just promote for now as they likely just registered.
-            console.error(`User with email ${email} does not exist. Please register via the app first, then run this script again.`)
-        }
+
+            console.log(`Successfully made ${email} an admin!`);
+            process.exit(0);
+        });
 
     } catch (error) {
-        console.error('Error:', error)
-    } finally {
-        rl.close();
-        process.exit()
+        console.error('Error:', error);
+        process.exit(1);
     }
 }
 
-createOrUpdateAdmin()
+makeAdmin();

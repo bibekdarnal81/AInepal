@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Play, Sparkles, MessageSquare, Image as ImageIcon, Music, Video, Send, Mic, MoreHorizontal, Bot, Brain, Cpu } from 'lucide-react';
+import { ArrowRight, Play, Sparkles, MessageSquare, Image as ImageIcon, Music, Video, Send, Mic, MoreHorizontal, Bot, Brain, Cpu, Download } from 'lucide-react';
 
 function HeroBackground() {
     return (
@@ -261,7 +261,7 @@ export default function Hero() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500"></span>
                         </span>
-                        AI for Developers • Nepal
+                        Integrated with VS Code
                     </motion.div>
 
                     <motion.h1
@@ -270,10 +270,7 @@ export default function Hero() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="mb-6 text-3xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
                     >
-                        Build <Highlight>smarter products</Highlight> with{' '}
-                        <span className="bg-gradient-to-r from-cyan-500 to-indigo-500 bg-clip-text text-transparent dark:from-cyan-400 dark:to-indigo-400">
-                            AI
-                        </span>
+                        AINepal: Your all-in-one <Highlight>AI assistant</Highlight>
                     </motion.h1>
 
                     <motion.p
@@ -282,8 +279,7 @@ export default function Hero() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="mb-8 max-w-2xl text-lg text-muted-foreground dark:text-white/70 sm:text-xl"
                     >
-                        Create chatbots, automation, and AI-powered apps with Next.js. Fast UI,
-                        clean APIs, and production-ready infrastructure designed for scale.
+                        Fast, personalized, and free.
                     </motion.p>
 
                     <motion.div
@@ -313,13 +309,20 @@ export default function Hero() {
                         className="flex flex-wrap items-center justify-center gap-4 lg:justify-start"
                     >
                         <Link
-                            href="/chat"
+                            href="https://marketplace.visualstudio.com/items?itemName=AINepal.ainepal-chat"
                             className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-xl bg-cyan-500 px-8 font-semibold text-white transition-all hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/25 dark:bg-cyan-500 dark:hover:bg-cyan-400"
                         >
-                            <span className="mr-2">Get Started</span>
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>Install ainepal-chat</span>
                         </Link>
 
+                        <Link
+                            href="/chat"
+                            className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-xl border border-border bg-background px-8 font-semibold text-foreground transition-all hover:bg-secondary/50"
+                        >
+                            <span className="mr-2">Try AINepal</span>
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
                     </motion.div>
 
                     <motion.div

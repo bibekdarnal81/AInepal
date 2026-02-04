@@ -16,6 +16,8 @@ export interface IUser extends Document {
     credits: number
     advancedCredits: number
     emailVerified?: Date | null
+    verificationToken?: string
+    verificationTokenExpires?: Date
     createdAt: Date
     updatedAt: Date
 }
@@ -76,6 +78,12 @@ const UserSchema = new Schema<IUser>(
             type: Date,
         },
         emailVerified: {
+            type: Date,
+        },
+        verificationToken: {
+            type: String,
+        },
+        verificationTokenExpires: {
             type: Date,
         },
     },

@@ -101,6 +101,8 @@ export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
+import { GoogleAnalytics } from "@next/third-parties/google";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -120,6 +122,7 @@ export default function RootLayout({
           <Toaster />
         </AuthProvider>
       </body>
+      <GoogleAnalytics gaId="G-XXXXXXXXXX" />
     </html>
   );
 }
