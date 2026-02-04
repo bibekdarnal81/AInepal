@@ -100,8 +100,9 @@ export default async function AboutPage() {
 
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                             {values.map((value: any, index: number) => {
-                                // @ts-ignore - Dynamic icon loading based on string name
-                                const Icon = LucideIcons[value.icon as keyof typeof LucideIcons] || LucideIcons.Star;
+                                // @ts-expect-error - Dynamic icon loading based on string name
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const Icon: any = LucideIcons[value.icon as keyof typeof LucideIcons] || LucideIcons.Star;
                                 return (
                                     <div
                                         key={index}
